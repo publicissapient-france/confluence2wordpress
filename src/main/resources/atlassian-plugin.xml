@@ -1,0 +1,62 @@
+<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+
+    <plugin-info>
+        <description>${project.description}</description>
+        <version>${project.version}</version>
+        <vendor name="${project.organization.name}" url="${project.organization.url}" />
+    </plugin-info>
+
+    <web-resource key="wp-converter-resources">
+        <resource type="download" name="wp-converter.css" location="css/wp-converter.css"/>
+    </web-resource>
+
+    <resource key="wp-converter-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
+    
+    <resource key="wp-converter-icon" type="download" name="wordpress.png" location="images/wordpress.png">
+        <property key="content-type" value="image/png"/>
+    </resource>
+    
+    <!--<macro name="confluence2wordpress" class="fr.dutra.xebia.confluence2wordpress.ExampleMacro" key="my-macro">
+     TODO: Add macro description 
+     <description></description> 
+    </macro>-->
+    
+    <!--<servlet name="WordPress Converter Servlet" key="wpconverterServlet" class="fr.dutra.xebia.confluence2wordpress.servlet.WordPressConverterServlet">
+        <description>Says Hello World, Australia or your name.</description>
+        <url-pattern>/wpconverter.action</url-pattern>
+        <init-param>
+            <param-name>useRdp</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </servlet>-->
+    
+    <web-item key="wp-converter-link" name="WordPress Converter Link" section="system.content.action/primary"  weight="100">
+        <label key="link.label" />
+        <link>/wp-converter/convert.action?pageId=$page.id</link>
+        <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
+        <icon height="16" width="16">
+            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress.png</link>
+        </icon>
+        <!--<condition class="fr.dutra.xebia.confluence2wordpress.RDPCondition"/>-->
+    </web-item>
+    
+     
+    <!--<action name="administrators" class="com.atlassian.confluence.user.actions.AdministratorsAction">
+        <interceptor-ref name="defaultStack"/>
+        <result name="success" type="velocity">/administrators.vm</result>
+    </action>-->
+    
+    <xwork key="wp-converter-action" name="WordPress Converter Action">
+    
+        <package name="confluence2wordpress" extends="default" namespace="/wp-converter">
+        
+            <default-interceptor-ref name="defaultStack" />
+
+            <action name="convert" class="fr.dutra.xebia.confluence2wordpress.action.WordPressConverterAction">
+                <result name="success" type="velocity">/vm/wp-converter.vm</result>
+            </action>
+            
+        </package>
+    </xwork>
+    
+</atlassian-plugin>
