@@ -6,6 +6,7 @@ package fr.dutra.xebia.confluence2wordpress.util.html.visitors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -23,6 +24,7 @@ public class HeadingsCollector implements TagNodeVisitor {
 
     private List<Heading> headings = new ArrayList<Heading>();
 
+
     /**
      * @inheritdoc
      */
@@ -39,7 +41,8 @@ public class HeadingsCollector implements TagNodeVisitor {
                 h4.setLabel(tag.getText().toString());
                 TagNode link = tag.findElementByName("a", false);
                 if(link != null) {
-                    h4.setAnchor(link.getAttributeByName("name"));
+                    String name = link.getAttributeByName("name");
+                    h4.setAnchor("#" + StringUtils.substringAfter(name, "DRAFT-Revuedepresse-"));
                 }
                 h3.addChild(h4);
             }

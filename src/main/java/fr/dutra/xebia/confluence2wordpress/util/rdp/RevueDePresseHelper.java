@@ -9,11 +9,10 @@ import com.atlassian.confluence.util.velocity.VelocityUtils;
 
 public class RevueDePresseHelper {
 
-    public String generateHeader(String baseUrl, List<Heading> headings) {
+    public String generateHeader(List<Heading> headings) {
         // Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         context.put("headings", headings);
-        context.put("baseUrl", baseUrl);
         // Render the Template
         String result = VelocityUtils.getRenderedTemplate("/vm/rdp-header.vm", context);
         return result;

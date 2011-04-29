@@ -28,6 +28,10 @@ public class Heading {
         this.label = label;
     }
 
+    public List<Heading> getChildren() {
+        return children;
+    }
+
     public void addChild(Heading e) {
         children.add(e);
     }

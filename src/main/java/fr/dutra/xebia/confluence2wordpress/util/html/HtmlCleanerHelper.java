@@ -16,7 +16,7 @@ import fr.dutra.xebia.confluence2wordpress.util.rdp.RevueDePresseHelper;
 
 public class HtmlCleanerHelper {
 
-    public String clean(String html, String htmlBaseUrl, String uploadedFilesBaseUrl, boolean includeRDPHeader) throws Exception {
+    public String clean(String html, String uploadedFilesBaseUrl, boolean includeRDPHeader) throws Exception {
 
         //HtmlCleaner is NOT thread-safe
         CleanerProperties properties = getCleanerProperties();
@@ -39,7 +39,7 @@ public class HtmlCleanerHelper {
             HeadingsCollector hc = new HeadingsCollector();
             body.traverse(hc);
             RevueDePresseHelper rdpHelper = new RevueDePresseHelper();
-            result = rdpHelper.generateHeader(htmlBaseUrl, hc.getHeadings()) + result;
+            result = rdpHelper.generateHeader(hc.getHeadings()) + result;
         }
 
         return result;

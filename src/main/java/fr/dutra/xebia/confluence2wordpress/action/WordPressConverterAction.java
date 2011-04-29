@@ -54,7 +54,7 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
         if(pageId != null) {
             page = pageManager.getPage(pageId);
             String rawHtml = wikiStyleRenderer.convertWikiToXHtml(page.toPageContext(), page.getContent());
-            html = helper.clean(rawHtml, htmlBaseUrl, uploadedFilesBaseUrl, includeRDPHeader);
+            html = helper.clean(rawHtml, uploadedFilesBaseUrl, includeRDPHeader);
         }
         return SUCCESS;
     }
