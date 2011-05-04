@@ -12,7 +12,7 @@
 
     <resource key="wp-converter-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
-    <resource key="wp-converter-icon" type="download" name="wordpress.png" location="images/wordpress.png">
+    <resource key="wp-converter-icon" type="download" name="wordpress-logo.png" location="images/wordpress-logo.png">
         <property key="content-type" value="image/png"/>
     </resource>
     
@@ -34,8 +34,8 @@
         <label key="link.label" />
         <link>/wp-converter/convert.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
-        <icon height="16" width="16">
-            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress.png</link>
+        <icon height="18" width="18">
+            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress-logo.png</link>
         </icon>
         <!--<condition class="fr.dutra.xebia.confluence2wordpress.RDPCondition"/>-->
     </web-item>
@@ -55,7 +55,7 @@
             <action name="convert" class="fr.dutra.xebia.confluence2wordpress.action.WordPressConverterAction">
                 <result name="success" type="velocity">/vm/wp-converter.vm</result>
             </action>
-            
+
         </package>
     </xwork>
     
