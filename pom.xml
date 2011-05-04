@@ -7,20 +7,29 @@
     <groupId>fr.dutra.xebia</groupId>
     <artifactId>confluence2wordpress</artifactId>
     <version>1.0-SNAPSHOT</version>
-
-    <organization>
-        <name>Example Company</name>
-        <url>http://www.example.com/</url>
-    </organization>
-
-    <name>confluence2wordpress</name>
-    <description>This is the fr.dutra.xebia.confluence2wordpress:confluence2wordpress plugin for Atlassian Confluence.</description>
     <packaging>atlassian-plugin</packaging>
+
+    <name>Confluence Wiki Markup to WordPress HTML Converter</name>
+    <description>This plugin allows Confluence Wiki Markup to be converted into HTML suitable for inclusion into a WordPress blog post.</description>
+    
+    <url>https://github.com/adutra/confluence2wordpress</url>
+    
+    <inceptionYear>2011</inceptionYear>
+    
+    <scm>
+    	<url>scm:git://github.com/adutra/confluence2wordpress.git</url>
+    </scm>
+    
+    <organization>
+        <name>Xebia IT Architects France</name>
+        <url>http://www.xebia.fr/</url>
+    </organization>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <confluence.version>3.5</confluence.version>
-        <confluence.data.version>3.5</confluence.data.version>
+        <!-- 3.4: version Xebia, 3.5: dernière version -->
+        <confluence.version>3.4.7</confluence.version>
+        <confluence.data.version>3.1</confluence.data.version>
         <!--<jericho.version>3.1</jericho.version>
         <jtidy.version>r938</jtidy.version>-->
         <htmlcleaner.version>2.2</htmlcleaner.version>
@@ -35,6 +44,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!--<dependency>
+            <groupId>xmlrpc</groupId>
+            <artifactId>xmlrpc-client</artifactId>
+            <version>3.0</version>
+            <scope>compile</scope>
+        </dependency>-->
+
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
             <artifactId>htmlcleaner</artifactId>
@@ -42,13 +58,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>r09</version>
-            <scope>compile</scope>
-        </dependency>
-        
         <!--<dependency>
             <groupId>net.sf.jtidy</groupId>
             <artifactId>jtidy</artifactId>
@@ -76,14 +85,14 @@
             <version>2.3</version>
             <scope>test</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>net.sourceforge.jwebunit</groupId>
             <artifactId>jwebunit-htmlunit-plugin</artifactId>
             <version>2.2</version>
             <scope>test</scope>
         </dependency>
-
+        
         <dependency>
             <groupId>net.sourceforge.nekohtml</groupId>
             <artifactId>nekohtml</artifactId>
@@ -99,12 +108,12 @@
             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-confluence-plugin</artifactId>
-                <version>3.3</version>
+                <version>3.2.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <productVersion>${confluence.version}</productVersion>
                     <productDataVersion>${confluence.data.version}</productDataVersion>
-                    <!--
+                     <!--
                         net.htmlparser*;version="[${jericho.version}]",
                         net.sf.jtidy*;version="[${jtidy.version}]",
                         org.htmlcleaner*;version="[${htmlcleaner.version}]"
@@ -118,8 +127,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
             </plugin>
             
