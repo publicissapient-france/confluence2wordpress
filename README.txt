@@ -1,0 +1,1 @@
+This plugin allows Confluence Wiki Markup to be converted into HTML suitable for inclusion into a WordPress blog post.
