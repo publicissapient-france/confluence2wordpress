@@ -50,7 +50,7 @@ public class WordPressConverterServlet extends HttpServlet {
 
         PrintWriter out = resp.getWriter();
 
-        out.println( "<html><head><title>WordPress Converter</title>" );
+        out.println( "<html><head><title>WordPressConnection Converter</title>" );
         out.println( "<meta name=\"decorator\" content=\"atl.general\"/>" );
 
         out.println( "<meta name=\"tab\" content=\"navigation\">" );

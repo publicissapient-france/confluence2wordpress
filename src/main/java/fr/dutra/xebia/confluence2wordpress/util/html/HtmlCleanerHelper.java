@@ -28,10 +28,10 @@ public class HtmlCleanerHelper {
         TagNode body = root.findElementByName("body", false);
 
         //tree transformations
-        body.traverse(new UrlConverter(uploadedFilesBaseUrl));
         body.traverse(new CdataStripper());
         body.traverse(new CodeSnippetConverter());
         body.traverse(new CssClassNameCleaner());
+        body.traverse(new UrlConverter(uploadedFilesBaseUrl));
 
         String result = serialize(body, properties);
 

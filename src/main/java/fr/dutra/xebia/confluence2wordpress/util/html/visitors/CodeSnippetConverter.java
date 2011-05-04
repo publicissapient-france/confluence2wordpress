@@ -35,7 +35,6 @@ public class CodeSnippetConverter implements TagNodeVisitor {
     /**
      * @inheritdoc
      */
-    @Override
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;

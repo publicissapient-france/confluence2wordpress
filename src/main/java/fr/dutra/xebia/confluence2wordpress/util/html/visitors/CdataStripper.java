@@ -21,7 +21,6 @@ public class CdataStripper implements TagNodeVisitor {
     /**
      * @inheritdoc
      */
-    @Override
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof ContentNode) {
             ContentNode tag = (ContentNode) htmlNode;

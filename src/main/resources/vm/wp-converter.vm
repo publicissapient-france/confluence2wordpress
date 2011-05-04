@@ -1,37 +1,46 @@
 <html>
 <head>
-<title>WordPress Converter</title>
+<title>$action.getText("wordpress.converter")</title>
 <meta name="decorator" content="atl.general"/>
 </head>
 <body>
 
-<h2>WordPress Converter</h2>
-
-<h2>Conversion Options</h2>
+<h2>$action.getText("conversion.options")</h2>
 
 <div>
+
 <form id="options" action="convert.action" method="post">
-<input type="hidden" name="pageId" width="100%" value="$action.pageId" />
+
+<input type="hidden" name="pageId" value="$action.pageId" />
+<input type="hidden" name="actionId" value="$action.actionId" />
 
 <table>
 
 <tr>
-<td nowrap="nowrap" align="right" valign="top"><label>Page to Translate&nbsp;:&nbsp;</label></td>
-<td><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</td>
+<td nowrap="nowrap" align="right"><label>$action.getText("page.to.translate")&nbsp;:&nbsp;</label></td>
+<td><a href="$action.baseUrl/$action.page.urlPath"><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</a></td>
 </tr>
 
-#tag( TextField "name='htmlBaseUrl'"          "label='form.htmlBaseUrl.label'"          "size='80'" "value='$action.htmlBaseUrl'" )
-#tag( TextField "name='uploadedFilesBaseUrl'" "label='form.uploadedFilesBaseUrl.label'" "size='80'" "value='$action.uploadedFilesBaseUrl'" )
-#tag( TextField "name='ignoreConfluenceMacros'" "label='form.ignoreConfluenceMacros.label'" "size='80'" "value='$action.ignoreConfluenceMacros'" )
+<tr>
+<td nowrap="nowrap" align="right"><label for="uploadedFilesBaseUrl">$action.getText("form.uploadedFilesBaseUrl.label")&nbsp;:&nbsp;</label></td>
+<td><input id="uploadedFilesBaseUrl" name="uploadedFilesBaseUrl" type="text" size="80" value="$action.uploadedFilesBaseUrl" /></td>
+</tr>
 
-#tag( Checkbox "label='form.includeRDPHeader.label'" "name='includeRDPHeader'" "value='$action.includeRDPHeader'" )
-#tag( Checkbox "label='form.includePictures.label'" "name='includePictures'" "value='$action.includePictures'" )
-#tag( Checkbox "label='form.includeTables.label'" "name='includeTables'" "value='$action.includeTables'" )
+<tr>
+<td nowrap="nowrap" align="right"><label for="ignoreConfluenceMacros">$action.getText("form.ignoreConfluenceMacros.label")&nbsp;:&nbsp;</label></td>
+<td><input id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" type="text" size="80" value="$action.ignoreConfluenceMacros" /></td>
+</tr>
 
-#tag( Submit "id=convertSubmit" "name='convert'" "label='form.button.convert'" )
-#tag( Submit "name='cancel'" "label='form.button.cancel'" )
+<tr>
+<td nowrap="nowrap" align="right"><label for="includeRDPHeader">$action.getText("form.includeRDPHeader.label")&nbsp;:&nbsp;</label></td>
+<td><input id="includeRDPHeader" name="includeRDPHeader" type="checkbox" checked="$action.includeRDPHeader" /></td>
+</tr>
 
 </table>
+
+<input type="submit" value="$action.getText("form.button.convert")" onclick="this.form.actionId.value='CONVERT'">
+<input type="submit" value="$action.getText("form.button.post")" onclick="this.form.actionId.value='POST'">
+<input type="button" value="$action.getText("form.button.cancel")" onclick="document.location='$action.baseUrl/$action.page.urlPath'">
 
 </form>
 
@@ -39,22 +48,23 @@
 
 
 <table width="100%">
+
 <tr>
-<td width="50%"><h2>Input</h2></td>
-<td width="50%"><h2>Output</h2></td>
+<td width="50%"><h2>$action.getText("conversion.input")</h2></td>
+<td width="50%"><h2>$action.getText("conversion.output")</h2></td>
 </tr>
+
 <tr>
 <td width="49%" style="padding-right:1%">
 <textarea style="width:100%;font-family:monospace" rows="20" readonly="true" wrap="off">$action.wikiMarkupEscaped</textarea>
+</td>
+
 <td width="49%" style="padding-right:1%">
-<textarea style="width:100%;font-family:monospace" rows="20" readonly="true" wrap="off">$action.htmlMarkupEscaped</textarea>
+<textarea style="width:100%;font-family:monospace" rows="20" readonly="true" wrap="off">$action.wordPressHtmlMarkupEscaped</textarea>
 </td>
 </tr>
-</table>
 
-##<h2>Preview</h2>
-##
-##$action.htmlMarkup
+</table>
 
 </body>
 </html>

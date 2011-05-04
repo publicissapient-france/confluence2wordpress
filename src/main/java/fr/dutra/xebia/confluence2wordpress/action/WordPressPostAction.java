@@ -1,29 +1,20 @@
 package fr.dutra.xebia.confluence2wordpress.action;
 
-import java.io.IOException;
-import java.net.URL;
-
-import org.apache.xmlrpc.XmlRpcException;
-
 import com.atlassian.confluence.core.ConfluenceActionSupport;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.renderer.PageContext;
-import com.atlassian.confluence.setup.settings.SettingsManager;
 import com.atlassian.renderer.WikiStyleRenderer;
 import com.opensymphony.util.TextUtils;
 
 import fr.dutra.xebia.confluence2wordpress.config.Config;
 import fr.dutra.xebia.confluence2wordpress.util.html.HtmlCleanerHelper;
-import fr.dutra.xebia.confluence2wordpress.wp.WordPressClient;
-import fr.dutra.xebia.confluence2wordpress.wp.WordPressConnection;
-import fr.dutra.xebia.confluence2wordpress.wp.WordPressPost;
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class WordPressConverterAction extends ConfluenceActionSupport {
+public class WordPressPostAction extends ConfluenceActionSupport {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,8 +23,6 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
     private PageManager pageManager;
 
     private WikiStyleRenderer wikiStyleRenderer;
-
-    private SettingsManager settingsManager;
 
     // helpers
 
@@ -47,9 +36,7 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
 
     //form fields
 
-    private Long pageId;
-
-    private String actionId = "INIT";
+    protected Long pageId;
 
     private String ignoreConfluenceMacros = "info warning";
 
@@ -68,30 +55,8 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
             pageContext = page.toPageContext();
             confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(pageContext, page.getContent());
             wordPressHtml = helper.clean(confluenceHtml, uploadedFilesBaseUrl, includeRDPHeader);
-            if(actionId != null) {
-                if("POST".equals(actionId)) {
-                    doPost();
-                }
-            }
-            return SUCCESS;
         }
-        return ERROR;
-    }
-
-    private void doPost() throws IOException, XmlRpcException {
-        URL url = new URL("http://localhost/wordpress/xmlrpc.php");
-        String userName = "admin";
-        String password = "admin";
-        String blogId = "1";
-        WordPressConnection wordPressConnection = new WordPressConnection(url, userName, password, blogId);
-        WordPressClient client = new WordPressClient(wordPressConnection);
-        WordPressPost post = new WordPressPost();
-        post.setAuthorId(3);
-        post.setTitle("Revue de Presse Xebia");
-        post.setBody(wordPressHtml);
-        post.setCategoryNames("test", "newcat");//categories must exist.
-        post.setTagNames("tag1", "tag2", "newtag"); //tags are dynamically created.
-        post = client.post(post);
+        return SUCCESS;
     }
 
     public Page getPage() {
@@ -122,24 +87,12 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
         this.wikiStyleRenderer = wikiStyleRenderer;
     }
 
-    public void setSpaceManager(SettingsManager settingsManager){
-        this.settingsManager = settingsManager;
-    }
-
     public Long getPageId() {
         return pageId;
     }
 
     public void setPageId(Long pageId) {
         this.pageId = pageId;
-    }
-
-    public String getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(String actionId) {
-        this.actionId = actionId;
     }
 
     public String getWikiMarkup() {
@@ -164,10 +117,6 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
 
     public String getHtmlMarkupEscaped() {
         return TextUtils.htmlEncode(getConfluenceHtmlMarkup());
-    }
-
-    public String getBaseUrl() {
-        return settingsManager.getGlobalSettings().getBaseUrl();
     }
 
 }
