@@ -38,9 +38,9 @@
 
 </table>
 
-<input type="submit" value="$action.getText("form.button.convert")" onclick="this.form.actionId.value='CONVERT'">
-<input type="submit" value="$action.getText("form.button.post")" onclick="this.form.actionId.value='POST'">
-<input type="button" value="$action.getText("form.button.cancel")" onclick="document.location='$action.baseUrl/$action.page.urlPath'">
+<input type="submit" value="$action.getText("form.button.convert")" onclick="this.form.actionId.value='CONVERT'" />
+<input type="submit" value="$action.getText("form.button.post")" onclick="this.form.actionId.value='POST'" />
+<input type="button" value="$action.getText("form.button.cancel")" onclick="document.location='$action.baseUrl/$action.page.urlPath'" />
 
 </form>
 

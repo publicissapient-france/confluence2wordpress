@@ -14,6 +14,7 @@ import com.atlassian.renderer.WikiStyleRenderer;
 import com.opensymphony.util.TextUtils;
 
 import fr.dutra.xebia.confluence2wordpress.config.Config;
+import fr.dutra.xebia.confluence2wordpress.util.PageRetriever;
 import fr.dutra.xebia.confluence2wordpress.util.html.HtmlCleanerHelper;
 import fr.dutra.xebia.confluence2wordpress.wp.WordPressClient;
 import fr.dutra.xebia.confluence2wordpress.wp.WordPressConnection;
@@ -35,9 +36,12 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
 
     private SettingsManager settingsManager;
 
+
     // helpers
 
     private HtmlCleanerHelper helper = new HtmlCleanerHelper();
+
+    private PageRetriever pageRetriever;
 
     // internal state
 
@@ -46,6 +50,8 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
     private String wordPressHtml;
 
     //form fields
+
+    private String pageUrl;
 
     private Long pageId;
 
@@ -65,6 +71,10 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
     public String execute() throws Exception {
         if(pageId != null) {
             page = pageManager.getPage(pageId);
+        } else if (pageUrl != null) {
+            page = pageRetriever.getPageFromUrl(pageUrl);
+        }
+        if(page != null) {
             pageContext = page.toPageContext();
             confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(pageContext, page.getContent());
             wordPressHtml = helper.clean(confluenceHtml, uploadedFilesBaseUrl, includeRDPHeader);
@@ -116,13 +126,15 @@ public class WordPressConverterAction extends ConfluenceActionSupport {
 
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
+        this.pageRetriever = new PageRetriever(pageManager);
     }
 
     public void setWikiStyleRenderer( WikiStyleRenderer wikiStyleRenderer ) {
         this.wikiStyleRenderer = wikiStyleRenderer;
     }
 
-    public void setSpaceManager(SettingsManager settingsManager){
+    @Override
+    public void setSettingsManager(SettingsManager settingsManager){
         this.settingsManager = settingsManager;
     }
 

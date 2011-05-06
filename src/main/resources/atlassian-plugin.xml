@@ -12,7 +12,7 @@
 
     <resource key="wp-converter-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
-    <resource key="wp-converter-icon" type="download" name="wordpress-logo.png" location="images/wordpress-logo.png">
+    <resource key="wp-converter-icon" type="download" name="wordpress.png" location="images/wordpress.png">
         <property key="content-type" value="image/png"/>
     </resource>
     
@@ -35,7 +35,7 @@
         <link>/wp-converter/convert.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
-            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress-logo.png</link>
+            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress.png</link>
         </icon>
         <!--<condition class="fr.dutra.xebia.confluence2wordpress.RDPCondition"/>-->
     </web-item>
@@ -58,5 +58,20 @@
 
         </package>
     </xwork>
+    
+    <!--<rest key="wp-converter-rest" path="/wp-converter" version="1.0">
+        <description>WordPress Converter REST API</description>
+        <package></package>
+    </rest>-->
+    
+    <rpc-xmlrpc key="wp-converter-xmlrpc"
+                name="WordPress Converter XML-RPC API"
+                class="fr.dutra.xebia.confluence2wordpress.xmlrpc.WordPressConverterImpl">
+        <description>WordPress Converter XML-RPC service</description>
+        <service-name>WordPressConverter</service-name>
+        <service-path>wpconverter</service-path>
+        <published-interface>fr.dutra.xebia.confluence2wordpress.xmlrpc.WordPressConverter</published-interface>
+        <authenticate>true</authenticate>
+    </rpc-xmlrpc>
     
 </atlassian-plugin>
