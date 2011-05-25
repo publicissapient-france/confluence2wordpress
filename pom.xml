@@ -5,19 +5,19 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.dutra.xebia</groupId>
-    <artifactId>confluence2wordpress</artifactId>
+    <artifactId>wiki2html</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>atlassian-plugin</packaging>
 
-    <name>Confluence Wiki Markup to WordPress HTML Converter</name>
-    <description>This plugin allows Confluence Wiki Markup to be converted into HTML suitable for inclusion into a WordPress blog post.</description>
+    <name>Confluence Wiki Markup to HTML Converter</name>
+    <description>This plugin allows Confluence Wiki Markup to be converted into clean HTML suitable for inclusion into any external document.</description>
     
-    <url>https://github.com/adutra/confluence2wordpress</url>
+    <url>https://github.com/adutra/wiki2html</url>
     
     <inceptionYear>2011</inceptionYear>
     
     <scm>
-    	<url>scm:git://github.com/adutra/confluence2wordpress.git</url>
+    	<url>scm:git://github.com/adutra/wiki2html.git</url>
     </scm>
     
     <organization>
@@ -27,6 +27,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- 3.4: version Xebia, 3.5: dernière version -->
         <confluence.version>3.4.7</confluence.version>
         <confluence.data.version>3.1</confluence.data.version>
@@ -43,14 +44,13 @@
             <version>${confluence.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <!--<dependency>
-            <groupId>xmlrpc</groupId>
-            <artifactId>xmlrpc-client</artifactId>
-            <version>3.0</version>
+            <groupId>com.atlassian.renderer</groupId>
+            <artifactId>atlassian-renderer</artifactId>
+            <version>6.2.1</version>
             <scope>compile</scope>
         </dependency>-->
-
+        
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
             <artifactId>htmlcleaner</artifactId>
@@ -72,32 +72,6 @@
             <scope>compile</scope>
         </dependency>-->
 
-
-        <!--<dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>jsr311-api</artifactId>
-            <version>1.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.atlassian.plugins.rest</groupId>
-            <artifactId>atlassian-rest-common</artifactId>
-            <version>1.0.2</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.3</version>
-            <scope>provided</scope>
-        </dependency>-->
-        
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -151,12 +125,48 @@
             </plugin>
             
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
                 <configuration>
-                    <source>1.5</source>
-                    <target>1.5</target>
+                    <source>1.6</source>
+                    <target>1.6</target>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.8.1</version>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>verify</id>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+      
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0</version>
+                <configuration>
+                    <header>LICENSE.txt</header>
+                    <strictCheck>true</strictCheck>
+                    <excludes>
+                        <exclude>LICENSE.txt</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            
             
         </plugins>
     </build>
