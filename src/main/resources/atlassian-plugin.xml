@@ -23,43 +23,43 @@
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
     </plugin-info>
 
-    <web-resource key="wiki2html-resources">
-        <resource type="download" name="wiki2html.css" location="css/wiki2html.css"/>
+    <web-resource key="confluence2wordpress-resources">
+        <resource type="download" name="confluence2wordpress.css" location="css/confluence2wordpress.css"/>
     </web-resource>
 
-    <resource key="wiki2html-i18n" type="i18n" name="i18n" location="i18n.wiki2html" />
+    <resource key="confluence2wordpress-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
     <!-- from http://www.freeiconsweb.com -->
-    <resource key="wiki2html-icon" type="download" name="wiki2html.png" location="img/wiki2html.png">
+    <resource key="confluence2wordpress-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">
         <property key="content-type" value="image/png"/>
     </resource>
     
-    <web-item key="wiki2html-link" name="HTML Converter Link" section="system.content.action/primary"  weight="100">
+    <web-item key="confluence2wordpress-link" name="Confluence-to-Wordpress Converter Link" section="system.content.action/primary"  weight="100">
         <label key="link.label" />
-        <link>/wiki2html/convert.action?pageId=$page.id</link>
+        <link>/confluence2wordpress/convert.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
-            <link>/download/resources/${project.groupId}.${project.artifactId}/wiki2html.png</link>
+            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress.png</link>
         </icon>
     </web-item>
     
      
-    <xwork key="wiki2html-action" name="Wiki-to-Html Converter Action">
-        <package name="wiki2html" extends="default" namespace="/wiki2html">
+    <xwork key="confluence2wordpress-action" name="Wiki-to-Html Converter Action">
+        <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
-            <action name="convert" class="fr.dutra.xebia.wiki2html.action.Wiki2HtmlAction">
-                <result name="success" type="velocity">/vm/wiki2html.vm</result>
+            <action name="convert" class="fr.xebia.confluence2wordpress.action.Confluence2WordpressAction">
+                <result name="success" type="velocity">/vm/confluence2wordpress.vm</result>
             </action>
         </package>
     </xwork>
     
-    <rpc-xmlrpc key="wiki2html-xmlrpc"
+    <rpc-xmlrpc key="confluence2wordpress-xmlrpc"
                 name="Wiki-to-Html Converter XML-RPC API"
-                class="fr.dutra.xebia.wiki2html.rpc.Wiki2HtmlRpcImpl">
-        <description>Wiki-to-Html Converter XML-RPC service</description>
+                class="fr.xebia.confluence2wordpress.rpc.Confluence2WordpressRpcImpl">
+        <description>Confluence-to-Wordpress Converter XML-RPC service</description>
         <service-name>Wiki2HtmlConverter</service-name>
-        <service-path>wiki2html</service-path>
-        <published-interface>fr.dutra.xebia.wiki2html.rpc.Wiki2HtmlRpc</published-interface>
+        <service-path>confluence2wordpress</service-path>
+        <published-interface>fr.xebia.confluence2wordpress.rpc.Confluence2WordpressRpc</published-interface>
         <authenticate>true</authenticate>
     </rpc-xmlrpc>
     

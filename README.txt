@@ -14,5 +14,4 @@
        limitations under the License.
 ====
 
-This plugin allows Confluence Wiki Markup to be converted into clean HTML suitable 
-for inclusion into any external document.
+This plugin allows Confluence pages to be converted into Wordpress posts.

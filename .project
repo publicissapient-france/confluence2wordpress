@@ -1,6 +1,6 @@
 <projectDescription>
   <name>confluence2wordpress</name>
-  <comment>This plugin allows Confluence Wiki Markup to be converted into HTML suitable for inclusion into a WordPress blog post. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <comment>This plugin allows Confluence Wiki Markup to be converted into clean HTML suitable for inclusion into any external document. NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
   <projects/>
   <buildSpec>
     <buildCommand>
