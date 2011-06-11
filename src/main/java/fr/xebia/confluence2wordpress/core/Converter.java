@@ -37,6 +37,7 @@ import fr.xebia.confluence2wordpress.core.visitors.CodeSnippetConverter;
 import fr.xebia.confluence2wordpress.core.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.visitors.EmptySpanStripper;
 import fr.xebia.confluence2wordpress.core.visitors.UrlConverter;
+import fr.xebia.confluence2wordpress.rdp.AnchorTransformer;
 import fr.xebia.confluence2wordpress.rdp.HeadingsCollector;
 import fr.xebia.confluence2wordpress.rdp.RevueDePresseHelper;
 
@@ -103,6 +104,8 @@ public class Converter {
         String html = serialize(body, cleanerProps);
 
         if(options.isAddRDPHeader()) {
+            AnchorTransformer t = new AnchorTransformer();
+            body.traverse(t);
             HeadingsCollector collector = new HeadingsCollector();
             body.traverse(collector);
             String header = new RevueDePresseHelper().generateHeader(collector.getHeadings());
