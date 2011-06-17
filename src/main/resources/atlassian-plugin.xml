@@ -21,6 +21,7 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
+        <param name="configure.url">/confluence2wordpress/admin.action</param>
     </plugin-info>
 
     <web-resource key="confluence2wordpress-resources">
@@ -39,30 +40,38 @@
         <link>/confluence2wordpress/convert.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
-            <link>/download/resources/${project.groupId}.${project.artifactId}/wordpress.png</link>
+            <link>/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png</link>
         </icon>
     </web-item>
     
-     
-    <xwork key="confluence2wordpress-action" name="Wiki-to-Html Converter Action">
+    <xwork key="confluence2wordpress-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
-            <action name="convert" class="fr.xebia.confluence2wordpress.action.Confluence2WordpressAction">
-                <result name="success" type="velocity">/vm/confluence2wordpress.vm</result>
+            <action name="convert" class="fr.xebia.confluence2wordpress.action.ConvertAction">
+                <result name="success" type="velocity">/vm/convert.vm</result>
+            </action>
+            <action name="displaySettings" class="fr.xebia.confluence2wordpress.action.DisplaySettingsAction">
+                <result name="success" type="velocity">/vm/settings.vm</result>
+            </action>
+            <action name="storeSettings" class="fr.xebia.confluence2wordpress.action.StoreSettingsAction">
+                <interceptor-ref name="validatingStack"/>
+                <result name="success" type="redirect-action">displaySettings</result>
             </action>
         </package>
     </xwork>
-    
+
     <rpc-xmlrpc key="confluence2wordpress-xmlrpc"
-                name="Wiki-to-Html Converter XML-RPC API"
-                class="fr.xebia.confluence2wordpress.rpc.Confluence2WordpressRpcImpl">
+                name="Confluence-to-Wordpress Converter XML-RPC API"
+                class="fr.xebia.confluence2wordpress.rpc.ConvertRpcImpl">
         <description>Confluence-to-Wordpress Converter XML-RPC service</description>
-        <service-name>Wiki2HtmlConverter</service-name>
+        <service-name>Confluence2WordpressConverter</service-name>
         <service-path>confluence2wordpress</service-path>
-        <published-interface>fr.xebia.confluence2wordpress.rpc.Confluence2WordpressRpc</published-interface>
+        <published-interface>fr.xebia.confluence2wordpress.rpc.ConvertRpc</published-interface>
         <authenticate>true</authenticate>
     </rpc-xmlrpc>
     
+    <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" />
+
     <component-import key="transactionTemplate">
         <description>Import the com.atlassian.sal.api.transaction.TransactionTemplate</description>
         <interface>com.atlassian.sal.api.transaction.TransactionTemplate</interface>

@@ -34,7 +34,7 @@ public class ConverterOptions {
 
     private boolean convertFontTagToSpan = true;
 
-    private boolean convertCdata = false;
+    private boolean convertCdata = true;
 
     private boolean convertScriptsToWordpressFormat = false;
 
@@ -44,7 +44,7 @@ public class ConverterOptions {
 
     private List<String> disableConfluenceMacros = null;
 
-    private boolean addRDPHeader = false;
+    private boolean optimizeForRDP = false;
 
     public ConverterOptions() {
     }
@@ -138,12 +138,12 @@ public class ConverterOptions {
         this.disableConfluenceMacros = ignoreConfluenceMacros;
     }
 
-    public boolean isAddRDPHeader() {
-        return addRDPHeader;
+    public boolean isOptimizeForRDP() {
+        return optimizeForRDP;
     }
 
-    public void setAddRDPHeader(boolean addRDPHeader) {
-        this.addRDPHeader = addRDPHeader;
+    public void setOptimizeForRDP(boolean optimizeForRDP) {
+        this.optimizeForRDP = optimizeForRDP;
     }
 
 }

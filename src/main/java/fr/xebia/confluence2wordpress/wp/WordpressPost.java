@@ -1,7 +1,7 @@
 package fr.xebia.confluence2wordpress.wp;
 
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 public class WordpressPost {
@@ -20,12 +20,11 @@ public class WordpressPost {
 
     private Integer authorId;
 
-    private String[] categoryNames;
+    private List<String> categoryNames;
 
-    private int[] categoryIds;
+    private List<String> tagNames;
 
-    private String[] tagNames;
-
+    private List<Integer> categoryIds;
 
 
     public Integer getPostId() {
@@ -101,44 +100,33 @@ public class WordpressPost {
     }
 
 
-    public String[] getCategoryNames() {
+    public List<String> getCategoryNames() {
         return categoryNames;
     }
 
 
-    public void setCategoryNames(String... categoryNames) {
+    public void setCategoryNames(List<String> categoryNames) {
         this.categoryNames = categoryNames;
     }
 
 
-    public String[] getTagNames() {
+    public List<String> getTagNames() {
         return tagNames;
     }
 
 
-    public void setTagNames(String... tagNames) {
+    public void setTagNames(List<String> tagNames) {
         this.tagNames = tagNames;
     }
 
 
-    public int[] getCategoryIds() {
+    public List<Integer> getCategoryIds() {
         return categoryIds;
     }
 
 
-    public void setCategoryIds(int... categoryIds) {
+    public void setCategoryIds(List<Integer> categoryIds) {
         this.categoryIds = categoryIds;
-    }
-
-
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("WordpressPost [authorId=").append(authorId).append(", body=").append(body).append(", categoryNames=").append(Arrays.toString(categoryNames)).append(
-        ", dateCreated=").append(dateCreated).append(", draft=").append(draft).append(", postId=").append(postId).append(", postSlug=").append(postSlug).append(", tagNames=")
-        .append(Arrays.toString(tagNames)).append(", title=").append(title).append("]");
-        return builder.toString();
     }
 
 

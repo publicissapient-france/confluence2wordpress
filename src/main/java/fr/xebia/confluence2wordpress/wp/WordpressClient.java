@@ -3,6 +3,7 @@ package fr.xebia.confluence2wordpress.wp;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -27,7 +28,7 @@ public class WordpressClient {
 
     private static final String GET_PAGE_METHOD_NAME = "blogger.getPost";
 
-    private static final String GET_USERS_METHOD_NAME = "xebia.getAuthors"; // "wp.getAuthors";
+    private static final String GET_USERS_METHOD_NAME = "confluence2wordpress.getAuthors"; // "wp.getAuthors";
 
     private static final String GET_CATEGORIES_METHOD_NAME = "wp.getCategories";
 
@@ -209,13 +210,13 @@ public class WordpressClient {
             title = StringUtils.substringBetween(body, "<title>", "</title>");
             body = StringUtils.substringAfter(body, "</title>");
         }
-        int[] categoryIds = null;
+        List<Integer> categoryIds = null;
         if(body.startsWith("<category>")) {
             String categories = StringUtils.substringBetween(body, "<category>", "</category>");
             String[] tokens = categories.split(",");
-            categoryIds = new int[tokens.length];
-            for (int i = 0; i < tokens.length; i++) {
-                categoryIds[i] = Integer.parseInt(tokens[i]);
+            categoryIds = new ArrayList<Integer>(tokens.length);
+            for (String token : tokens) {
+                categoryIds.add(Integer.valueOf(token));
             }
             body = StringUtils.substringAfter(body, "</category>");
         }
@@ -297,7 +298,7 @@ public class WordpressClient {
         WordpressClient client = new WordpressClient(
             wordpressConnection
             //,"proxy.gicm.net", 3128
-        );
+            );
 
         System.out.println(client.getUsers());
 
@@ -313,8 +314,8 @@ public class WordpressClient {
         post.setAuthorId(3);
         post.setTitle("Revue de Presse Xebia");
         post.setBody("coucou c'est un draft");
-        post.setCategoryNames("test", "newcat");//categories must exist.
-        post.setTagNames("tag1", "tag2", "newtag"); //tags are dynamically created.
+        post.setCategoryNames(Arrays.asList(new String[]{"test", "newcat"}));//categories must exist.
+        post.setTagNames(Arrays.asList(new String[]{"tag1", "tag2", "newtag"})); //tags are dynamically created.
         post = client.post(post);
         System.out.println(post);
 

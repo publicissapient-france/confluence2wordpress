@@ -20,6 +20,8 @@ package fr.xebia.confluence2wordpress.util.string;
 
 
 
+
+
 /**
  * @author Alexandre Dutra
  *
@@ -27,6 +29,7 @@ package fr.xebia.confluence2wordpress.util.string;
 public class XmlEscapeUtils{
 
     public static String escapeText(String text) {
+        //better than StringEscapeUtils.escapeXml(text);
         return text.replace("<", "&lt;").replace("&", "&amp;");
     }
 

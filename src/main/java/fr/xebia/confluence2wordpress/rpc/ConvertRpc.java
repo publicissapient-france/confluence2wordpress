@@ -20,7 +20,7 @@ import java.util.Hashtable;
 import com.atlassian.confluence.rpc.RemoteException;
 import com.atlassian.confluence.rpc.SecureRpc;
 
-public interface Confluence2WordpressRpc extends SecureRpc {
+public interface ConvertRpc extends SecureRpc {
 
     String convert(String authToken, String pageUrl, Hashtable<Object,Object> options) throws RemoteException;
 

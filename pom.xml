@@ -28,9 +28,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- 3.4: version Xebia, 3.5: dernière version -->
-        <confluence.version>3.4.7</confluence.version>
-        <confluence.data.version>3.1</confluence.data.version>
+        <!-- ancienne version -->
+        <!-- <confluence.version>3.4.7</confluence.version>
+        <confluence.data.version>3.1</confluence.data.version> -->
+        <confluence.version>3.5.2</confluence.version>
+        <confluence.data.version>3.5</confluence.data.version>
         <!--<jericho.version>3.1</jericho.version>
         <jtidy.version>r938</jtidy.version>-->
         <htmlcleaner.version>2.2</htmlcleaner.version>
@@ -38,18 +40,41 @@
 
     <dependencies>
 
+        <!-- required confluence dependencies -->
+        
         <dependency>
             <groupId>com.atlassian.confluence</groupId>
             <artifactId>confluence</artifactId>
             <version>${confluence.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.atlassian.confluence.plugin</groupId>
+            <artifactId>func-test</artifactId>
+            <version>2.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.jwebunit</groupId>
+            <artifactId>jwebunit-htmlunit-plugin</artifactId>
+            <version>2.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.nekohtml</groupId>
+            <artifactId>nekohtml</artifactId>
+            <version>1.9.12</version>
+            <scope>test</scope>
+        </dependency>
+
         <!--<dependency>
             <groupId>com.atlassian.renderer</groupId>
             <artifactId>atlassian-renderer</artifactId>
             <version>6.2.1</version>
             <scope>compile</scope>
         </dependency>-->
+        
+        <!-- our dependencies -->
         
         <dependency>
             <groupId>net.sourceforge.htmlcleaner</groupId>
@@ -79,48 +104,19 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.atlassian.confluence.plugin</groupId>
-            <artifactId>func-test</artifactId>
-            <version>2.3</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>net.sourceforge.jwebunit</groupId>
-            <artifactId>jwebunit-htmlunit-plugin</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        
-        <dependency>
-            <groupId>net.sourceforge.nekohtml</groupId>
-            <artifactId>nekohtml</artifactId>
-            <version>1.9.12</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
         
-            <plugin>
+             <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-confluence-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.3.4</version>
                 <extensions>true</extensions>
                 <configuration>
                     <productVersion>${confluence.version}</productVersion>
                     <productDataVersion>${confluence.data.version}</productDataVersion>
-                     <!--
-                        net.htmlparser*;version="[${jericho.version}]",
-                        net.sf.jtidy*;version="[${jtidy.version}]",
-                        org.htmlcleaner*;version="[${htmlcleaner.version}]"
-                    -->
-                    <!--<instructions>
-                    
-                    </instructions>-->
                 </configuration>
             </plugin>
             

@@ -33,9 +33,10 @@ import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.WikiStyleRenderer;
 
 import fr.xebia.confluence2wordpress.core.visitors.CdataStripper;
-import fr.xebia.confluence2wordpress.core.visitors.CodeSnippetConverter;
+import fr.xebia.confluence2wordpress.core.visitors.CodeMacroConverter;
 import fr.xebia.confluence2wordpress.core.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.visitors.EmptySpanStripper;
+import fr.xebia.confluence2wordpress.core.visitors.SyntaxHighlighterConverter;
 import fr.xebia.confluence2wordpress.core.visitors.UrlConverter;
 import fr.xebia.confluence2wordpress.rdp.HeadingsCollector;
 import fr.xebia.confluence2wordpress.rdp.RevueDePresseHelper;
@@ -73,7 +74,7 @@ public class Converter {
          * java.lang.LinkageError: loader constraint violation: when resolving method
          * "com.atlassian.confluence.renderer.PageContext.pushRenderMode(Lcom/atlassian/renderer/v2/RenderMode;)V"
          * the class loader (instance of org/apache/felix/framework/ModuleImpl$ModuleClassLoader) of the current class,
-         * fr/dutra/xebia/confluence2wordpress/rpc/Confluence2WordpressRpcImpl$1, and the class loader (instance of org/apache/catalina/loader/WebappClassLoader)
+         * fr/dutra/xebia/confluence2wordpress/rpc/ConvertRpcImpl$1, and the class loader (instance of org/apache/catalina/loader/WebappClassLoader)
          * for resolved class, com/atlassian/confluence/renderer/PageContext,
          * have different Class objects for the type com/atlassian/renderer/v2/RenderMode used in the signature
          */
@@ -102,7 +103,7 @@ public class Converter {
 
         String html = serialize(body, cleanerProps);
 
-        if(options.isAddRDPHeader()) {
+        if(options.isOptimizeForRDP()) {
             HeadingsCollector collector = new HeadingsCollector();
             body.traverse(collector);
             String header = new RevueDePresseHelper().generateHeader(collector.getHeadings());
@@ -140,7 +141,7 @@ public class Converter {
             tt.addAttributeTransformation(
                 "style",
                 "${style};font-family=${face};font-size=${size};"
-            );
+                );
             transformations.addTransformation(tt);
         }
 
@@ -149,10 +150,11 @@ public class Converter {
 
     protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
+        visitors.add(new CodeMacroConverter());
+        visitors.add(new SyntaxHighlighterConverter());
         if(options.isConvertCdata()) {
             visitors.add(new CdataStripper());
         }
-        visitors.add(new CodeSnippetConverter());
         if(options.getBaseUrl() != null) {
             visitors.add(new UrlConverter(options.getBaseUrl()));
         }

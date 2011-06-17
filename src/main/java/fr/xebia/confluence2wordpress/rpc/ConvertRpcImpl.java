@@ -36,7 +36,7 @@ import fr.xebia.confluence2wordpress.core.PageLocator;
  * 
  * @author Alexandre Dutra
  */
-public class Confluence2WordpressRpcImpl implements Confluence2WordpressRpc {
+public class ConvertRpcImpl implements ConvertRpc {
 
     /**
      * @see "http://confluence.atlassian.com/display/CONFDEV/RPC+Module"

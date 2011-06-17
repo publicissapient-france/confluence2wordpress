@@ -6,12 +6,9 @@ package fr.xebia.confluence2wordpress.rdp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
-
-import fr.xebia.confluence2wordpress.rdp.Heading;
 
 
 /**
@@ -41,7 +38,7 @@ public class HeadingsCollector implements TagNodeVisitor {
                 TagNode link = tag.findElementByName("a", false);
                 if(link != null) {
                     String name = link.getAttributeByName("name");
-                    h4.setAnchor("#" + StringUtils.substringAfter(name, "DRAFT-Revuedepresse-"));
+                    h4.setAnchor("#" + name);
                 }
                 h3.addChild(h4);
             }
