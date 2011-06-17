@@ -21,7 +21,7 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="configure.url">/confluence2wordpress/admin.action</param>
+        <param name="configure.url">/confluence2wordpress/displaySettings.action</param>
     </plugin-info>
 
     <web-resource key="confluence2wordpress-resources">
@@ -55,7 +55,7 @@
             </action>
             <action name="storeSettings" class="fr.xebia.confluence2wordpress.action.StoreSettingsAction">
                 <interceptor-ref name="validatingStack"/>
-                <result name="success" type="redirect-action">displaySettings</result>
+                <result name="success" type="redirect">displaySettings.action</result>
             </action>
         </package>
     </xwork>
