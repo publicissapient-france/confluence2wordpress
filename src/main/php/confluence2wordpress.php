@@ -57,8 +57,6 @@ function get_authors($args) {
 		return(new IXR_Error(401, __("Sorry, you cannot access this API.")));
 	}
 
-	//do_action('xmlrpc_call', 'xebia.getEditors');
-
 	global $wpdb;
 	
 	//http://codex.wordpress.org/Roles_and_Capabilities#User_Level_to_Role_Conversion
@@ -86,4 +84,5 @@ function get_authors($args) {
 	return($editors);
 
 }
+
 ?>

@@ -13,3 +13,27 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+textarea.c2w_preview {
+	border:none;
+	margin:0;
+	padding:0;
+	width:100%;
+	font-family:monospace !important;
+}
+
+fieldset.c2w_preview {
+	width:47%;
+	border:1px solid #326CA6 !important;
+    border-radius:5px !important;
+    -moz-border-radius:5px !important;
+	-khtml-border-radius:5px !important;
+	-webkit-border-radius:5px !important;
+}
+
+.c2w_left {
+    float:left;
+}
+
+.c2w_right {
+    float:right;
+}

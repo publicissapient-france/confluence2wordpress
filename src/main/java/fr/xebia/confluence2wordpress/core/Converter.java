@@ -158,8 +158,8 @@ public class Converter {
         if(options.isConvertCdata()) {
             visitors.add(new CdataStripper());
         }
-        if(options.getBaseUrl() != null) {
-            visitors.add(new UrlConverter(options.getBaseUrl()));
+        if(options.getResourcesBaseUrl() != null) {
+            visitors.add(new UrlConverter(options.getResourcesBaseUrl()));
         }
         //regular visitors
         visitors.add(new CssClassNameCleaner());

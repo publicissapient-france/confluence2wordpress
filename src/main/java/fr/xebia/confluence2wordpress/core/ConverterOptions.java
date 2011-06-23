@@ -38,7 +38,7 @@ public class ConverterOptions {
 
     private boolean convertScriptsToWordpressFormat = false;
 
-    private String baseUrl = null;
+    private String resourcesBaseUrl = null;
 
     private Map<String, String> tagTransformations = null;
 
@@ -113,12 +113,12 @@ public class ConverterOptions {
         this.convertScriptsToWordpressFormat = convertScriptsToWordpressFormat;
     }
 
-    public String getBaseUrl() {
-        return baseUrl;
+    public String getResourcesBaseUrl() {
+        return resourcesBaseUrl;
     }
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = StringUtils.trimToNull(baseUrl);
+    public void setResourcesBaseUrl(String resourcesBaseUrl) {
+        this.resourcesBaseUrl = StringUtils.trimToNull(resourcesBaseUrl);
     }
 
     public Map<String, String> getTagTransformations() {

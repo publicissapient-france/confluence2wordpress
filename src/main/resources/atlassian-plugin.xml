@@ -21,7 +21,7 @@
         <description>${project.description}</description>
         <version>${project.version}</version>
         <vendor name="${project.organization.name}" url="${project.organization.url}" />
-        <param name="configure.url">/confluence2wordpress/displaySettings.action</param>
+        <param name="configure.url">/confluence2wordpress/settings.action?pageId=${page.id}</param>
     </plugin-info>
 
     <web-resource key="confluence2wordpress-resources">
@@ -30,7 +30,6 @@
 
     <resource key="confluence2wordpress-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
-    <!-- from http://www.freeiconsweb.com -->
     <resource key="confluence2wordpress-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">
         <property key="content-type" value="image/png"/>
     </resource>
@@ -47,15 +46,20 @@
     <xwork key="confluence2wordpress-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
-            <action name="convert" class="fr.xebia.confluence2wordpress.action.ConvertAction">
+            <action name="convert" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="input">
                 <result name="success" type="velocity">/vm/convert.vm</result>
             </action>
-            <action name="displaySettings" class="fr.xebia.confluence2wordpress.action.DisplaySettingsAction">
+            <action name="preview" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="preview">
+                 <result name="success" type="velocity">/vm/preview.vm</result>
+            </action>
+            <action name="post" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="post">
+                 <result name="success" type="redirect">convert.action?pageId=${pageId}</result>
+            </action>
+            <action name="settings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="input">
                 <result name="success" type="velocity">/vm/settings.vm</result>
             </action>
-            <action name="storeSettings" class="fr.xebia.confluence2wordpress.action.StoreSettingsAction">
-                <interceptor-ref name="validatingStack"/>
-                <result name="success" type="redirect">displaySettings.action</result>
+            <action name="updateSettings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="execute">
+                <result name="success" type="redirect">settings.action?pageUrl=${pageUrl}</result>
             </action>
         </package>
     </xwork>
@@ -70,7 +74,7 @@
         <authenticate>true</authenticate>
     </rpc-xmlrpc>
     
-    <component-import key="userManager" interface="com.atlassian.sal.api.user.UserManager" />
+    <component-import key="salUserManager" interface="com.atlassian.sal.api.user.UserManager" />
 
     <component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
 

@@ -30,22 +30,22 @@ import org.htmlcleaner.Utils;
  */
 public class UrlConverter implements TagNodeVisitor {
 
-    private String baseUrl;
+    private String resourcesBaseUrl;
 
 
-    public UrlConverter(String baseUrl) {
+    public UrlConverter(String resourcesBaseUrl) {
         super();
-        this.baseUrl = baseUrl;
+        this.resourcesBaseUrl = resourcesBaseUrl;
     }
 
 
-    public String getBaseUrl() {
-        return baseUrl;
+    public String getResourcesBaseUrl() {
+        return resourcesBaseUrl;
     }
 
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setResourcesBaseUrl(String resourcesBaseUrl) {
+        this.resourcesBaseUrl = resourcesBaseUrl;
     }
 
     /**
@@ -58,7 +58,7 @@ public class UrlConverter implements TagNodeVisitor {
             if ("img".equals(tagName)) {
                 String src = tag.getAttributeByName("src");
                 if (src != null) {
-                    tag.setAttribute("src", Utils.fullUrl(baseUrl, src));
+                    tag.setAttribute("src", Utils.fullUrl(resourcesBaseUrl, src));
                 }
             }
         }

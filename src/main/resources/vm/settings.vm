@@ -14,26 +14,100 @@
  *    limitations under the License.
  *#
 <html>
+
   <head>
     <title>$action.getText("confluence2wordpress.converter")</title>
     <meta name="decorator" content="atl.admin">
-    
-    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
-
+    #requireResource("fr.xebia.confluence2wordpress:confluence2wordpress-resources")
   </head>
+  
   <body>
-    <form id="admin" class="aui">
-      <div>
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" class="text">
+  
+    <form action="updateSettings.action" method="post" class="aui long-label">
+
+      <input type="hidden" name="pageUrl" value="$action.pageUrl" />
+        
+      <h2>$action.getText("settings.form.section.confluence.section")</h2>
+      
+      <div class="field-group">
+        <label for="ignoreConfluenceMacros">
+            $action.getText("settings.form.ignoreConfluenceMacros.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" value="$action.ignoreConfluenceMacros" title="$action.getText("settings.form.ignoreConfluenceMacros.label")">
+        <div class="description">$action.getText("settings.form.ignoreConfluenceMacros.description")</div>
       </div>
-      <div>
-        <label for="time">Time:</label>
-        <input type="text" id="time" name="time" class="text">
+    
+      <h2>$action.getText("settings.form.section.wordpress.section")</h2>
+      
+      <div class="field-group">
+        <label for="wordpressRootUrl">
+            $action.getText("settings.form.wordpressRootUrl.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressRootUrl" name="wordpressRootUrl" value="$action.wordpressRootUrl" title="$action.getText("settings.form.wordpressRootUrl.label")">
       </div>
-      <div>
-        <input type="submit" value="Save" class="button">
+    
+      <div class="field-group">
+        <label for="resourcesBaseUrl">
+            $action.getText("settings.form.resourcesBaseUrl.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="resourcesBaseUrl" name="resourcesBaseUrl" value="$action.resourcesBaseUrl" title="$action.getText("settings.form.resourcesBaseUrl.label")">
+        <div class="description">$action.getText("settings.form.resourcesBaseUrl.description")</div>
       </div>
+    
+      <div class="field-group">
+        <label for="resourcesBaseUrl">
+            $action.getText("settings.form.editPostUrl.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="editPostUrl" name="editPostUrl" value="$action.editPostUrl" title="$action.getText("settings.form.editPostUrl.label")">
+        <div class="description">$action.getText("settings.form.editPostUrl.description")</div>
+      </div>
+    
+      <h3>$action.getText("settings.form.section.wordpress.xmlrpc")</h2>
+      
+      <div class="field-group">
+        <label for="wordpressXmlRpcUrl">
+            $action.getText("settings.form.wordpressXmlRpcUrl.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressXmlRpcUrl" name="wordpressXmlRpcUrl" value="$action.wordpressXmlRpcUrl" title="$action.getText("settings.form.wordpressXmlRpcUrl.label")">
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressUserName">
+            $action.getText("settings.form.wordpressUserName.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressUserName" name="wordpressUserName" value="$action.wordpressUserName" title="$action.getText("settings.form.wordpressUserName.label")">
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressPassword">
+            $action.getText("settings.form.wordpressPassword.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="password long-field" type="password" id="wordpressPassword" name="wordpressPassword" value="$action.wordpressPassword" title="$action.getText("settings.form.wordpressPassword.label")">
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressBlogId">
+            $action.getText("settings.form.wordpressBlogId.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressBlogId" name="wordpressBlogId" value="$action.wordpressBlogId" title="$action.getText("settings.form.wordpressBlogId.label")">
+      </div>
+      
+      <div class="buttons-container">
+        <div class="buttons">
+          <input class="button submit" type="submit" value="submit">
+          &nbsp;|&nbsp;
+          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}http://localhost:1990/confluence/admin/console.action#end">Cancel</a>
+        </div>
+      </div>
+      
     </form>
   </body>
 </html>

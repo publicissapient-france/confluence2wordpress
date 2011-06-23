@@ -24,9 +24,11 @@ import fr.xebia.confluence2wordpress.wp.transport.DefaultProxyAwareXmlRpcTranspo
  */
 public class WordpressClient {
 
-    private static final String POST_METHOD_NAME = "metaWeblog.newPost";
+    private static final String CREATE_POST_METHOD_NAME = "metaWeblog.newPost";
 
-    private static final String GET_PAGE_METHOD_NAME = "blogger.getPost";
+    private static final String UPDATE_POST_METHOD_NAME = "metaWeblog.editPost";
+
+    private static final String FIND_POST_BY_ID_METHOD_NAME = "metaWeblog.getPost"; //"blogger.getPost";
 
     private static final String GET_USERS_METHOD_NAME = "confluence2wordpress.getAuthors"; // "wp.getAuthors";
 
@@ -77,14 +79,17 @@ public class WordpressClient {
 
         List<WordpressUser> categories = new ArrayList<WordpressUser>(rows.size());
         for (Map<String, Object> row : rows) {
-            WordpressUser author = new WordpressUser();
-            author.setId(Integer.valueOf(row.get("user_id").toString()));
-            author.setFirstName((String)row.get("first_name"));
-            author.setLastName((String)row.get("last_name"));
-            author.setNiceName((String) row.get("user_nicename"));
-            author.setDisplayName((String)row.get("display_name"));
-            author.setLevel(Integer.valueOf(row.get("user_level").toString()));
-            categories.add(author);
+            WordpressUser user = new WordpressUser();
+            user.setId(Integer.valueOf(row.get("user_id").toString()));
+            user.setLogin(row.get("user_login").toString());
+            user.setFirstName((String)row.get("first_name"));
+            user.setLastName((String)row.get("last_name"));
+            user.setNiceName((String) row.get("user_nicename"));
+            user.setDisplayName((String)row.get("display_name"));
+            if(row.get("user_level") != null && StringUtils.isNotEmpty(row.get("user_level").toString())) {
+                user.setLevel(Integer.valueOf(row.get("user_level").toString()));
+            }
+            categories.add(user);
         }
 
         return categories;
@@ -170,59 +175,77 @@ public class WordpressClient {
      */
     public WordpressPost findPostById(int postId) throws XmlRpcException, IOException {
         Vector<Object> params = new Vector<Object>();
-        params.add(wordpressConnection.getBlogId());
+        //params.add(wordpressConnection.getBlogId());
         params.add(postId);
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
         Map<String, Object> map;
         try {
             @SuppressWarnings("unchecked")
-            Map<String, Object> mapTemp = (Map<String, Object>) client.execute(GET_PAGE_METHOD_NAME, params);
+            Map<String, Object> mapTemp = (Map<String, Object>) client.execute(FIND_POST_BY_ID_METHOD_NAME, params);
             map = mapTemp;
         } catch(XmlRpcException e) {
-            if(e.getCause() != null && "Unparseable date: \"T::\"".equals(e.getCause().getMessage())){
-                //Means WordpressConnection didn't find the post and sent an empty XML back.
+            if(e.getMessage().contains("no such post")){
                 return null;
             }
             throw e;
         }
 
         /*Sample of the response structure:
-            userid=1
-            content=<title>Hello world!</title><category>1</category>Welcome
-            dateCreated=Tue May 03 15:15:43 CEST 2011
-            postid=1
+         * 
+         * userid=3,
+         * mt_allow_pings=1,
+         * postid=40,
+         * wp_author_id=3,
+         * date_created_gmt=Wed May 04 14:32:57 CEST 2011,
+         * wp_password=,
+         * link=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
+         * mt_keywords=tag1, tag2,
+         * dateCreated=Wed May 04 16:32:57 CEST 2011,
+         * categories=[test],
+         * post_status=publish,
+         * mt_allow_comments=1,
+         * wp_slug=revue-de-presse-xebia-9,
+         * permaLink=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
+         * description=coucou c'est un draft,
+         * custom_fields=[],
+         * mt_text_more=,
+         * mt_excerpt=,
+         * sticky=false,
+         * title=Revue de Presse Xebia,
+         * wp_author_display_name=xebia-france
          */
 
         WordpressPost post = new WordpressPost();
         post.setPostId(postId);
         post.setDraft(false);
 
-        Object authorId = map.get("userid");
+        Object authorId = map.get("wp_author_id");
         post.setAuthorId(authorId == null ? null : Integer.valueOf(authorId.toString()));
 
         Date dateCreated = (Date) map.get("dateCreated");
         post.setDateCreated(dateCreated);
 
-        String body = (String) map.get("content");
-        String title = null;
-        if(body.startsWith("<title>")) {
-            title = StringUtils.substringBetween(body, "<title>", "</title>");
-            body = StringUtils.substringAfter(body, "</title>");
-        }
-        List<Integer> categoryIds = null;
-        if(body.startsWith("<category>")) {
-            String categories = StringUtils.substringBetween(body, "<category>", "</category>");
-            String[] tokens = categories.split(",");
-            categoryIds = new ArrayList<Integer>(tokens.length);
-            for (String token : tokens) {
-                categoryIds.add(Integer.valueOf(token));
-            }
-            body = StringUtils.substringAfter(body, "</category>");
-        }
+        String body = (String) map.get("description");
         post.setBody(body);
+
+        String title = (String) map.get("title");
         post.setTitle(title);
-        post.setCategoryIds(categoryIds);
+
+        post.setDraft( ! "publish".equals(map.get("post_status")));
+
+        @SuppressWarnings("unchecked")
+        List<String> categoryNames = (List<String>) map.get("categories");
+        post.setCategoryNames(categoryNames);
+
+        List<String> tagNames = Arrays.asList(((String) map.get("mt_keywords")).split(",\\s*"));
+        post.setTagNames(tagNames);
+
+        String slug = (String) map.get("wp_slug");
+        post.setPostSlug(slug);
+
+        String permaLink = (String) map.get("permaLink");
+        post.setLink(permaLink);
 
         return post;
     }
@@ -233,6 +256,7 @@ public class WordpressClient {
      * mais PAS:
      * Author, Contributor, Subscriber
      * 
+     * http://www.xmlrpc.com/metaWeblogApi
      * http://mindsharestrategy.com/wp-xmlrpc-metaweblog/
      * http://www.perkiset.org/forum/perl/metaweblognewpost_to_wordpress_blog_xmlrpcphp-t1307.0.html
      * http://joysofprogramming.com/wordpress-xmlrpc-metaweblog-newpost/
@@ -247,7 +271,11 @@ public class WordpressClient {
 
         Vector<Object> params = new Vector<Object>();
 
-        params.add(wordpressConnection.getBlogId());
+        if(post.getPostId() == null) {
+            params.add(wordpressConnection.getBlogId());
+        } else {
+            params.add(post.getPostId());
+        }
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
 
@@ -256,13 +284,13 @@ public class WordpressClient {
             map.put("title", post.getTitle());
         }
         if(post.getCategoryNames() != null) {
-            map.put("categories", post.getCategoryNames());
+            map.put("categories", new Vector<String>(post.getCategoryNames()));
         }
         if(post.getBody() != null) {
             map.put("description", post.getBody());
         }
         if(post.getTagNames() != null) {
-            map.put("mt_keywords", post.getTagNames());
+            map.put("mt_keywords", new Vector<String>(post.getTagNames()));
         }
         if(post.getAuthorId() != null) {
             map.put("wp_author_id", post.getAuthorId());
@@ -272,14 +300,21 @@ public class WordpressClient {
         }
         params.add(map);
 
-        params.add(post.isDraft());
+        //to publish ?
+        params.add( ! post.isDraft());
 
-        Object ret = client.execute(POST_METHOD_NAME, params);
+        if(post.getPostId() == null) {
+            Object ret = client.execute(CREATE_POST_METHOD_NAME, params);
+            int postId = Integer.parseInt(ret.toString());
+            post.setPostId(postId);
+        } else {
+            Boolean ret = (Boolean) client.execute(UPDATE_POST_METHOD_NAME, params);
+            if( ! ret) {
+                throw new XmlRpcException(0, "Post edit failed");
+            }
+        }
 
-        int postId = Integer.parseInt(ret.toString());
-        post.setPostId(postId);
-
-        return post;
+        return findPostById(post.getPostId());
     }
 
     public static void main(String[] args) throws Exception {
@@ -301,19 +336,20 @@ public class WordpressClient {
             );
 
         System.out.println(client.getUsers());
+        //
+        //        System.out.println(client.getCategories());
+        //
+        //        System.out.println(client.getTags());
 
-        System.out.println(client.getCategories());
+        //        WordpressPost post = client.findPostById(127);
+        //
+        //        System.out.println(post);
 
-        System.out.println(client.getTags());
-
-        WordpressPost post = client.findPostById(40);
-
-        System.out.println(post);
-
-        post = new WordpressPost();
-        post.setAuthorId(3);
+        WordpressPost post = new WordpressPost();
+        post.setAuthorId(6);
         post.setTitle("Revue de Presse Xebia");
         post.setBody("coucou c'est un draft");
+        post.setPostSlug("slug");
         post.setCategoryNames(Arrays.asList(new String[]{"test", "newcat"}));//categories must exist.
         post.setTagNames(Arrays.asList(new String[]{"tag1", "tag2", "newtag"})); //tags are dynamically created.
         post = client.post(post);
