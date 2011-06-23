@@ -16,6 +16,7 @@
 package fr.xebia.confluence2wordpress.form;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.text.StrTokenizer;
@@ -44,9 +45,9 @@ public class ConversionForm implements Serializable {
 
     private Integer wordpressUserId;
 
-    private List<String> wordpressCategoryNames;
+    private List<String> wordpressCategoryNames = new ArrayList<String>();
 
-    private List<String> wordpressTagNames;
+    private List<String> wordpressTagNames = new ArrayList<String>();
 
     public Long getPageId() {
         return pageId;

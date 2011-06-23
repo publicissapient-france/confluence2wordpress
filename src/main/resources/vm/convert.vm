@@ -66,7 +66,7 @@
     
     <fieldset class="group">
       <div class="checkbox">
-        <input id="optimizeForRDP" name="optimizeForRDP" type="checkbox" class="checkbox" #if($action.optimizeForRDP)checked="checked"#end />
+        <input id="optimizeForRDP" name="optimizeForRDP" value="true" type="checkbox" class="checkbox" #if($action.optimizeForRDP)checked="checked"#end />
         <label for="optimizeForRDP">$action.getText("convert.form.optimizeForRDP.label")</label>
       </div>
     </fieldset>
@@ -102,13 +102,13 @@
     </div>
     
     <div class="field-group">
-        <label for="wordpressCategoryIds">
-            $action.getText("convert.form.wordpressCategoryIds.label")
+        <label for="wordpressCategoryNames">
+            $action.getText("convert.form.wordpressCategoryNames.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
-        <select id="wordpressCategoryIds" name="wordpressCategoryIds" multiple="true" class="multi-select">
+        <select id="wordpressCategoryNames" name="wordpressCategoryNames" multiple="true" class="multi-select">
             #foreach($wordpressCategory in $action.wordpressCategories)
-                <option value="$wordpressCategory.id" #if( $action.wordpressCategoryIds.contains($wordpressCategory.id.toString()) ) selected="true" #end >$wordpressCategory.categoryName</option>
+                <option value="$wordpressCategory.categoryName" #if( $action.wordpressCategoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
             #end
         </select>
     </div>
