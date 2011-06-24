@@ -1,7 +1,6 @@
 package fr.xebia.confluence2wordpress.wp;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -35,6 +34,9 @@ public class WordpressClient {
     private static final String GET_CATEGORIES_METHOD_NAME = "wp.getCategories";
 
     private static final String GET_TAGS_METHOD_NAME = "wp.getTags";
+
+    private static final String UPLOAD_FILE_METHOD_NAME = "wp.uploadFile";
+
 
     /**
      * Very, VERY old version of the lib bundled with Confluence.
@@ -251,10 +253,6 @@ public class WordpressClient {
     }
 
     /**
-     * L'utilisateur doit être:
-     * Editor ou Administrator
-     * mais PAS:
-     * Author, Contributor, Subscriber
      * 
      * http://www.xmlrpc.com/metaWeblogApi
      * http://mindsharestrategy.com/wp-xmlrpc-metaweblog/
@@ -317,43 +315,30 @@ public class WordpressClient {
         return findPostById(post.getPostId());
     }
 
-    public static void main(String[] args) throws Exception {
-        // the url of your xmlrpc.php, typically
-        // of the form http://your.domain.here/wordpress/xmlrpc.php
-        String xmlRpcUrl = "http://blog.xebia.fr/xmlrpc.php";
-        xmlRpcUrl = "http://localhost/wordpress/xmlrpc.php";
+    public WordpressFile uploadFile(WordpressFile file) throws XmlRpcException, IOException {
 
-        URL url = new URL(xmlRpcUrl);
-        String userName = "adutra";
-        String password = "80Onizofr";
-        String blogId = "1";
+        Vector<Object> params = new Vector<Object>();
+        params.add(wordpressConnection.getBlogId());
+        params.add(wordpressConnection.getUsername());
+        params.add(wordpressConnection.getPassword());
 
-        WordpressConnection wordpressConnection = new WordpressConnection(url, userName, password, blogId);
+        Hashtable<String,Object> map = new Hashtable<String,Object>();
+        map.put("name", file.getFileName());
+        map.put("type", file.getMimeType());
+        map.put("bits", file.getData());
+        //see http://core.trac.wordpress.org/ticket/17604
+        map.put("overwrite", true);
+        params.add(map);
 
-        WordpressClient client = new WordpressClient(
-            wordpressConnection
-            //,"proxy.gicm.net", 3128
-            );
+        @SuppressWarnings("unchecked")
+        Map<String, String> response = (Map<String, String>) client.execute(UPLOAD_FILE_METHOD_NAME, params);
 
-        System.out.println(client.getUsers());
-        //
-        //        System.out.println(client.getCategories());
-        //
-        //        System.out.println(client.getTags());
+        file.setFileName(response.get("file"));
+        file.setMimeType(response.get("type"));
+        file.setUrl(response.get("url"));
 
-        //        WordpressPost post = client.findPostById(127);
-        //
-        //        System.out.println(post);
-
-        WordpressPost post = new WordpressPost();
-        post.setAuthorId(6);
-        post.setTitle("Revue de Presse Xebia");
-        post.setBody("coucou c'est un draft");
-        post.setPostSlug("slug");
-        post.setCategoryNames(Arrays.asList(new String[]{"test", "newcat"}));//categories must exist.
-        post.setTagNames(Arrays.asList(new String[]{"tag1", "tag2", "newtag"})); //tags are dynamically created.
-        post = client.post(post);
-        System.out.println(post);
+        return file;
 
     }
+
 }
