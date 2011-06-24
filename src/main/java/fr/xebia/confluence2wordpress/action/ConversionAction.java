@@ -21,11 +21,16 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlrpc.XmlRpcException;
 
+import com.atlassian.confluence.pages.Attachment;
+import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.renderer.WikiStyleRenderer;
@@ -37,6 +42,7 @@ import fr.xebia.confluence2wordpress.form.ConversionForm;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
 import fr.xebia.confluence2wordpress.wp.WordpressConnection;
+import fr.xebia.confluence2wordpress.wp.WordpressFile;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 import fr.xebia.confluence2wordpress.wp.WordpressTag;
 import fr.xebia.confluence2wordpress.wp.WordpressUser;
@@ -45,7 +51,7 @@ import fr.xebia.confluence2wordpress.wp.WordpressUser;
  * @author Alexandre Dutra
  *
  */
-public class ConversionAction extends SettingsAwareAction {
+public class ConversionAction extends BaseAction {
 
     private static final long serialVersionUID = 1L;
 
@@ -67,7 +73,9 @@ public class ConversionAction extends SettingsAwareAction {
 
     private Converter converter;
 
-    protected PageManager pageManager;
+    private PageManager pageManager;
+
+    private AttachmentManager attachmentManager;
 
     private ConversionForm form = new ConversionForm();
 
@@ -81,6 +89,10 @@ public class ConversionAction extends SettingsAwareAction {
 
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
+    }
+
+    public void setAttachmentManager(AttachmentManager attachmentManager) {
+        this.attachmentManager = attachmentManager;
     }
 
     public void setWikiStyleRenderer(WikiStyleRenderer wikiStyleRenderer) {
@@ -246,7 +258,7 @@ public class ConversionAction extends SettingsAwareAction {
      * @throws Exception
      */
     public String preview() throws Exception {
-        this.html = convert();
+        this.html = convert(null);
         return SUCCESS;
     }
 
@@ -262,7 +274,8 @@ public class ConversionAction extends SettingsAwareAction {
         post.setPostId(this.getPostId());
         post.setAuthorId(this.getWordpressUserId());
         post.setTitle(this.getPageTitle());
-        post.setBody(convert());
+        Map<String, String> attachmentsMap = uploadAttachments();
+        post.setBody(convert(attachmentsMap));
         post.setPostSlug(this.getPostSlug());
         post.setCategoryNames(getWordpressCategoryNames()); //categories must exist.
         post.setTagNames(this.getWordpressTagNames()); //tags are dynamically created.
@@ -272,6 +285,23 @@ public class ConversionAction extends SettingsAwareAction {
         storePostResult(postResult);
         storeConversionForm(this.form);
         return SUCCESS;
+    }
+
+    public Map<String, String> uploadAttachments() throws IOException, XmlRpcException {
+        Page page = getPage();
+        Map<String, String> attachmentsMap = new HashMap<String, String>();
+        WordpressClient client = newWordpressClient();
+        List<Attachment> attachments = attachmentManager.getAttachments(page);
+        for (Attachment attachment : attachments) {
+            byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
+            WordpressFile file = new WordpressFile(
+                attachment.getFileName(),
+                attachment.getContentType(),
+                data);
+            file = client.uploadFile(file);
+            attachmentsMap.put(attachment.getDownloadPath(), file.getUrl());
+        }
+        return attachmentsMap;
     }
 
     private String initConversionForm() throws XmlRpcException, IOException {
@@ -341,11 +371,12 @@ public class ConversionAction extends SettingsAwareAction {
         return SUCCESS;
     }
 
-    private String convert() {
+    private String convert(Map<String, String> attachmentsMap) {
         ConverterOptions options = new ConverterOptions();
         options.setResourcesBaseUrl(getResourcesBaseUrl());
         options.setDisableConfluenceMacros(getIgnoreConfluenceMacrosAsList());
         options.setOptimizeForRDP(getOptimizeForRDP() == null ? false : getOptimizeForRDP());
+        options.setAttachmentsMap(attachmentsMap);
         Page page = getPage();
         String originalTitle = page.getTitle();
         try {

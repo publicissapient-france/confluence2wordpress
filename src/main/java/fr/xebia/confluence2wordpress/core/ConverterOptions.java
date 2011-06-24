@@ -46,6 +46,8 @@ public class ConverterOptions {
 
     private boolean optimizeForRDP = false;
 
+    private Map<String, String> attachmentsMap;
+
     public ConverterOptions() {
     }
 
@@ -144,6 +146,14 @@ public class ConverterOptions {
 
     public void setOptimizeForRDP(boolean optimizeForRDP) {
         this.optimizeForRDP = optimizeForRDP;
+    }
+
+    public Map<String, String> getAttachmentsMap() {
+        return attachmentsMap;
+    }
+
+    public void setAttachmentsMap(Map<String, String> attachmentsMap) {
+        this.attachmentsMap = attachmentsMap;
     }
 
 }

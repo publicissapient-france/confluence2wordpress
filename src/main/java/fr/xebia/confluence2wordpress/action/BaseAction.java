@@ -26,7 +26,7 @@ import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
  * @author Alexandre Dutra
  *
  */
-public abstract class SettingsAwareAction extends ConfluenceActionSupport {
+public abstract class BaseAction extends ConfluenceActionSupport {
 
     private static final String DEFAULT_WP_XML_RPC_USERNAME = "admin";
 

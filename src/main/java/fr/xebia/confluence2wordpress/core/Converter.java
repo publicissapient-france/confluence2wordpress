@@ -32,6 +32,7 @@ import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.WikiStyleRenderer;
 
+import fr.xebia.confluence2wordpress.core.visitors.AttachmentsProcessor;
 import fr.xebia.confluence2wordpress.core.visitors.CdataStripper;
 import fr.xebia.confluence2wordpress.core.visitors.CodeMacroConverter;
 import fr.xebia.confluence2wordpress.core.visitors.CssClassNameCleaner;
@@ -160,6 +161,9 @@ public class Converter {
         }
         if(options.getResourcesBaseUrl() != null) {
             visitors.add(new UrlConverter(options.getResourcesBaseUrl()));
+        }
+        if(options.getAttachmentsMap() != null) {
+            visitors.add(new AttachmentsProcessor(options.getAttachmentsMap()));
         }
         //regular visitors
         visitors.add(new CssClassNameCleaner());

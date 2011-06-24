@@ -18,7 +18,7 @@ import com.atlassian.user.User;
 /**
  * @author Alexandre Dutra
  */
-public class SettingsAction extends SettingsAwareAction {
+public class SettingsAction extends BaseAction {
 
     private static final long serialVersionUID = 1L;
 

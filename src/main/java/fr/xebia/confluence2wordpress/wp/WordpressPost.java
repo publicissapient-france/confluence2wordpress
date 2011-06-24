@@ -1,10 +1,16 @@
 package fr.xebia.confluence2wordpress.wp;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 
-public class WordpressPost {
+public class WordpressPost implements Serializable {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
     private Integer postId;
 
@@ -105,6 +111,5 @@ public class WordpressPost {
     public void setLink(String link) {
         this.link = link;
     }
-
 
 }
