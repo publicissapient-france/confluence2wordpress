@@ -1,4 +1,4 @@
-package fr.xebia.confluence2wordpress.core;
+package fr.xebia.confluence2wordpress.core.converter;
 
 import java.util.HashMap;
 import java.util.Map;

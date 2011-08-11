@@ -13,31 +13,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-/**
- * 
- */
-package fr.xebia.confluence2wordpress.core.visitors;
+package fr.xebia.confluence2wordpress.core.metadata;
 
-import org.htmlcleaner.HtmlNode;
-import org.htmlcleaner.TagNode;
-import org.htmlcleaner.TagNodeVisitor;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class CssClassNameCleaner implements TagNodeVisitor {
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MetadataItem {
 
     /**
-     * @inheritdoc
+     * @return The metadata entry's label (key)
      */
-    public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
-        if (htmlNode instanceof TagNode) {
-            TagNode tag = (TagNode) htmlNode;
-            tag.removeAttribute("class");
-        }
-        return true;
-    }
-
+    String value();
+        
 }

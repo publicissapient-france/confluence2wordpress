@@ -16,46 +16,35 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.core.visitors;
-
-import java.util.Collection;
-import java.util.List;
+package fr.xebia.confluence2wordpress.core.converter.visitors;
 
 import org.apache.commons.lang.StringUtils;
+import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
+
+import fr.xebia.confluence2wordpress.util.string.XmlEscapeUtils;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class EmptySpanStripper implements TagNodeVisitor {
+public class CdataStripper implements TagNodeVisitor {
 
     /**
      * @inheritdoc
      */
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
-        if (htmlNode instanceof TagNode) {
-            TagNode tag = (TagNode) htmlNode;
-            if("span".equals(tag.getName()) && hasNoAttributes(tag)) {
-                parentNode.removeChild(tag);
-                @SuppressWarnings("unchecked")
-                List<HtmlNode> children = tag.getChildren();
-                for (HtmlNode child : children) {
-                    parentNode.addChild(child);
-                }
-            }
-        }
-        return true;
-    }
-
-    private boolean hasNoAttributes(TagNode tag) {
-        Collection<String> values = tag.getAttributes().values();
-        for (String value : values) {
-            if(StringUtils.isNotBlank(value)){
-                return false;
+        if (htmlNode instanceof ContentNode) {
+            ContentNode tag = (ContentNode) htmlNode;
+            String code = tag.getContent().toString();
+            if(code.startsWith("<![CDATA[") && code.endsWith("]]>")) {
+                code = StringUtils.substringBetween(code, "<![CDATA[", "]]>");
+                code = XmlEscapeUtils.escapeText(code);
+                ContentNode replacement = new ContentNode(code);
+                parentNode.replaceChild(tag, replacement);
             }
         }
         return true;

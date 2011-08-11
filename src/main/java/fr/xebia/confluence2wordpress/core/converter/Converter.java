@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core;
+package fr.xebia.confluence2wordpress.core.converter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,36 +23,35 @@ import java.util.Map.Entry;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.CleanerTransformations;
 import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.HtmlSerializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 import org.htmlcleaner.TagTransformation;
 
-import com.atlassian.confluence.pages.Page;
+import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.WikiStyleRenderer;
 
-import fr.xebia.confluence2wordpress.core.visitors.AttachmentsProcessor;
-import fr.xebia.confluence2wordpress.core.visitors.CdataStripper;
-import fr.xebia.confluence2wordpress.core.visitors.CodeMacroConverter;
-import fr.xebia.confluence2wordpress.core.visitors.CssClassNameCleaner;
-import fr.xebia.confluence2wordpress.core.visitors.EmptySpanStripper;
-import fr.xebia.confluence2wordpress.core.visitors.SyntaxHighlighterConverter;
-import fr.xebia.confluence2wordpress.core.visitors.UrlConverter;
-import fr.xebia.confluence2wordpress.rdp.AnchorTransformer;
-import fr.xebia.confluence2wordpress.rdp.HeadingsCollector;
-import fr.xebia.confluence2wordpress.rdp.RevueDePresseHelper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CdataStripper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroConverter;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
+import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.HeadingsCollector;
+import fr.xebia.confluence2wordpress.core.converter.visitors.SyntaxHighlighterConverter;
 
 public class Converter {
 
     private WikiStyleRenderer wikiStyleRenderer;
+    private VelocityHelper velocityHelper = new VelocityHelper();
 
     public Converter(WikiStyleRenderer wikiStyleRenderer) {
         super();
         this.wikiStyleRenderer = wikiStyleRenderer;
     }
 
-    public String convert(Page page, ConverterOptions options) {
+    public String convert(ContentEntityObject page, ConverterOptions options) {
         String wiki = preConvert(page.getContent(), options);
         String confluenceHtml = convertInternal(page.toPageContext(), wiki, options);
         String wordpressHtml = postConvert(confluenceHtml, options);
@@ -69,7 +68,7 @@ public class Converter {
         return wiki;
     }
 
-    protected String convertInternal(PageContext pageContext, String wiki, @SuppressWarnings("unused") ConverterOptions options) {
+    protected String convertInternal(PageContext pageContext, String wiki, ConverterOptions options) {
         //see DefaultWysiwygConverter and RenderContext
         /*
          * Can't play with some classes here:
@@ -105,12 +104,15 @@ public class Converter {
 
         String html = serialize(body, cleanerProps);
 
-        if(options.isOptimizeForRDP()) {
-            AnchorTransformer t = new AnchorTransformer();
-            body.traverse(t);
+        if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
             HeadingsCollector collector = new HeadingsCollector();
             body.traverse(collector);
-            String header = new RevueDePresseHelper().generateHeader(collector.getHeadings());
+            String toc = velocityHelper.generateTOC(collector.getHeadings());
+            html = toc + html;
+        }
+        
+        if(options.isOptimizeForRDP()) {
+            String header = velocityHelper.generateHeader();
             html = header + html;
         }
 
@@ -159,9 +161,6 @@ public class Converter {
         if(options.isConvertCdata()) {
             visitors.add(new CdataStripper());
         }
-        if(options.getResourcesBaseUrl() != null) {
-            visitors.add(new UrlConverter(options.getResourcesBaseUrl()));
-        }
         if(options.getAttachmentsMap() != null) {
             visitors.add(new AttachmentsProcessor(options.getAttachmentsMap()));
         }
@@ -172,11 +171,12 @@ public class Converter {
     }
 
     protected String serialize(TagNode body, CleanerProperties properties) {
+        HtmlSerializer serializer;
         //does not work very well
-        //PrettyHtmlSerializer serializer = new PrettyHtmlSerializer(cleaner.getProperties());
-        SimpleHtmlSerializer serializer = new SimpleHtmlSerializer(properties);
+        //serializer = new PrettyHtmlSerializer(properties);
+        serializer = new SimpleHtmlSerializer(properties);
         try {
-            return serializer.getAsString(body, true);
+            return serializer.getAsString(body, "UTF-8", true);
         } catch (IOException e) {
             // should not occur with string writers
             return null;

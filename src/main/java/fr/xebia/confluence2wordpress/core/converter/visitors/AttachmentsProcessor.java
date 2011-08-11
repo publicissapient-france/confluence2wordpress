@@ -16,12 +16,12 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.core.visitors;
+package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -50,32 +50,39 @@ public class AttachmentsProcessor implements TagNodeVisitor {
             TagNode tag = (TagNode) htmlNode;
             String tagName = tag.getName();
             if ("img".equals(tagName)) {
-                String src = tag.getAttributeByName("src");
-                //http:// mais sans port :(
-                if (src != null) {
-                    try {
-                        URL url = new URL(src);
-                        String urlString = url.getPath();
-                        if(url.getQuery() != null) {
-                            urlString += url.getQuery();
-                        }
-                        if(attachmentsMap.containsKey(urlString)) {
-                            tag.setAttribute("src", attachmentsMap.get(url));
-                        }
-                    } catch (MalformedURLException e) {
+                String url = tag.getAttributeByName("src");
+                //URL is absolute, i.e. starts with scheme "http://" but has no port number :(
+                if (url != null) {
+                    String src = replaceAttachmentUrl(url);
+                    if(src != null) {
+                        tag.setAttribute("src", src);
                     }
                 }
             } else if ("a".equals(tagName)) {
                 String url = tag.getAttributeByName("href");
-                // /confluence
+                // URL starts with context path, i.e. "/confluence"
                 if (url != null) {
-                    if(attachmentsMap.containsKey(url)) {
-                        tag.setAttribute("href", attachmentsMap.get(url));
+                    String href = replaceAttachmentUrl(url);
+                    if(href != null) {
+                        tag.setAttribute("href", href);
                     }
                 }
             }
+            //TODO object
         }
         return true;
+    }
+
+
+    private String replaceAttachmentUrl(String url) {
+        //url may contain "&amp;" - due to htmlcleaner?
+        String sanitized = StringEscapeUtils.unescapeXml(url);
+        for (Entry<String,String> entry : attachmentsMap.entrySet()) {
+            if(sanitized.endsWith(entry.getKey())){
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
 

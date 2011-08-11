@@ -50,15 +50,6 @@
     
       <div class="field-group">
         <label for="resourcesBaseUrl">
-            $action.getText("settings.form.resourcesBaseUrl.label")
-            <span class="form-icon icon-required"/>
-        </label>
-        <input class="text long-field" type="text" id="resourcesBaseUrl" name="resourcesBaseUrl" value="$action.resourcesBaseUrl" title="$action.getText("settings.form.resourcesBaseUrl.label")">
-        <div class="description">$action.getText("settings.form.resourcesBaseUrl.description")</div>
-      </div>
-    
-      <div class="field-group">
-        <label for="resourcesBaseUrl">
             $action.getText("settings.form.editPostUrl.label")
             <span class="form-icon icon-required"/>
         </label>
@@ -74,14 +65,33 @@
             <span class="form-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="wordpressXmlRpcUrl" name="wordpressXmlRpcUrl" value="$action.wordpressXmlRpcUrl" title="$action.getText("settings.form.wordpressXmlRpcUrl.label")">
+        <div class="description">$action.getText("settings.form.wordpressXmlRpcUrl.description")</div>
       </div>
       
+      <div class="field-group">
+        <label for="proxyHost">
+            $action.getText("settings.form.proxyHost.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="proxyHost" name="proxyHost" value="$!action.proxyHost" title="$action.getText("settings.form.proxyHost.label")">
+        <div class="description">$action.getText("settings.form.proxyHost.description")</div>
+      </div>
+      
+      <div class="field-group">
+        <label for="proxyPort">
+            $action.getText("settings.form.proxyPort.label")
+            <span class="form-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="proxyPort" name="proxyPort" value="$!action.proxyPort" title="$action.getText("settings.form.proxyPort.label")">
+        <div class="description">$action.getText("settings.form.proxyPort.description")</div>
+      </div>
       <div class="field-group">
         <label for="wordpressUserName">
             $action.getText("settings.form.wordpressUserName.label")
             <span class="form-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="wordpressUserName" name="wordpressUserName" value="$action.wordpressUserName" title="$action.getText("settings.form.wordpressUserName.label")">
+        <div class="description">$action.getText("settings.form.wordpressUserName.description")</div>
       </div>
       
       <div class="field-group">
@@ -104,7 +114,7 @@
         <div class="buttons">
           <input class="button submit" type="submit" value="submit">
           &nbsp;|&nbsp;
-          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}http://localhost:1990/confluence/admin/console.action#end">Cancel</a>
+          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}${action.confluenceRootUrl}/admin/console.action#end">Cancel</a>
         </div>
       </div>
       

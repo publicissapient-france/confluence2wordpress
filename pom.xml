@@ -28,9 +28,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- ancienne version -->
-        <!-- <confluence.version>3.4.7</confluence.version>
-        <confluence.data.version>3.1</confluence.data.version> -->
         <confluence.version>3.5.2</confluence.version>
         <confluence.data.version>3.5</confluence.data.version>
         <!--<jericho.version>3.1</jericho.version>

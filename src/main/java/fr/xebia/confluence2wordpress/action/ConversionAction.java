@@ -16,76 +16,73 @@
 package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.MessageFormat;
-import java.util.Calendar;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.xmlrpc.XmlRpcException;
 
+import com.atlassian.confluence.labels.LabelManager;
+import com.atlassian.confluence.pages.AbstractPage;
 import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.pages.AttachmentManager;
-import com.atlassian.confluence.pages.Page;
 import com.atlassian.confluence.pages.PageManager;
+import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
 import com.atlassian.renderer.WikiStyleRenderer;
+import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
-import fr.xebia.confluence2wordpress.core.Converter;
-import fr.xebia.confluence2wordpress.core.ConverterOptions;
-import fr.xebia.confluence2wordpress.form.ConversionForm;
+import fr.xebia.confluence2wordpress.core.PluginSettingsManager;
+import fr.xebia.confluence2wordpress.core.converter.Converter;
+import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
+import fr.xebia.confluence2wordpress.core.metadata.Metadata;
+import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
+import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
+import fr.xebia.confluence2wordpress.core.metadata.PageLabelsSynchronizer;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
-import fr.xebia.confluence2wordpress.wp.WordpressConnection;
 import fr.xebia.confluence2wordpress.wp.WordpressFile;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 import fr.xebia.confluence2wordpress.wp.WordpressTag;
 import fr.xebia.confluence2wordpress.wp.WordpressUser;
+import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class ConversionAction extends BaseAction {
+public class ConversionAction extends AbstractPageAwareAction {
 
     private static final long serialVersionUID = 1L;
 
-    private static class PostResult implements Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        private WordpressPost post;
-
-        private boolean creation;
-
-        public PostResult(WordpressPost post, boolean creation) {
-            super();
-            this.post = post;
-            this.creation = creation;
-        }
-
-    }
-
+    private static final String ACTION_ERRORS_KEY = "C2W_ACTION_ERRORS";
+    
+    private static final String ACTION_MESSAGES_KEY = "C2W_ACTION_MESSAGES";
+    
     private Converter converter;
 
     private PageManager pageManager;
 
     private AttachmentManager attachmentManager;
 
-    private ConversionForm form = new ConversionForm();
+    private PluginSettingsManager pluginSettingsManager;
+
+    private final MetadataManager metadataManager = new MetadataManager();
+
+    private Metadata metadata;
 
     private String html;
 
-    private boolean displayCreationMessage = false;
-
-    private boolean displayUpdateMessage = false;
-
-    private String permaLink;
+    private PageLabelsSynchronizer pageLabelsSynchronizer;
+    
+    private boolean allowPostOverride = false;
 
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -99,107 +96,73 @@ public class ConversionAction extends BaseAction {
         this.converter = new Converter(wikiStyleRenderer);
     }
 
-    public Page getPage() {
-        return pageManager.getPage(getPageId());
+    public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
+        this.pluginSettingsManager = new PluginSettingsManager();
+        this.pluginSettingsManager.setPluginSettingsFactory(pluginSettingsFactory);
     }
 
-    public Long getPageId() {
-        return form.getPageId();
+    public void setLabelManager(LabelManager labelManager) {
+        super.setLabelManager(labelManager);
+        this.pageLabelsSynchronizer = new PageLabelsSynchronizer(labelManager);
     }
 
-    public void setPageId(Long pageId) {
-        form.setPageId(pageId);
+    @SuppressWarnings("unchecked")
+    public List<WordpressUser> getWordpressUsers() {
+        return (List<WordpressUser>) getSession().get("C2W_WP_USERS");
     }
 
-    public String getPageTitle() {
-        return form.getPageTitle();
+    @SuppressWarnings("unchecked")
+    private void setWordpressUsers(List<WordpressUser> users) {
+        getSession().put("C2W_WP_USERS", users);
     }
 
-    public void setPageTitle(String pageTitle) {
-        form.setPageTitle(pageTitle);
+    @SuppressWarnings("unchecked")
+    public Set<WordpressCategory> getWordpressCategories() {
+        return (Set<WordpressCategory>) getSession().get("C2W_WP_CATEGORIES");
+    }
+
+    @SuppressWarnings("unchecked")
+    private void setWordpressCategories(Set<WordpressCategory> categories) {
+        getSession().put("C2W_WP_CATEGORIES", categories);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<WordpressTag> getWordpressTags() {
+        return (Set<WordpressTag>) getSession().get("C2W_WP_TAGS");
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void setWordpressTags(Set<WordpressTag> tags) {
+        getSession().put("C2W_WP_TAGS", tags);
+    }
+
+    public void setPageId(long pageId){
+        this.setPage(pageManager.getPage(pageId));
+    }
+    
+    public boolean isAllowPostOverride() {
+        return allowPostOverride;
+    }
+    
+    public void setAllowPostOverride(boolean allowPostOverride) {
+        this.allowPostOverride = allowPostOverride;
+    }
+
+    @ParameterSafe
+    public Metadata getMetadata() {
+        if(metadata == null){
+            metadata = new Metadata();
+        }
+        return metadata;
     }
 
     public String getIgnoreConfluenceMacros() {
-        return form.getIgnoreConfluenceMacros();
+      return StringUtils.join(getMetadata().getIgnoreConfluenceMacros(), ' ');
     }
-
-    public List<String> getIgnoreConfluenceMacrosAsList() {
-        return form.getIgnoreConfluenceMacrosAsList();
-    }
-
+    
     public void setIgnoreConfluenceMacros(String ignoreConfluenceMacros) {
-        form.setIgnoreConfluenceMacros(ignoreConfluenceMacros);
+      getMetadata().setIgnoreConfluenceMacros(Arrays.asList(StringUtils.split(ignoreConfluenceMacros)));
     }
-
-    public String getResourcesBaseUrl() {
-        return form.getResourcesBaseUrl();
-    }
-
-    public void setResourcesBaseUrl(String resourcesBaseUrl) {
-        form.setResourcesBaseUrl(resourcesBaseUrl);
-    }
-
-    public Boolean getOptimizeForRDP() {
-        return form.getOptimizeForRDP();
-    }
-
-    public void setOptimizeForRDP(Boolean optimizeForRDP) {
-        form.setOptimizeForRDP(optimizeForRDP);
-    }
-
-    public Integer getPostId() {
-        return form.getPostId();
-    }
-
-    public void setPostId(Integer postId) {
-        form.setPostId(postId);
-    }
-
-    public String getPostSlug() {
-        return form.getPostSlug();
-    }
-
-    public void setPostSlug(String postSlug) {
-        form.setPostSlug(postSlug);
-    }
-
-    public Integer getWordpressUserId() {
-        return form.getWordpressUserId();
-    }
-
-    public void setWordpressUserId(Integer wordpressUserId) {
-        form.setWordpressUserId(wordpressUserId);
-    }
-
-    public List<String> getWordpressTagNames() {
-        return form.getWordpressTagNames();
-    }
-
-    public void setWordpressTagNames(List<String> wordpressTagNames) {
-        form.setWordpressTagNames(wordpressTagNames);
-    }
-
-    public List<String> getWordpressCategoryNames() {
-        return form.getWordpressCategoryNames();
-    }
-
-    public void setWordpressCategoryNames(List<String> categoryNames) {
-        form.setWordpressCategoryNames(categoryNames);
-    }
-
-    public List<WordpressUser> getWordpressUsers() {
-        return retrieveWordpressUsers();
-    }
-
-    public List<WordpressCategory> getWordpressCategories() {
-        return retrieveWordpressCategories();
-    }
-
-    public List<WordpressTag> getWordpressTags() {
-        return retrieveWordpressTags();
-    }
-
-    // read-only
 
     public String getHtml() {
         return html;
@@ -217,39 +180,67 @@ public class ConversionAction extends BaseAction {
         return TextUtils.htmlEncode(getHtml());
     }
 
-    public boolean isDisplayCreationMessage() {
-        return displayCreationMessage;
-    }
-
-    public boolean isDisplayUpdateMessage() {
-        return displayUpdateMessage;
-    }
-
-    public String getPermaLink() {
-        return permaLink;
-    }
-
     public String getEditLink() {
-        return MessageFormat.format(getDefaultWordpressEditPostUrl(), getPostId());
+        return pluginSettingsManager.getWordpressRootUrl() + 
+        MessageFormat.format(pluginSettingsManager.getWordpressEditPostUrl(), metadata.getPostId());
     }
 
+    public String getConfluenceRootUrl(){
+        return settingsManager.getGlobalSettings().getBaseUrl();
+    }
+    
     @Override
     public void validate() {
-        super.validate();
+        try {
+            if (StringUtils.isBlank(getMetadata().getPageTitle())) {
+                addActionError(getText("convert.errors.pageTitle.empty"));
+            }
+            if (StringUtils.isNotBlank(getMetadata().getPostSlug())) {
+                checkPostSlugSyntax();
+                checkPostSlugAvailability();
+            }
+            if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
+                checkConcurrentPostModification();
+            }
+        } catch (WordpressXmlRpcException e) {
+            addActionError(getText("convert.errors.connection.failed"), e.getMessage());
+        }
+    }
+
+    private void checkPostSlugAvailability() throws WordpressXmlRpcException {
+        WordpressClient client = pluginSettingsManager.newWordpressClient();
+        Integer retrievedPostId = client.findPageIdBySlug(getMetadata().getPostSlug());
+        if (retrievedPostId != null && ! retrievedPostId.equals(getMetadata().getPostId())){
+            addActionError(getText("convert.errors.postSlug.availability"), retrievedPostId);
+        }
+    }
+
+    private void checkConcurrentPostModification() throws WordpressXmlRpcException {
+        WordpressClient client = pluginSettingsManager.newWordpressClient();
+        WordpressPost post = client.findPostById(getMetadata().getPostId());
+        if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
+            addActionError(getText("convert.errors.digest.concurrentModification"));
+        }
+    }
+
+    private void checkPostSlugSyntax() {
+        if( ! getMetadata().getPostSlug().matches("[a-zA-Z0-9\\-_]+")){
+            addActionError(getText("convert.errors.postSlug.syntax"));
+        }
     }
 
     /**
-     * Action when the conversion form is displayed.
+     * Action when the synchronization form is displayed.
      * @return The action result.
-     * @throws Exception
+     * @throws MetadataException 
+     * @throws WordpressXmlRpcException 
      */
-    public String input() throws Exception {
-        ConversionForm sessionForm = retrieveConversionForm();
-        if(sessionForm == null) {
-            return initConversionForm();
-        } else {
-            return processFormAfterPost(sessionForm);
-        }
+    public String input() throws MetadataException, WordpressXmlRpcException {
+        restoreActionErrorsAndMessagesFromSession();
+        initFormElements();
+        initMetadata();
+        mergeLocalAndRemoteTags();
+        return SUCCESS;
     }
 
     /**
@@ -258,39 +249,115 @@ public class ConversionAction extends BaseAction {
      * @throws Exception
      */
     public String preview() throws Exception {
-        this.html = convert(null);
+        this.html = createPostBody(true);
         return SUCCESS;
     }
 
     /**
-     * Action when a post to Wordpress is to be performed.
+     * Action when a sync with Wordpress is to be performed.
      * @return The action result.
-     * @throws Exception
+     * @throws IOException 
+     * @throws WordpressXmlRpcException 
+     * @throws MetadataException 
      */
-    public String post() throws Exception {
-        boolean creation = this.getPostId() == null;
-        WordpressPost post = new WordpressPost();
-        post.setDraft(true);
-        post.setPostId(this.getPostId());
-        post.setAuthorId(this.getWordpressUserId());
-        post.setTitle(this.getPageTitle());
-        Map<String, String> attachmentsMap = uploadAttachments();
-        post.setBody(convert(attachmentsMap));
-        post.setPostSlug(this.getPostSlug());
-        post.setCategoryNames(getWordpressCategoryNames()); //categories must exist.
-        post.setTagNames(this.getWordpressTagNames()); //tags are dynamically created.
-        WordpressClient client = newWordpressClient();
+    public String sync() throws IOException, WordpressXmlRpcException, MetadataException {
+        //create the post
+        boolean creation = this.metadata.getPostId() == null;
+        WordpressPost post = metadata.createPost(createPostBody(false));
+        //post it
+        WordpressClient client = pluginSettingsManager.newWordpressClient();
         post = client.post(post);
-        PostResult postResult = new PostResult(post, creation);
-        storePostResult(postResult);
-        storeConversionForm(this.form);
+        //update metadata
+        metadata.updateFromPost(post);
+        pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
+        metadataManager.storeMetadata(getPage(), metadata);
+        if(creation) addActionMessage(getText("convert.msg.creation.success"));
+        else addActionMessage(getText("convert.msg.update.success"));
+        storeActionErrorsAndMessagesInSession();
         return SUCCESS;
     }
 
-    public Map<String, String> uploadAttachments() throws IOException, XmlRpcException {
-        Page page = getPage();
+    @SuppressWarnings("unchecked")
+    private void storeActionErrorsAndMessagesInSession() {
+        getSession().put(ACTION_ERRORS_KEY, getActionErrors());
+        getSession().put(ACTION_MESSAGES_KEY, getActionMessages());
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void restoreActionErrorsAndMessagesFromSession() {
+        List<String> errors = (List<String>) getSession().get(ACTION_ERRORS_KEY);
+        if(errors != null){
+            for (String error : errors) {
+                addActionError(error);
+            }
+            getSession().put(ACTION_ERRORS_KEY, null);
+        }
+        List<String> messages = (List<String>) getSession().get(ACTION_MESSAGES_KEY);
+        if(messages != null){
+            for (String message : messages) {
+                addActionMessage(message);
+            }
+            getSession().put(ACTION_MESSAGES_KEY, null);
+        }
+    }
+        
+    private void initFormElements() throws WordpressXmlRpcException {
+        if(getWordpressUsers() == null) {
+            WordpressClient client = pluginSettingsManager.newWordpressClient();
+            setWordpressUsers(client.getUsers());
+            TreeSet<WordpressCategory> categories = new TreeSet<WordpressCategory>(new Comparator<WordpressCategory>() {
+                @Override public int compare(WordpressCategory o1, WordpressCategory o2) {
+                    return o1.getCategoryName().compareTo(o2.getCategoryName());
+                }
+            });
+            categories.addAll(client.getCategories());
+            setWordpressCategories(categories);
+            Set<WordpressTag> tags = new TreeSet<WordpressTag>(new Comparator<WordpressTag>() {
+                @Override public int compare(WordpressTag o1, WordpressTag o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+            tags.addAll(client.getTags()); 
+            setWordpressTags(tags);
+        }
+    }
+
+    private void mergeLocalAndRemoteTags() {
+        List<String> tagNames = metadata.getTagNames();
+        for (String tagName : tagNames) {
+            boolean found = false;
+            for (WordpressTag tag : getWordpressTags()) {
+                if(tag.getName().equals(tagName)){
+                    found = true;
+                    break;
+                }
+            }
+            if( ! found){
+                getWordpressTags().add(new WordpressTag(tagName));
+            }
+        }
+    }
+
+    private void initMetadata() throws MetadataException {
+        if(metadata == null){
+            metadata = metadataManager.extractMetadata(getPage());
+            if(metadata == null) {
+                metadata = metadataManager.createMetadata(
+                    getPage(), 
+                    getWordpressUsers(), 
+                    getWordpressCategories(),
+                    pluginSettingsManager.getDefaultIgnoreConfluenceMacrosAsList()
+                );
+            }
+        }
+        pageLabelsSynchronizer.pageLabelsToTagNames(getPage(), metadata);
+        metadataManager.storeMetadata(getPage(), metadata);
+    }
+
+    private Map<String, String> uploadAttachments() throws WordpressXmlRpcException, IOException {
+        AbstractPage page = getPage();
         Map<String, String> attachmentsMap = new HashMap<String, String>();
-        WordpressClient client = newWordpressClient();
+        WordpressClient client = pluginSettingsManager.newWordpressClient();
         List<Attachment> attachments = attachmentManager.getAttachments(page);
         for (Attachment attachment : attachments) {
             byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
@@ -304,153 +371,22 @@ public class ConversionAction extends BaseAction {
         return attachmentsMap;
     }
 
-    private String initConversionForm() throws XmlRpcException, IOException {
-        if(getPageTitle() == null) {
-            String pageTitle = getPage().getTitle();
-            if(StringUtils.contains(pageTitle, "DRAFT - ")) {
-                setPageTitle(StringUtils.substringAfter(pageTitle, "DRAFT - "));
-            } else {
-                setPageTitle(pageTitle);
-            }
-        }
-        if(getOptimizeForRDP() == null) {
-            if(getPageTitle().contains("Revue de presse")) {
-                setOptimizeForRDP(true);
-                setPageTitle("Revue de Presse Xebia");
-                initWordpressElements();
-                List<WordpressCategory> wordpressCategories = getWordpressCategories();
-                for (WordpressCategory wordpressCategory : wordpressCategories) {
-                    if(StringUtils.containsIgnoreCase(wordpressCategory.getCategoryName(), "revue de presse")){
-                        getWordpressCategoryNames().add(wordpressCategory.getCategoryName());
-                    }
-                }
-                Calendar now = Calendar.getInstance();
-                setPostSlug(String.format("revue-de-presse-xebia-%1$tY-%2$02d", now.getTime(), now.get(Calendar.WEEK_OF_YEAR)));
-                for (WordpressUser wordpressUser : getWordpressUsers()) {
-                    if("xebia-france".equals(wordpressUser.getDisplayName())){
-                        setWordpressUserId(wordpressUser.getId());
-                        break;
-                    }
-                }
-            }
-        }
-        if(getWordpressUserId() == null) {
-            String creatorName = getPage().getCreatorName();
-            if(creatorName != null) {
-                for (WordpressUser wordpressUser : getWordpressUsers()) {
-                    if(creatorName.equals(wordpressUser.getLogin())){
-                        setWordpressUserId(wordpressUser.getId());
-                        break;
-                    }
-                }
-            }
-        }
-        if(getResourcesBaseUrl() == null) {
-            setResourcesBaseUrl(getDefaultResourcesBaseUrlFormatted());
-        }
-        if(getIgnoreConfluenceMacros() == null) {
-            setIgnoreConfluenceMacros(getDefaultIgnoreConfluenceMacros());
-        }
-        return SUCCESS;
-    }
-
-    private String processFormAfterPost(ConversionForm sessionForm) {
-        this.form = sessionForm;
-        storeConversionForm(null);
-        PostResult result = retrievePostResult();
-        storePostResult(null);
-        setPostId(result.post.getPostId());
-        setWordpressUserId(result.post.getAuthorId());
-        setPageTitle(result.post.getTitle());
-        setWordpressCategoryNames(result.post.getCategoryNames());
-        setWordpressTagNames(result.post.getTagNames());
-        setPostSlug(result.post.getPostSlug());
-        this.permaLink = result.post.getLink();
-        this.displayCreationMessage = result.creation;
-        this.displayUpdateMessage = ! result.creation;
-        return SUCCESS;
-    }
-
-    private String convert(Map<String, String> attachmentsMap) {
+    private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
-        options.setResourcesBaseUrl(getResourcesBaseUrl());
-        options.setDisableConfluenceMacros(getIgnoreConfluenceMacrosAsList());
-        options.setOptimizeForRDP(getOptimizeForRDP() == null ? false : getOptimizeForRDP());
-        options.setAttachmentsMap(attachmentsMap);
-        Page page = getPage();
+        options.setDisableConfluenceMacros(metadata.getIgnoreConfluenceMacros());
+        options.setOptimizeForRDP(metadata.isOptimizeForRDP());
+        if( ! preview){
+            Map<String, String> attachmentsMap = uploadAttachments();
+            options.setAttachmentsMap(attachmentsMap);
+        }
+        AbstractPage page = getPage();
         String originalTitle = page.getTitle();
         try {
-            page.setTitle(getPageTitle());
+            page.setTitle(metadata.getPageTitle());
             return converter.convert(page, options);
         } finally {
             page.setTitle(originalTitle);
         }
-    }
-
-    private synchronized void initWordpressElements() throws XmlRpcException, IOException {
-        if(getWordpressUsers() == null) {
-            WordpressClient client = newWordpressClient();
-            storeWordpressUsers(client.getUsers());
-            storeWordpressCategories(client.getCategories());
-            storeWordpressTags(client.getTags());
-        }
-    }
-
-    private WordpressClient newWordpressClient() throws MalformedURLException {
-        WordpressConnection wordpressConnection = new WordpressConnection(
-            new URL(getDefaultWordpressXmlRpcUrl()),
-            getDefaultWordpressUserName(),
-            getDefaultWordpressPassword(),
-            getDefaultWordpressBlogId());
-        return new WordpressClient(wordpressConnection);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void storeConversionForm(ConversionForm form) {
-        getSession().put("C2W_CONVERSION_FORM", form);
-    }
-
-    private ConversionForm retrieveConversionForm() {
-        return (ConversionForm) getSession().get("C2W_CONVERSION_FORM");
-    }
-
-    @SuppressWarnings("unchecked")
-    private void storePostResult(PostResult result) {
-        getSession().put("C2W_POST_RESULT", result);
-    }
-
-    private PostResult retrievePostResult() {
-        return (PostResult) getSession().get("C2W_POST_RESULT");
-    }
-
-    @SuppressWarnings("unchecked")
-    private void storeWordpressUsers(List<WordpressUser> users) {
-        getSession().put("C2W_WP_USERS", users);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<WordpressUser> retrieveWordpressUsers() {
-        return (List<WordpressUser>) getSession().get("C2W_WP_USERS");
-    }
-
-    @SuppressWarnings("unchecked")
-    private void storeWordpressCategories(List<WordpressCategory> categories) {
-        getSession().put("C2W_WP_CATEGORIES", categories);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<WordpressCategory> retrieveWordpressCategories() {
-        return (List<WordpressCategory>) getSession().get("C2W_WP_CATEGORIES");
-    }
-
-    @SuppressWarnings("unchecked")
-    private void storeWordpressTags(List<WordpressTag> tags) {
-        getSession().put("C2W_WP_TAGS", tags);
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<WordpressTag> retrieveWordpressTags() {
-        return (List<WordpressTag>) getSession().get("C2W_WP_TAGS");
     }
 
 }

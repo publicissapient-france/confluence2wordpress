@@ -16,37 +16,22 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.core.visitors;
+package fr.xebia.confluence2wordpress.core.converter.visitors;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
-import org.htmlcleaner.Utils;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class UrlConverter implements TagNodeVisitor {
-
-    private String resourcesBaseUrl;
-
-
-    public UrlConverter(String resourcesBaseUrl) {
-        super();
-        this.resourcesBaseUrl = resourcesBaseUrl;
-    }
-
-
-    public String getResourcesBaseUrl() {
-        return resourcesBaseUrl;
-    }
-
-
-    public void setResourcesBaseUrl(String resourcesBaseUrl) {
-        this.resourcesBaseUrl = resourcesBaseUrl;
-    }
+public class EmptySpanStripper implements TagNodeVisitor {
 
     /**
      * @inheritdoc
@@ -54,12 +39,23 @@ public class UrlConverter implements TagNodeVisitor {
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            String tagName = tag.getName();
-            if ("img".equals(tagName)) {
-                String src = tag.getAttributeByName("src");
-                if (src != null) {
-                    tag.setAttribute("src", Utils.fullUrl(resourcesBaseUrl, src));
+            if("span".equals(tag.getName()) && hasNoAttributes(tag)) {
+                parentNode.removeChild(tag);
+                @SuppressWarnings("unchecked")
+                List<HtmlNode> children = tag.getChildren();
+                for (HtmlNode child : children) {
+                    parentNode.addChild(child);
                 }
+            }
+        }
+        return true;
+    }
+
+    private boolean hasNoAttributes(TagNode tag) {
+        Collection<String> values = tag.getAttributes().values();
+        for (String value : values) {
+            if(StringUtils.isNotBlank(value)){
+                return false;
             }
         }
         return true;

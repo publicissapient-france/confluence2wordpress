@@ -1,6 +1,8 @@
 package fr.xebia.confluence2wordpress.wp;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,6 +18,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import fr.xebia.confluence2wordpress.wp.transport.DefaultProxyAwareXmlRpcTransportFactory;
 
 /**
+ * 
  * @see "http://codex.wordpress.org/XML-RPC_wp"
  * 
  * @author Alexandre Dutra
@@ -36,8 +39,25 @@ public class WordpressClient {
     private static final String GET_TAGS_METHOD_NAME = "wp.getTags";
 
     private static final String UPLOAD_FILE_METHOD_NAME = "wp.uploadFile";
+    
+    private static final String FIND_PAGE_ID_BY_SLUG_METHOD_NAME = "confluence2wordpress.findPageIdBySlug";
+    
 
 
+    /*
+        Sample of XML-RPC invocation with curl:
+        curl -d "<methodCall> \
+           <methodName>wp.getAuthors</methodName> \
+              <params> \
+                 <param> \
+                    <value><int>1</int></value> \
+                    <value><string>admin</string></value> \
+                    <value><string>admin</string></value> \
+                 </param> \
+              </params> \
+        </methodCall>" http://localhost/~alexandre/wordpress/xmlrpc.php
+     */
+    
     /**
      * Very, VERY old version of the lib bundled with Confluence.
      * Does not even know about Lists and Maps,
@@ -48,26 +68,17 @@ public class WordpressClient {
     private WordpressConnection wordpressConnection;
 
     public WordpressClient(WordpressConnection wordpressConnection) {
-        this.client = new XmlRpcClient(wordpressConnection.getUrl());
         this.wordpressConnection = wordpressConnection;
     }
 
 
-    public WordpressClient(WordpressConnection wordpressConnection, String proxyHost, int proxyPort) {
-        this.client = new XmlRpcClient(
-            wordpressConnection.getUrl(),
-            new DefaultProxyAwareXmlRpcTransportFactory(
-                wordpressConnection.getUrl(), proxyHost, proxyPort));
-        this.wordpressConnection = wordpressConnection;
-    }
-
+    
     /**
      * @see "http://codex.wordpress.org/XML-RPC_wp#wp.getAuthors"
      * @return the list of {@link WordpressUser}s of the blog.
-     * @throws XmlRpcException
-     * @throws IOException
+     * @throws WordpressXmlRpcException
      */
-    public List<WordpressUser> getUsers() throws XmlRpcException, IOException {
+    public List<WordpressUser> getUsers() throws WordpressXmlRpcException {
 
         Vector<Object> params = new Vector<Object>();
 
@@ -75,36 +86,34 @@ public class WordpressClient {
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
 
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> rows = (List<Map<String, Object>>)
-        client.execute(GET_USERS_METHOD_NAME, params);
+        List<Map<String, Object>> rows = invoke(GET_USERS_METHOD_NAME, params);
 
-        List<WordpressUser> categories = new ArrayList<WordpressUser>(rows.size());
+        List<WordpressUser> users = new ArrayList<WordpressUser>(rows.size());
         for (Map<String, Object> row : rows) {
             WordpressUser user = new WordpressUser();
             user.setId(Integer.valueOf(row.get("user_id").toString()));
             user.setLogin(row.get("user_login").toString());
+            user.setDisplayName((String)row.get("display_name"));
             user.setFirstName((String)row.get("first_name"));
             user.setLastName((String)row.get("last_name"));
             user.setNiceName((String) row.get("user_nicename"));
-            user.setDisplayName((String)row.get("display_name"));
             if(row.get("user_level") != null && StringUtils.isNotEmpty(row.get("user_level").toString())) {
                 user.setLevel(Integer.valueOf(row.get("user_level").toString()));
             }
-            categories.add(user);
+            users.add(user);
         }
 
-        return categories;
+        return users;
     }
+
 
 
     /**
      * @see "http://codex.wordpress.org/XML-RPC_wp#wp.getCategories"
      * @return the list of {@link WordpressCategory}s of the blog.
-     * @throws XmlRpcException
-     * @throws IOException
+     * @throws WordpressXmlRpcException
      */
-    public List<WordpressCategory> getCategories() throws XmlRpcException, IOException {
+    public List<WordpressCategory> getCategories() throws WordpressXmlRpcException {
 
         Vector<Object> params = new Vector<Object>();
 
@@ -112,9 +121,7 @@ public class WordpressClient {
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
 
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> rows = (List<Map<String, Object>>)
-        client.execute(GET_CATEGORIES_METHOD_NAME, params);
+        List<Map<String, Object>> rows = invoke(GET_CATEGORIES_METHOD_NAME, params);
 
         List<WordpressCategory> categories = new ArrayList<WordpressCategory>(rows.size());
         for (Map<String, Object> row : rows) {
@@ -135,10 +142,9 @@ public class WordpressClient {
     /**
      * @see "http://codex.wordpress.org/XML-RPC_wp#wp.getTags"
      * @return the list of {@link WordpressCategory}s of the blog.
-     * @throws XmlRpcException
-     * @throws IOException
+     * @throws WordpressXmlRpcException
      */
-    public List<WordpressTag> getTags() throws XmlRpcException, IOException {
+    public List<WordpressTag> getTags() throws WordpressXmlRpcException {
 
         Vector<Object> params = new Vector<Object>();
 
@@ -146,9 +152,7 @@ public class WordpressClient {
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
 
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> rows = (List<Map<String, Object>>)
-        client.execute(GET_TAGS_METHOD_NAME, params);
+        List<Map<String, Object>> rows = invoke(GET_TAGS_METHOD_NAME, params);
 
         List<WordpressTag> tags = new ArrayList<WordpressTag>(rows.size());
         for (Map<String, Object> row : rows) {
@@ -172,26 +176,15 @@ public class WordpressClient {
      * 
      * @param postId
      * @return post
-     * @throws XmlRpcException
-     * @throws IOException
+     * @throws WordpressXmlRpcException
      */
-    public WordpressPost findPostById(int postId) throws XmlRpcException, IOException {
+    public WordpressPost findPostById(int postId) throws WordpressXmlRpcException {
         Vector<Object> params = new Vector<Object>();
         //params.add(wordpressConnection.getBlogId());
         params.add(postId);
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
-        Map<String, Object> map;
-        try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> mapTemp = (Map<String, Object>) client.execute(FIND_POST_BY_ID_METHOD_NAME, params);
-            map = mapTemp;
-        } catch(XmlRpcException e) {
-            if(e.getMessage().contains("no such post")){
-                return null;
-            }
-            throw e;
-        }
+        Map<String, Object> map = invoke(FIND_POST_BY_ID_METHOD_NAME, params);
 
         /*Sample of the response structure:
          * 
@@ -254,6 +247,25 @@ public class WordpressClient {
 
     /**
      * 
+     * @param postSlug
+     * @return postId
+     * @throws WordpressXmlRpcException
+     */
+    public Integer findPageIdBySlug(String postSlug) throws WordpressXmlRpcException {
+        Vector<Object> params = new Vector<Object>();
+        params.add(wordpressConnection.getBlogId());
+        params.add(wordpressConnection.getUsername());
+        params.add(wordpressConnection.getPassword());
+        params.add(postSlug);
+        Integer result = (Integer) invoke(FIND_PAGE_ID_BY_SLUG_METHOD_NAME, params);
+        if(result != null && result == 0){
+            return null;
+        }
+        return result;
+    }
+
+    /**
+     * 
      * http://www.xmlrpc.com/metaWeblogApi
      * http://mindsharestrategy.com/wp-xmlrpc-metaweblog/
      * http://www.perkiset.org/forum/perl/metaweblognewpost_to_wordpress_blog_xmlrpcphp-t1307.0.html
@@ -262,10 +274,9 @@ public class WordpressClient {
      * 
      * @param post to create
      * @return the created post
-     * @throws XmlRpcException
-     * @throws IOException
+     * @throws WordpressXmlRpcException
      */
-    public WordpressPost post(WordpressPost post) throws XmlRpcException, IOException {
+    public WordpressPost post(WordpressPost post) throws WordpressXmlRpcException {
 
         Vector<Object> params = new Vector<Object>();
 
@@ -302,20 +313,25 @@ public class WordpressClient {
         params.add( ! post.isDraft());
 
         if(post.getPostId() == null) {
-            Object ret = client.execute(CREATE_POST_METHOD_NAME, params);
+            Object ret = invoke(CREATE_POST_METHOD_NAME, params);
             int postId = Integer.parseInt(ret.toString());
             post.setPostId(postId);
         } else {
-            Boolean ret = (Boolean) client.execute(UPDATE_POST_METHOD_NAME, params);
+            Boolean ret = invoke(UPDATE_POST_METHOD_NAME, params);
             if( ! ret) {
-                throw new XmlRpcException(0, "Post edit failed");
+                throw new WordpressXmlRpcException("Post edit failed");
             }
         }
 
         return findPostById(post.getPostId());
     }
 
-    public WordpressFile uploadFile(WordpressFile file) throws XmlRpcException, IOException {
+    /**
+     * @param file
+     * @return
+     * @throws WordpressXmlRpcException
+     */
+    public WordpressFile uploadFile(WordpressFile file) throws WordpressXmlRpcException {
 
         Vector<Object> params = new Vector<Object>();
         params.add(wordpressConnection.getBlogId());
@@ -330,8 +346,7 @@ public class WordpressClient {
         map.put("overwrite", true);
         params.add(map);
 
-        @SuppressWarnings("unchecked")
-        Map<String, String> response = (Map<String, String>) client.execute(UPLOAD_FILE_METHOD_NAME, params);
+        Map<String, String> response = invoke(UPLOAD_FILE_METHOD_NAME, params);
 
         file.setFileName(response.get("file"));
         file.setMimeType(response.get("type"));
@@ -341,4 +356,32 @@ public class WordpressClient {
 
     }
 
+    @SuppressWarnings("unchecked")
+    private <T> T invoke(String methodName, Vector<Object> params) throws WordpressXmlRpcException {
+        try {
+            return (T) getClientInstance().execute(methodName, params);
+        } catch (XmlRpcException e) {
+            throw new WordpressXmlRpcException("Error invoking method: " + methodName, e);
+        } catch (IOException e) {
+            throw new WordpressXmlRpcException("Error invoking method: " + methodName, e);
+        }
+    }
+
+    private XmlRpcClient getClientInstance() throws MalformedURLException {
+        if(this.client == null){
+            URL wordpressUrl = new URL(wordpressConnection.getUrl());
+            if(this.wordpressConnection.getProxyHost() == null){
+                this.client = new XmlRpcClient(wordpressUrl);
+            } else {
+                this.client = new XmlRpcClient(
+                    wordpressUrl,
+                    new DefaultProxyAwareXmlRpcTransportFactory(
+                        wordpressUrl, 
+                        wordpressConnection.getProxyHost(), 
+                        wordpressConnection.getProxyPort()));
+                
+            }
+        }
+        return this.client;
+    }
 }

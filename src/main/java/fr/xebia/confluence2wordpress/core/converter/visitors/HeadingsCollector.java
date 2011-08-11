@@ -1,7 +1,7 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.rdp;
+package fr.xebia.confluence2wordpress.core.converter.visitors;
 
 import java.util.ArrayList;
 import java.util.List;

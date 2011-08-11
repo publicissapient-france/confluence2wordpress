@@ -26,9 +26,9 @@ import com.atlassian.renderer.WikiStyleRenderer;
 import com.atlassian.sal.api.transaction.TransactionCallback;
 import com.atlassian.sal.api.transaction.TransactionTemplate;
 
-import fr.xebia.confluence2wordpress.core.Converter;
-import fr.xebia.confluence2wordpress.core.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.PageLocator;
+import fr.xebia.confluence2wordpress.core.converter.Converter;
+import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 
 /**
  * There is a test XML-RPC method that already does a similar function:

@@ -1,0 +1,4 @@
+- Double-check that code conversion works with and without syntax highlighter on both sides -> plugin settings option
+- better error handling
+- Attachments not rendered correctly
+- Check attachments override

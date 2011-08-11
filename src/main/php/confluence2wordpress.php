@@ -26,12 +26,59 @@ Copyright 2011 Alexandre Dutra
 */
 
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+require_once(ABSPATH . 'wp-includes/post.php');
 
 add_filter('xmlrpc_methods', 'add_confluence2wordpress_xmlrpc_methods');
+add_filter('xmlrpc_methods', 'add_confluence2wordpress_xmlrpc_methods');
+
+add_filter('upload_mimes', 'add_xml_mime_type');
 
 function add_confluence2wordpress_xmlrpc_methods( $methods ) {
     $methods['confluence2wordpress.getAuthors'] = 'get_authors';
+    $methods['confluence2wordpress.findPageIdBySlug'] = 'get_page_id_by_slug';
     return $methods;
+}
+
+/**
+ * Adds XML mime type to allowed mime types.
+ * @see functions.php function wp_check_filetype()
+ * @param array $mimes
+ */
+function add_xml_mime_type( $mimes ) {
+    $mimes['xml'] = 'text/xml';
+    return $mimes;
+}
+
+function get_page_id_by_slug($args){
+	// Parse the arguments, assuming they're in the correct order
+	
+	//please see http://core.trac.wordpress.org/ticket/10513
+	//WP version MUST be >= 2.9
+	global $wp_xmlrpc_server;
+
+	$wp_xmlrpc_server->escape($args);
+
+	$blog_id	= (int) $args[0];
+	$username	= $args[1];
+	$password	= $args[2];
+	$slug	    = $args[3];
+	
+    // Let's run a check to see if credentials are okay
+	if ( !$user = $wp_xmlrpc_server->login($username, $password) ) {
+		return $wp_xmlrpc_server->error;
+	}
+	
+	if(!current_user_can("edit_posts")) {
+		return(new IXR_Error(401, __("Sorry, you cannot access this API.")));
+	}
+
+	$page = get_page_by_path($slug, OBJECT, 'post');
+	
+	if($page){
+		return $page->ID;
+	}
+	
+	return null;
 }
 
 function get_authors($args) {

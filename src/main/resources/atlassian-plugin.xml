@@ -52,14 +52,18 @@
             <action name="preview" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="preview">
                  <result name="success" type="velocity">/vm/preview.vm</result>
             </action>
-            <action name="post" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="post">
+            <action name="sync" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="sync">
+                 <interceptor-ref name="validatingStack" />
                  <result name="success" type="redirect">convert.action?pageId=${pageId}</result>
+                 <result name="input" type="velocity">/vm/convert.vm</result>
             </action>
             <action name="settings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="input">
                 <result name="success" type="velocity">/vm/settings.vm</result>
             </action>
             <action name="updateSettings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="execute">
+                <interceptor-ref name="validatingStack" />
                 <result name="success" type="redirect">settings.action?pageUrl=${pageUrl}</result>
+                 <result name="input" type="redirect">settings.action?pageUrl=${pageUrl}</result>
             </action>
         </package>
     </xwork>

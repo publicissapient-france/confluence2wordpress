@@ -1,0 +1,11 @@
+#foreach($heading in $headings)
+<p><strong>$heading.label</strong></p>
+<ul>
+#foreach($subHeading in $heading.children)
+<li><a href="$subHeading.anchor">$subHeading.label</a></li>
+#end
+</ul>
+#end
+
+<!--more-->
+

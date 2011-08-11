@@ -16,6 +16,15 @@ public class WordpressTag {
 
     private String rssUrl;
 
+    public WordpressTag() {
+        super();
+    }
+
+    public WordpressTag(String name) {
+        super();
+        this.name = name;
+    }
+
     public Integer getId() {
         return id;
     }

@@ -12,13 +12,17 @@
  */
 package fr.xebia.confluence2wordpress.action;
 
+import com.atlassian.confluence.core.ConfluenceActionSupport;
+import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.user.User;
+
+import fr.xebia.confluence2wordpress.core.PluginSettingsManager;
 
 /**
  * @author Alexandre Dutra
  */
-public class SettingsAction extends BaseAction {
+public class SettingsAction extends ConfluenceActionSupport {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,11 +40,16 @@ public class SettingsAction extends BaseAction {
 
     private String ignoreConfluenceMacros;
 
-    private String resourcesBaseUrl;
-
     private String wordpressRootUrl;
 
     private String editPostUrl;
+
+    private PluginSettingsManager pluginSettingsManager;
+
+    public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
+        this.pluginSettingsManager = new PluginSettingsManager();
+        this.pluginSettingsManager.setPluginSettingsFactory(pluginSettingsFactory);
+    }
 
     public String input() throws Exception {
 
@@ -50,14 +59,13 @@ public class SettingsAction extends BaseAction {
             return LOGIN;
         }
 
-        wordpressRootUrl = getDefaultWordpressRootUrl();
-        resourcesBaseUrl = getDefaultResourcesBaseUrl();
-        ignoreConfluenceMacros = getDefaultIgnoreConfluenceMacros();
-        wordpressXmlRpcUrl = getDefaultWordpressXmlRpcUrl();
-        wordpressUserName = getDefaultWordpressUserName();
-        wordpressPassword = getDefaultWordpressPassword();
-        wordpressBlogId = getDefaultWordpressBlogId();
-        editPostUrl = getDefaultWordpressEditPostUrl();
+        wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
+        ignoreConfluenceMacros = pluginSettingsManager.getDefaultIgnoreConfluenceMacros();
+        wordpressXmlRpcUrl = pluginSettingsManager.getWordpressXmlRpcUrl();
+        wordpressUserName = pluginSettingsManager.getWordpressUserName();
+        wordpressPassword = pluginSettingsManager.getWordpressPassword();
+        wordpressBlogId = pluginSettingsManager.getWordpressBlogId();
+        editPostUrl = pluginSettingsManager.getWordpressEditPostUrl();
 
         return SUCCESS;
     }
@@ -71,14 +79,13 @@ public class SettingsAction extends BaseAction {
             return LOGIN;
         }
 
-        setDefaultWordpressRootUrl(wordpressRootUrl);
-        setDefaultResourcesBaseUrl(resourcesBaseUrl);
-        setDefaultIgnoreConfluenceMacros(ignoreConfluenceMacros);
-        setDefaultWordpressXmlRpcUrl(wordpressXmlRpcUrl);
-        setDefaultWordpressUserName(wordpressUserName);
-        setDefaultWordpressPassword(wordpressPassword);
-        setDefaultWordpressBlogId(wordpressBlogId);
-        setDefaultWordpressEditPostUrl(editPostUrl);
+        pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
+        pluginSettingsManager.setDefaultIgnoreConfluenceMacros(ignoreConfluenceMacros);
+        pluginSettingsManager.setWordpressXmlRpcUrl(wordpressXmlRpcUrl);
+        pluginSettingsManager.setWordpressUserName(wordpressUserName);
+        pluginSettingsManager.setWordpressPassword(wordpressPassword);
+        pluginSettingsManager.setWordpressBlogId(wordpressBlogId);
+        pluginSettingsManager.setWordpressEditPostUrl(editPostUrl);
 
         return SUCCESS;
     }
@@ -139,14 +146,6 @@ public class SettingsAction extends BaseAction {
 
     public void setIgnoreConfluenceMacros(String ignoreConfluenceMacros) {
         this.ignoreConfluenceMacros = ignoreConfluenceMacros;
-    }
-
-    public String getResourcesBaseUrl() {
-        return resourcesBaseUrl;
-    }
-
-    public void setResourcesBaseUrl(String resourcesBaseUrl) {
-        this.resourcesBaseUrl = resourcesBaseUrl;
     }
 
     public String getWordpressRootUrl() {

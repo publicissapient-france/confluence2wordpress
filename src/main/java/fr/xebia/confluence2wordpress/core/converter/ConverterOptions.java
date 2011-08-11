@@ -10,7 +10,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core;
+package fr.xebia.confluence2wordpress.core.converter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.lang.StringUtils;
 
 import fr.xebia.confluence2wordpress.util.collections.MapUtils;
 
@@ -38,13 +37,13 @@ public class ConverterOptions {
 
     private boolean convertScriptsToWordpressFormat = false;
 
-    private String resourcesBaseUrl = null;
-
     private Map<String, String> tagTransformations = null;
 
     private List<String> disableConfluenceMacros = null;
 
     private boolean optimizeForRDP = false;
+
+    private boolean includeTOC = false;
 
     private Map<String, String> attachmentsMap;
 
@@ -115,14 +114,6 @@ public class ConverterOptions {
         this.convertScriptsToWordpressFormat = convertScriptsToWordpressFormat;
     }
 
-    public String getResourcesBaseUrl() {
-        return resourcesBaseUrl;
-    }
-
-    public void setResourcesBaseUrl(String resourcesBaseUrl) {
-        this.resourcesBaseUrl = StringUtils.trimToNull(resourcesBaseUrl);
-    }
-
     public Map<String, String> getTagTransformations() {
         return tagTransformations;
     }
@@ -146,6 +137,14 @@ public class ConverterOptions {
 
     public void setOptimizeForRDP(boolean optimizeForRDP) {
         this.optimizeForRDP = optimizeForRDP;
+    }
+    
+    public boolean isIncludeTOC() {
+        return includeTOC;
+    }
+    
+    public void setIncludeTOC(boolean includeTOC) {
+        this.includeTOC = includeTOC;
     }
 
     public Map<String, String> getAttachmentsMap() {

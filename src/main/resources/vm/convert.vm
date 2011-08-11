@@ -21,26 +21,31 @@
 </head>
 <body>
 
-#if ($action.displayCreationMessage || $action.displayUpdateMessage)
+#applyDecorator("root")
+#decoratorParam("helper" $action.helper)
+#decoratorParam("mode" "edit")
+#decoratorParam("context" "page")
+#end
+    
+#if ( $action.hasActionMessages())
     <div class="aui-message success closeable shadowed">
         <p class="title">
             <span class="aui-icon icon-success"></span>
             <strong>
-            #if ($action.displayCreationMessage)
-            $action.getText("convert.msg.creation.success")
-            #else
-            $action.getText("convert.msg.update.success")
+            #foreach ($message in $action.actionMessages)
+            $message
             #end
             </strong>
         </p>
-        <p><a href="$action.permaLink" target="_blank">$action.getText("convert.link.viewPost")</a></p>
-        <p><a href="$action.editLink" target="_blank">$action.getText("convert.link.editPost")</a></p>
+        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("convert.link.viewPost")</a></p>
+        <p><a href="$action.editLink" target="wp-edit">$action.getText("convert.link.editPost")</a></p>
     </div>   
 #end
 
-<form id="options" action="post.action" method="post" class="aui long-label">
+<form id="options" action="sync.action" method="post" class="aui long-label">
 
     <input name="pageId" type="hidden" value="$action.pageId" />
+    <input name="metadata.digest" type="hidden" value="$!action.metadata.digest" />
 
     <h2>$action.getText("convert.form.title.conversionOptions")</h2>
     
@@ -50,34 +55,63 @@
     </div>    
     
     <div class="field-group">
-        <label for="pageTitle">$action.getText("convert.form.pageTitle.label")</label>
-        <input id="pageTitle" name="pageTitle" type="text" value="$action.pageTitle" class="text"/>
+        <label for="pageTitle">
+            $action.getText("convert.form.pageTitle.label")
+            <span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text"/>
     </div>    
-    
-    <div class="field-group">    
-        <label for="resourcesBaseUrl">$action.getText("convert.form.resourcesBaseUrl.label")</label>
-        <input id="resourcesBaseUrl" name="resourcesBaseUrl" type="text" value="$!action.resourcesBaseUrl" class="text long-field"/>
-    </div>
     
     <div class="field-group">
         <label for="ignoreConfluenceMacros">$action.getText("convert.form.ignoreConfluenceMacros.label")</label>
         <input id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" type="text" value="$action.ignoreConfluenceMacros" class="text" />
+        <div class="description">$action.getText("convert.form.ignoreConfluenceMacros.description")</div>
     </div>    
     
     <fieldset class="group">
       <div class="checkbox">
-        <input id="optimizeForRDP" name="optimizeForRDP" value="true" type="checkbox" class="checkbox" #if($action.optimizeForRDP)checked="checked"#end />
+        <input id="optimizeForRDP" name="metadata.optimizeForRDP" value="true" type="checkbox" class="checkbox" #if($action.metadata.optimizeForRDP)checked="checked"#end />
         <label for="optimizeForRDP">$action.getText("convert.form.optimizeForRDP.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("convert.form.optimizeForRDP.description")</div>
       </div>
     </fieldset>
 
-    <h2>$action.getText("convert.form.title.postOptions")</h2>
+   <fieldset class="group">
+      <div class="checkbox">
+        <input id="includeTOC" name="metadata.includeTOC" value="true" type="checkbox" class="checkbox" #if($action.metadata.includeTOC)checked="checked"#end />
+        <label for="includeTOC">$action.getText("convert.form.includeTOC.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("convert.form.includeTOC.description")</div>
+      </div>
+    </fieldset>
+
+    <h2>$action.getText("convert.form.title.syncOptions")</h2>
+
+    <fieldset class="group">
+        <legend><span>$action.getText("convert.form.draft.label")</legend>
+        <div class="matrix">
+          <div class="radio" style="width:8em">
+            <input id="draft.true" name="metadata.draft" value="true" type="radio" class="radio" #if($action.metadata.draft)checked="checked"#end />
+            <label for="draft.true">$action.getText("convert.form.draft.true.label")</label>
+          </div>
+          <div class="radio">
+            <input id="draft.false" name="metadata.draft" value="false" type="radio" class="radio" #if( ! $action.metadata.draft)checked="checked"#end />
+            <label for="draft.false">$action.getText("convert.form.draft.false.label")</label>
+          </div>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("convert.form.draft.description")</div>
+      </div>
+    </fieldset>
     
     <div class="field-group">
         <label for="postId">
             $action.getText("convert.form.postId.label")
         </label>
-        <input type="text" id="postId" name="postId" class="text" value="$!action.postId" />
+        <input type="text" id="postId" name="metadata.postId" class="text" value="$!action.metadata.postId" />
         <div class="description">$action.getText("convert.form.postId.description")</div>
     </div>
     
@@ -85,49 +119,57 @@
         <label for="postSlug">
             $action.getText("convert.form.postSlug.label")
         </label>
-        <input type="text" id="postSlug" name="postSlug" class="text" value="$!action.postSlug" />
+        <input type="text" id="postSlug" name="metadata.postSlug" class="text" value="$!action.metadata.postSlug" />
         <div class="description">$action.getText("convert.form.postSlug.description")</div>
     </div>
+
+   <fieldset class="group">
+      <div class="checkbox">
+        <input id="allowPostOverride" name="allowPostOverride" value="true" type="checkbox" class="checkbox" #if($action.allowPostOverride)checked="checked"#end />
+        <label for="allowPostOverride">$action.getText("convert.form.allowPostOverride.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("convert.form.allowPostOverride.description")</div>
+      </div>
+    </fieldset>
     
     <div class="field-group">
-        <label for="wordpressUserId">
-            $action.getText("convert.form.wordpressUserId.label")
+        <label for="authorId">
+            $action.getText("convert.form.authorId.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
-        <select id="wordpressUserId" name="wordpressUserId" class="select">
+        <select id="authorId" name="metadata.authorId" class="select">
             #foreach($wordpressUser in $action.wordpressUsers)
-                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.wordpressUserId ) selected="true" #end >$!wordpressUser.displayName $!wordpressUser.firstName $!wordpressUser.lastName</option>
+                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$!wordpressUser.displayName $!wordpressUser.firstName $!wordpressUser.lastName</option>
             #end
         </select>
     </div>
     
     <div class="field-group">
-        <label for="wordpressCategoryNames">
-            $action.getText("convert.form.wordpressCategoryNames.label")
-            <span class="form-icon aui-icon icon-required"/>
+        <label for="categoryNames">
+            $action.getText("convert.form.categoryNames.label")
         </label>
-        <select id="wordpressCategoryNames" name="wordpressCategoryNames" multiple="true" class="multi-select">
+        <select id="categoryNames" name="metadata.categoryNames" multiple="true" class="multi-select">
             #foreach($wordpressCategory in $action.wordpressCategories)
-                <option value="$wordpressCategory.categoryName" #if( $action.wordpressCategoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
+                <option value="$wordpressCategory.categoryName" #if( $action.metadata.categoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
             #end
         </select>
     </div>
     
     <div class="field-group">
-        <label for="wordpressTagNames">
-            $action.getText("convert.form.wordpressTagNames.label")
-            <span class="form-icon aui-icon icon-required"/>
+        <label for="tagNames">
+            $action.getText("convert.form.tagNames.label")
         </label>
-        <select id="wordpressTagIds" name="wordpressTagNames" multiple="true" class="multi-select">
+        <select id="wordpressTagIds" name="metadata.tagNames" multiple="true" class="multi-select">
             #foreach($wordpressTag in $action.wordpressTags)
-                <option value="$wordpressTag.name" #if( $action.wordpressTagNames.contains($wordpressTag.name) ) selected="true" #end >$wordpressTag.name</option>
+                <option value="$wordpressTag.name" #if( $action.metadata.tagNames.contains($wordpressTag.name) ) selected="true" #end >$wordpressTag.name</option>
             #end
         </select>
     </div>
         
     <div class="buttons-container">
       <div class="buttons">
-        <input type="submit" class="button submit" value="$action.getText("convert.form.button.post")" onclick="this.form.target='_self';this.form.action='post.action'" />
+        <input type="submit" class="button submit" value="$action.getText("convert.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
         <input type="submit" class="button submit" value="$action.getText("convert.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
         <a href="settings.action?pageUrl=convert.action?pageId=$action.pageId">$action.getText("convert.form.link.settings")</a>
         &nbsp;|&nbsp;

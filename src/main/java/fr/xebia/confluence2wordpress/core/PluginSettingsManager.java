@@ -13,20 +13,24 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.action;
+package fr.xebia.confluence2wordpress.core;
 
-import java.util.Date;
-import java.util.IllegalFormatException;
+import java.util.Arrays;
+import java.util.List;
 
-import com.atlassian.confluence.core.ConfluenceActionSupport;
+import org.apache.commons.lang.StringUtils;
+
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+
+import fr.xebia.confluence2wordpress.wp.WordpressClient;
+import fr.xebia.confluence2wordpress.wp.WordpressConnection;
 
 /**
  * @author Alexandre Dutra
  *
  */
-public abstract class BaseAction extends ConfluenceActionSupport {
+public class PluginSettingsManager {
 
     private static final String DEFAULT_WP_XML_RPC_USERNAME = "admin";
 
@@ -34,15 +38,13 @@ public abstract class BaseAction extends ConfluenceActionSupport {
 
     private static final String DEFAULT_WP_XML_RPC_BLOG_ID = "1";
 
-    private static final String DEFAULT_IGNORE_CONFLUENCE_MACROS = "info warning";
+    private static final String DEFAULT_IGNORE_CONFLUENCE_MACROS = "tip info note warning";
 
     private static final String DEFAULT_WORDPRESS_ROOT_URL = "http://localhost/wordpress";
 
-    private static final String DEFAULT_RESOURCES_BASE_URL = DEFAULT_WORDPRESS_ROOT_URL + "/wp-content/uploads/%1$tY/%1$tm/";
+    private static final String DEFAULT_WP_XML_RPC_URL = "/xmlrpc.php";
 
-    private static final String DEFAULT_WP_XML_RPC_URL = DEFAULT_WORDPRESS_ROOT_URL + "/xmlrpc.php";
-
-    private static final String DEFAULT_WP_EDIT_POST_URL = DEFAULT_WORDPRESS_ROOT_URL + "/wp-admin/post.php?action=edit&post={0}";
+    private static final String DEFAULT_WP_EDIT_POST_URL = "/wp-admin/post.php?action=edit&post={0}";
 
     private static final long serialVersionUID = 1L;
 
@@ -52,7 +54,7 @@ public abstract class BaseAction extends ConfluenceActionSupport {
         this.pluginSettingsFactory = pluginSettingsFactory;
     }
 
-    protected <T> T retrieveSettings(String settingsKey, T defaultValue) {
+    public <T> T retrieveSettings(String settingsKey, T defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
         @SuppressWarnings("unchecked")
         T value = (T) pluginSettings.get("fr.xebia.confluence2wordpress:" + settingsKey);
@@ -63,83 +65,94 @@ public abstract class BaseAction extends ConfluenceActionSupport {
         return value;
     }
 
-    protected void storeSettings(String settingsKey, Object value) {
+    public void storeSettings(String settingsKey, Object value) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
         pluginSettings.put("fr.xebia.confluence2wordpress:" + settingsKey, value);
     }
 
-    protected void setDefaultWordpressXmlRpcUrl(String wordpressXmlRpcUrl){
+    public void setWordpressXmlRpcUrl(String wordpressXmlRpcUrl){
         storeSettings("wordpressXmlRpcUrl", wordpressXmlRpcUrl);
     }
 
-    protected String getDefaultWordpressXmlRpcUrl(){
+    public String getWordpressXmlRpcUrl(){
         return retrieveSettings("wordpressXmlRpcUrl", DEFAULT_WP_XML_RPC_URL);
     }
 
-    protected void setDefaultWordpressEditPostUrl(String wordpressXmlRpcUrl){
+    public void setProxyHost(String proxyHost){
+        storeSettings("proxyHost", proxyHost);
+    }
+
+    public String getProxyHost(){
+        return retrieveSettings("proxyHost", null);
+    }
+    
+    public void setProxyPort(Integer proxyPort){
+        storeSettings("proxyPort", proxyPort);
+    }
+
+    public Integer getProxyPort(){
+        return retrieveSettings("proxyPort", null);
+    }
+
+    public void setWordpressEditPostUrl(String wordpressXmlRpcUrl){
         storeSettings("wordpressEditPostUrl", wordpressXmlRpcUrl);
     }
 
-    protected String getDefaultWordpressEditPostUrl(){
+    public String getWordpressEditPostUrl(){
         return retrieveSettings("wordpressEditPostUrl", DEFAULT_WP_EDIT_POST_URL);
     }
 
-    protected void setDefaultWordpressUserName(String wordpressUserName){
+    public void setWordpressUserName(String wordpressUserName){
         storeSettings("wordpressUserName", wordpressUserName);
     }
 
-    protected String getDefaultWordpressUserName(){
+    public String getWordpressUserName(){
         return retrieveSettings("wordpressUserName", DEFAULT_WP_XML_RPC_USERNAME);
     }
 
-    protected void setDefaultWordpressPassword(String wordpressPassword){
+    public void setWordpressPassword(String wordpressPassword){
         storeSettings("wordpressPassword", wordpressPassword);
     }
 
-    protected String getDefaultWordpressPassword(){
+    public String getWordpressPassword(){
         return retrieveSettings("wordpressPassword", DEFAULT_WP_XML_RPC_PASSWORD);
     }
 
-    protected void setDefaultWordpressBlogId(String wordpressBlogId){
+    public void setWordpressBlogId(String wordpressBlogId){
         storeSettings("wordpressBlogId", wordpressBlogId);
     }
 
-    protected String getDefaultWordpressBlogId(){
+    public String getWordpressBlogId(){
         return retrieveSettings("wordpressBlogId", DEFAULT_WP_XML_RPC_BLOG_ID);
     }
 
-    protected void setDefaultIgnoreConfluenceMacros(String ignoreConfluenceMacros){
+    public void setDefaultIgnoreConfluenceMacros(String ignoreConfluenceMacros){
         storeSettings("ignoreConfluenceMacros", ignoreConfluenceMacros);
     }
 
-    protected String getDefaultIgnoreConfluenceMacros(){
+    public String getDefaultIgnoreConfluenceMacros(){
         return retrieveSettings("ignoreConfluenceMacros", DEFAULT_IGNORE_CONFLUENCE_MACROS);
     }
 
-    protected void setDefaultWordpressRootUrl(String wordpressRootUrl){
+    public List<String> getDefaultIgnoreConfluenceMacrosAsList(){
+        return Arrays.asList(StringUtils.split(getDefaultIgnoreConfluenceMacros()));
+    }
+
+    public void setWordpressRootUrl(String wordpressRootUrl){
         storeSettings("wordpressRootUrl", wordpressRootUrl);
     }
 
-    protected String getDefaultWordpressRootUrl(){
+    public String getWordpressRootUrl(){
         return retrieveSettings("wordpressRootUrl", DEFAULT_WORDPRESS_ROOT_URL);
     }
 
-    protected void setDefaultResourcesBaseUrl(String resourcesBaseUrl){
-        storeSettings("resourcesBaseUrl", resourcesBaseUrl);
+    public WordpressClient newWordpressClient() {
+        WordpressConnection wordpressConnection = new WordpressConnection(
+            getWordpressRootUrl() + getWordpressXmlRpcUrl(),
+            getWordpressUserName(),
+            getWordpressPassword(),
+            getWordpressBlogId());
+        return new WordpressClient(wordpressConnection);
     }
-
-    protected String getDefaultResourcesBaseUrl(){
-        return retrieveSettings("resourcesBaseUrl", DEFAULT_RESOURCES_BASE_URL);
-    }
-
-    protected String getDefaultResourcesBaseUrlFormatted(){
-        String rawUrl = getDefaultResourcesBaseUrl();
-        try {
-            return String.format(rawUrl, new Date());
-        } catch (IllegalFormatException e) {
-            return rawUrl;
-        }
-    }
-
 
 }
