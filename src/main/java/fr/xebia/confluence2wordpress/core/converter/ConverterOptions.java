@@ -47,7 +47,10 @@ public class ConverterOptions {
 
     private Map<String, String> attachmentsMap;
 
+    private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
+    
     public ConverterOptions() {
+        this.tagTransformations = MapUtils.split("tt=code", ",", "=");
     }
 
     public ConverterOptions(Map<Object,Object> properties) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
@@ -153,6 +156,14 @@ public class ConverterOptions {
 
     public void setAttachmentsMap(Map<String, String> attachmentsMap) {
         this.attachmentsMap = attachmentsMap;
+    }
+    
+    public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {
+        return syntaxHighlighterPlugin;
+    }
+    
+    public void setSyntaxHighlighterPlugin(SyntaxHighlighterPlugin syntaxHighlighterPlugin) {
+        this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
     }
 
 }

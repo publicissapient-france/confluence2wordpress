@@ -33,32 +33,33 @@ import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.WikiStyleRenderer;
 
+import fr.xebia.confluence2wordpress.core.converter.postprocessors.ConversionPostProcessor;
+import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
+import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CdataStripper;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroConverter;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
-import fr.xebia.confluence2wordpress.core.converter.visitors.HeadingsCollector;
-import fr.xebia.confluence2wordpress.core.converter.visitors.SyntaxHighlighterConverter;
+import fr.xebia.confluence2wordpress.core.converter.visitors.NewCodeMacroProcessor;
 
 public class Converter {
 
     private WikiStyleRenderer wikiStyleRenderer;
-    private VelocityHelper velocityHelper = new VelocityHelper();
-
+    
     public Converter(WikiStyleRenderer wikiStyleRenderer) {
         super();
         this.wikiStyleRenderer = wikiStyleRenderer;
     }
 
     public String convert(ContentEntityObject page, ConverterOptions options) {
-        String wiki = preConvert(page.getContent(), options);
-        String confluenceHtml = convertInternal(page.toPageContext(), wiki, options);
-        String wordpressHtml = postConvert(confluenceHtml, options);
+        String wiki = processWiki(page.getContent(), options);
+        String confluenceHtml = processConfluenceHtml(page.toPageContext(), wiki, options);
+        String wordpressHtml = processWordpressHtml(confluenceHtml, options);
         return wordpressHtml;
     }
 
-    protected String preConvert(String wiki, ConverterOptions options) {
+    protected String processWiki(String wiki, ConverterOptions options) {
         if(options.getDisableConfluenceMacros() != null) {
             for (String macro : options.getDisableConfluenceMacros()) {
                 MacroDisabler disabler = MacroDisabler.forMacro(macro);
@@ -68,7 +69,7 @@ public class Converter {
         return wiki;
     }
 
-    protected String convertInternal(PageContext pageContext, String wiki, ConverterOptions options) {
+    protected String processConfluenceHtml(PageContext pageContext, String wiki, ConverterOptions options) {
         //see DefaultWysiwygConverter and RenderContext
         /*
          * Can't play with some classes here:
@@ -84,7 +85,7 @@ public class Converter {
         return confluenceHtml;
     }
 
-    protected String postConvert(String confluenceHtml, ConverterOptions options) {
+    protected String processWordpressHtml(String confluenceHtml, ConverterOptions options) {
 
         //HtmlCleaner is NOT thread-safe
         CleanerProperties cleanerProps = getCleanerProperties(options);
@@ -101,24 +102,31 @@ public class Converter {
         for (TagNodeVisitor visitor : visitors) {
             body.traverse(visitor);
         }
-
+        
         String html = serialize(body, cleanerProps);
 
-        if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
-            HeadingsCollector collector = new HeadingsCollector();
-            body.traverse(collector);
-            String toc = velocityHelper.generateTOC(collector.getHeadings());
-            html = toc + html;
+        List<ConversionPostProcessor> postProcessors = getPostProcessors(options);
+        for (ConversionPostProcessor conversionPostProcessor : postProcessors) {
+            html = conversionPostProcessor.postProcess(html, body, options);
         }
         
-        if(options.isOptimizeForRDP()) {
-            String header = velocityHelper.generateHeader();
-            html = header + html;
-        }
-
         return html;
     }
 
+    protected String serialize(TagNode body, CleanerProperties cleanerProps) {
+        
+        try {
+            //PrettyHtmlSerializer does not work very well
+            //JTidy is too violent and Jericho almost OK but no
+            HtmlSerializer serializer = new SimpleHtmlSerializer(cleanerProps);
+            return serializer.getAsString(body, "UTF-8", true);
+        } catch (IOException e) {
+            // should not occur with string writers
+            return null;
+        }
+        
+    }
+    
     protected CleanerProperties getCleanerProperties(ConverterOptions options) {
         CleanerProperties properties = new CleanerProperties();
         properties.setOmitXmlDeclaration(options.isOmitXmlDeclaration());
@@ -156,8 +164,8 @@ public class Converter {
 
     protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
-        visitors.add(new CodeMacroConverter());
-        visitors.add(new SyntaxHighlighterConverter());
+        visitors.add(new CodeMacroProcessor());
+        visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin().getSubstitutionMap()));
         if(options.isConvertCdata()) {
             visitors.add(new CdataStripper());
         }
@@ -169,18 +177,15 @@ public class Converter {
         visitors.add(new EmptySpanStripper());
         return visitors;
     }
+    
+    protected List<ConversionPostProcessor> getPostProcessors(ConverterOptions options) {
 
-    protected String serialize(TagNode body, CleanerProperties properties) {
-        HtmlSerializer serializer;
-        //does not work very well
-        //serializer = new PrettyHtmlSerializer(properties);
-        serializer = new SimpleHtmlSerializer(properties);
-        try {
-            return serializer.getAsString(body, "UTF-8", true);
-        } catch (IOException e) {
-            // should not occur with string writers
-            return null;
-        }
+        List<ConversionPostProcessor> processors = new ArrayList<ConversionPostProcessor>();
+        processors.add(new TableOfContentsPostProcessor());
+        processors.add(new PressReviewHeaderPostProcessor());
+        return processors;
+        
     }
+
 
 }

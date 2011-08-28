@@ -16,6 +16,8 @@
 package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -36,6 +38,7 @@ import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
 import com.atlassian.renderer.WikiStyleRenderer;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
+import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
@@ -60,7 +63,27 @@ import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
  */
 public class ConversionAction extends AbstractPageAwareAction {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 140791345328730095L;
+
+    private static final String MSG_UPDATE_SUCCESS_KEY = "convert.msg.update.success";
+
+    private static final String MSG_CREATION_SUCCESS_KEY = "convert.msg.creation.success";
+
+    private static final String ERRORS_POST_SLUG_SYNTAX_KEY = "convert.errors.postSlug.syntax";
+
+    private static final String ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY = "convert.errors.digest.concurrentModification";
+
+    private static final String ERRORS_POST_SLUG_AVAILABILITY_KEY = "convert.errors.postSlug.availability";
+
+    private static final String ERRORS_CONNECTION_FAILED_KEY = "convert.errors.connection.failed";
+
+    private static final String ERRORS_PAGE_TITLE_EMPTY_KEY = "convert.errors.pageTitle.empty";
+
+    private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
+
+    private static final String WP_CATEGORIES_KEY = "C2W_WP_CATEGORIES";
+
+    private static final String WP_USERS_KEY = "C2W_WP_USERS";
 
     private static final String ACTION_ERRORS_KEY = "C2W_ACTION_ERRORS";
     
@@ -73,6 +96,8 @@ public class ConversionAction extends AbstractPageAwareAction {
     private AttachmentManager attachmentManager;
 
     private PluginSettingsManager pluginSettingsManager;
+
+    private UserManager userManager;
 
     private final MetadataManager metadataManager = new MetadataManager();
 
@@ -105,41 +130,53 @@ public class ConversionAction extends AbstractPageAwareAction {
         super.setLabelManager(labelManager);
         this.pageLabelsSynchronizer = new PageLabelsSynchronizer(labelManager);
     }
+    
+    public void setSalUserManager(UserManager userManager) {
+        this.userManager = userManager;
+    }
 
+    public boolean isRemoteUserAdmin(){
+        return userManager.isAdmin(getRemoteUser().getName());
+    }
+    
     @SuppressWarnings("unchecked")
     public List<WordpressUser> getWordpressUsers() {
-        return (List<WordpressUser>) getSession().get("C2W_WP_USERS");
+        return (List<WordpressUser>) getSession().get(WP_USERS_KEY);
     }
 
     @SuppressWarnings("unchecked")
     private void setWordpressUsers(List<WordpressUser> users) {
-        getSession().put("C2W_WP_USERS", users);
+        getSession().put(WP_USERS_KEY, users);
     }
 
     @SuppressWarnings("unchecked")
     public Set<WordpressCategory> getWordpressCategories() {
-        return (Set<WordpressCategory>) getSession().get("C2W_WP_CATEGORIES");
+        return (Set<WordpressCategory>) getSession().get(WP_CATEGORIES_KEY);
     }
 
     @SuppressWarnings("unchecked")
     private void setWordpressCategories(Set<WordpressCategory> categories) {
-        getSession().put("C2W_WP_CATEGORIES", categories);
+        getSession().put(WP_CATEGORIES_KEY, categories);
     }
 
     @SuppressWarnings("unchecked")
     public Set<WordpressTag> getWordpressTags() {
-        return (Set<WordpressTag>) getSession().get("C2W_WP_TAGS");
+        return (Set<WordpressTag>) getSession().get(WP_TAGS_KEY);
     }
     
     @SuppressWarnings("unchecked")
     private void setWordpressTags(Set<WordpressTag> tags) {
-        getSession().put("C2W_WP_TAGS", tags);
+        getSession().put(WP_TAGS_KEY, tags);
     }
 
     public void setPageId(long pageId){
         this.setPage(pageManager.getPage(pageId));
     }
-    
+
+    public String getPageUrlAbsolutePath() throws MalformedURLException{
+        return new URL(new URL(settingsManager.getGlobalSettings().getBaseUrl()), getPage().getUrlPath()).getPath();
+    }
+
     public boolean isAllowPostOverride() {
         return allowPostOverride;
     }
@@ -193,7 +230,7 @@ public class ConversionAction extends AbstractPageAwareAction {
     public void validate() {
         try {
             if (StringUtils.isBlank(getMetadata().getPageTitle())) {
-                addActionError(getText("convert.errors.pageTitle.empty"));
+                addActionError(getText(ERRORS_PAGE_TITLE_EMPTY_KEY));
             }
             if (StringUtils.isNotBlank(getMetadata().getPostSlug())) {
                 checkPostSlugSyntax();
@@ -203,7 +240,7 @@ public class ConversionAction extends AbstractPageAwareAction {
                 checkConcurrentPostModification();
             }
         } catch (WordpressXmlRpcException e) {
-            addActionError(getText("convert.errors.connection.failed"), e.getMessage());
+            addActionError(getText(ERRORS_CONNECTION_FAILED_KEY), e.getMessage());
         }
     }
 
@@ -211,21 +248,23 @@ public class ConversionAction extends AbstractPageAwareAction {
         WordpressClient client = pluginSettingsManager.newWordpressClient();
         Integer retrievedPostId = client.findPageIdBySlug(getMetadata().getPostSlug());
         if (retrievedPostId != null && ! retrievedPostId.equals(getMetadata().getPostId())){
-            addActionError(getText("convert.errors.postSlug.availability"), retrievedPostId);
+            addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY), retrievedPostId);
         }
     }
 
     private void checkConcurrentPostModification() throws WordpressXmlRpcException {
-        WordpressClient client = pluginSettingsManager.newWordpressClient();
-        WordpressPost post = client.findPostById(getMetadata().getPostId());
-        if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
-            addActionError(getText("convert.errors.digest.concurrentModification"));
+        if(getMetadata().getPostId() != null){
+            WordpressClient client = pluginSettingsManager.newWordpressClient();
+            WordpressPost post = client.findPostById(getMetadata().getPostId());
+            if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
+                addActionError(getText(ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY));
+            }
         }
     }
 
     private void checkPostSlugSyntax() {
         if( ! getMetadata().getPostSlug().matches("[a-zA-Z0-9\\-_]+")){
-            addActionError(getText("convert.errors.postSlug.syntax"));
+            addActionError(getText(ERRORS_POST_SLUG_SYNTAX_KEY));
         }
     }
 
@@ -271,8 +310,8 @@ public class ConversionAction extends AbstractPageAwareAction {
         metadata.updateFromPost(post);
         pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
-        if(creation) addActionMessage(getText("convert.msg.creation.success"));
-        else addActionMessage(getText("convert.msg.update.success"));
+        if(creation) addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
+        else addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
         storeActionErrorsAndMessagesInSession();
         return SUCCESS;
     }

@@ -63,7 +63,7 @@
             <action name="updateSettings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="execute">
                 <interceptor-ref name="validatingStack" />
                 <result name="success" type="redirect">settings.action?pageUrl=${pageUrl}</result>
-                 <result name="input" type="redirect">settings.action?pageUrl=${pageUrl}</result>
+                <result name="input" type="velocity">/vm/settings.vm</result>
             </action>
         </package>
     </xwork>

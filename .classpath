@@ -425,10 +425,20 @@
       <attribute value="jar:file:/Users/alexandre/.m2/repository/org/apache/pdfbox/jempbox/1.2.1/jempbox-1.2.1-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/net/htmlparser/jericho/jericho-html/3.2/jericho-html-3.2.jar" sourcepath="M2_REPO/net/htmlparser/jericho/jericho-html/3.2/jericho-html-3.2-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/Users/alexandre/.m2/repository/net/htmlparser/jericho/jericho-html/3.2/jericho-html-3.2-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
   <classpathentry kind="var" path="M2_REPO/jfree/jfreechart/1.0.0/jfreechart-1.0.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/joda-time/joda-time/1.6/joda-time-1.6.jar" sourcepath="M2_REPO/joda-time/joda-time/1.6/joda-time-1.6-sources.jar">
     <attributes>
       <attribute value="jar:file:/Users/alexandre/.m2/repository/joda-time/joda-time/1.6/joda-time-1.6-javadoc.jar!/" name="javadoc_location"/>
+    </attributes>
+  </classpathentry>
+  <classpathentry kind="var" path="M2_REPO/net/sf/jtidy/jtidy/r938/jtidy-r938.jar" sourcepath="M2_REPO/net/sf/jtidy/jtidy/r938/jtidy-r938-sources.jar">
+    <attributes>
+      <attribute value="jar:file:/Users/alexandre/.m2/repository/net/sf/jtidy/jtidy/r938/jtidy-r938-javadoc.jar!/" name="javadoc_location"/>
     </attributes>
   </classpathentry>
   <classpathentry kind="var" path="M2_REPO/org/hibernate/jtidy/r8-20060801/jtidy-r8-20060801.jar"/>

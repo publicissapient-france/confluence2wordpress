@@ -79,7 +79,7 @@ public class PageLabelsSynchronizer {
                 metadata.setTagNames(tagNames);
             }
             for (Label label : labels) {
-                if( ! tagNames.contains(label.getName())){
+                if(! "wordpressmetadata".equalsIgnoreCase(label.getName()) && ! tagNames.contains(label.getName())){
                     tagNames.add(label.getName());
                 }
             }

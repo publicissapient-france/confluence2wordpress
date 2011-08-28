@@ -25,14 +25,13 @@
   
     <form action="updateSettings.action" method="post" class="aui long-label">
 
-      <input type="hidden" name="pageUrl" value="$action.pageUrl" />
+      <input type="hidden" name="pageUrl" value="$!action.pageUrl" />
         
       <h2>$action.getText("settings.form.section.confluence.section")</h2>
       
       <div class="field-group">
         <label for="ignoreConfluenceMacros">
             $action.getText("settings.form.ignoreConfluenceMacros.label")
-            <span class="form-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" value="$action.ignoreConfluenceMacros" title="$action.getText("settings.form.ignoreConfluenceMacros.label")">
         <div class="description">$action.getText("settings.form.ignoreConfluenceMacros.description")</div>
@@ -42,16 +41,14 @@
       
       <div class="field-group">
         <label for="wordpressRootUrl">
-            $action.getText("settings.form.wordpressRootUrl.label")
-            <span class="form-icon icon-required"/>
+            $action.getText("settings.form.wordpressRootUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="wordpressRootUrl" name="wordpressRootUrl" value="$action.wordpressRootUrl" title="$action.getText("settings.form.wordpressRootUrl.label")">
       </div>
     
       <div class="field-group">
         <label for="resourcesBaseUrl">
-            $action.getText("settings.form.editPostUrl.label")
-            <span class="form-icon icon-required"/>
+            $action.getText("settings.form.editPostUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="editPostUrl" name="editPostUrl" value="$action.editPostUrl" title="$action.getText("settings.form.editPostUrl.label")">
         <div class="description">$action.getText("settings.form.editPostUrl.description")</div>
@@ -61,17 +58,38 @@
       
       <div class="field-group">
         <label for="wordpressXmlRpcUrl">
-            $action.getText("settings.form.wordpressXmlRpcUrl.label")
-            <span class="form-icon icon-required"/>
+            $action.getText("settings.form.wordpressXmlRpcUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="wordpressXmlRpcUrl" name="wordpressXmlRpcUrl" value="$action.wordpressXmlRpcUrl" title="$action.getText("settings.form.wordpressXmlRpcUrl.label")">
         <div class="description">$action.getText("settings.form.wordpressXmlRpcUrl.description")</div>
+      </div>
+
+      <div class="field-group">
+        <label for="wordpressBlogId">
+            $action.getText("settings.form.wordpressBlogId.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressBlogId" name="wordpressBlogId" value="$action.wordpressBlogId" title="$action.getText("settings.form.wordpressBlogId.label")">
+        <div class="description">$action.getText("settings.form.wordpressBlogId.description")</div>
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressUserName">
+            $action.getText("settings.form.wordpressUserName.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input class="text long-field" type="text" id="wordpressUserName" name="wordpressUserName" value="$action.wordpressUserName" title="$action.getText("settings.form.wordpressUserName.label")">
+        <div class="description">$action.getText("settings.form.wordpressUserName.description")</div>
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressPassword">
+            $action.getText("settings.form.wordpressPassword.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input class="password long-field" type="password" id="wordpressPassword" name="wordpressPassword" value="$action.wordpressPassword" title="$action.getText("settings.form.wordpressPassword.label")">
       </div>
       
       <div class="field-group">
         <label for="proxyHost">
             $action.getText("settings.form.proxyHost.label")
-            <span class="form-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="proxyHost" name="proxyHost" value="$!action.proxyHost" title="$action.getText("settings.form.proxyHost.label")">
         <div class="description">$action.getText("settings.form.proxyHost.description")</div>
@@ -80,41 +98,16 @@
       <div class="field-group">
         <label for="proxyPort">
             $action.getText("settings.form.proxyPort.label")
-            <span class="form-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="proxyPort" name="proxyPort" value="$!action.proxyPort" title="$action.getText("settings.form.proxyPort.label")">
         <div class="description">$action.getText("settings.form.proxyPort.description")</div>
       </div>
-      <div class="field-group">
-        <label for="wordpressUserName">
-            $action.getText("settings.form.wordpressUserName.label")
-            <span class="form-icon icon-required"/>
-        </label>
-        <input class="text long-field" type="text" id="wordpressUserName" name="wordpressUserName" value="$action.wordpressUserName" title="$action.getText("settings.form.wordpressUserName.label")">
-        <div class="description">$action.getText("settings.form.wordpressUserName.description")</div>
-      </div>
-      
-      <div class="field-group">
-        <label for="wordpressPassword">
-            $action.getText("settings.form.wordpressPassword.label")
-            <span class="form-icon icon-required"/>
-        </label>
-        <input class="password long-field" type="password" id="wordpressPassword" name="wordpressPassword" value="$action.wordpressPassword" title="$action.getText("settings.form.wordpressPassword.label")">
-      </div>
-      
-      <div class="field-group">
-        <label for="wordpressBlogId">
-            $action.getText("settings.form.wordpressBlogId.label")
-            <span class="form-icon icon-required"/>
-        </label>
-        <input class="text long-field" type="text" id="wordpressBlogId" name="wordpressBlogId" value="$action.wordpressBlogId" title="$action.getText("settings.form.wordpressBlogId.label")">
-      </div>
       
       <div class="buttons-container">
         <div class="buttons">
-          <input class="button submit" type="submit" value="submit">
+          <input class="button submit" type="submit" value="$action.getText("settings.form.button.submit")">
           &nbsp;|&nbsp;
-          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}${action.confluenceRootUrl}/admin/console.action#end">Cancel</a>
+          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}${action.confluenceRootUrl}/admin/console.action#end">$action.getText("settings.form.button.cancel")</a>
         </div>
       </div>
       

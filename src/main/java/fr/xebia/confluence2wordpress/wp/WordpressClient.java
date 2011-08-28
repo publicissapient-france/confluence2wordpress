@@ -32,15 +32,15 @@ public class WordpressClient {
 
     private static final String FIND_POST_BY_ID_METHOD_NAME = "metaWeblog.getPost"; //"blogger.getPost";
 
-    private static final String GET_USERS_METHOD_NAME = "confluence2wordpress.getAuthors"; // "wp.getAuthors";
+    private static final String GET_USERS_METHOD_NAME = "c2w.getAuthors"; //"wp.getAuthors";
 
     private static final String GET_CATEGORIES_METHOD_NAME = "wp.getCategories";
 
     private static final String GET_TAGS_METHOD_NAME = "wp.getTags";
 
-    private static final String UPLOAD_FILE_METHOD_NAME = "wp.uploadFile";
+    private static final String UPLOAD_FILE_METHOD_NAME = "c2w.uploadFile"; //"wp.uploadFile";
     
-    private static final String FIND_PAGE_ID_BY_SLUG_METHOD_NAME = "confluence2wordpress.findPageIdBySlug";
+    private static final String FIND_PAGE_ID_BY_SLUG_METHOD_NAME = "c2w.findPageIdBySlug";
     
 
 

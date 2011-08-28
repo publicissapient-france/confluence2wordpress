@@ -30,8 +30,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <confluence.version>3.5.2</confluence.version>
         <confluence.data.version>3.5</confluence.data.version>
-        <!--<jericho.version>3.1</jericho.version>
-        <jtidy.version>r938</jtidy.version>-->
+        <!-- <jericho.version>3.2</jericho.version> -->
+        <!-- <jtidy.version>r938</jtidy.version> -->
         <htmlcleaner.version>2.2</htmlcleaner.version>
     </properties>
 
@@ -80,19 +80,19 @@
             <scope>compile</scope>
         </dependency>
 
-        <!--<dependency>
+        <!-- <dependency>
             <groupId>net.sf.jtidy</groupId>
             <artifactId>jtidy</artifactId>
             <version>${jtidy.version}</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency> -->
 
-        <dependency>
+        <!-- <dependency>
             <groupId>net.htmlparser.jericho</groupId>
             <artifactId>jericho-html</artifactId>
             <version>${jericho.version}</version>
             <scope>compile</scope>
-        </dependency>-->
+        </dependency> -->
 
         <dependency>
             <groupId>junit</groupId>

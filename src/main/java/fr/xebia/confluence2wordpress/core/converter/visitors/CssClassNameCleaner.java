@@ -35,7 +35,9 @@ public class CssClassNameCleaner implements TagNodeVisitor {
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            tag.removeAttribute("class");
+            if( ! "pre".equals(tag.getName())){
+                tag.removeAttribute("class");
+            }
         }
         return true;
     }

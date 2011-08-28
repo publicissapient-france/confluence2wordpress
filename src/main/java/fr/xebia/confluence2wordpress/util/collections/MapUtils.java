@@ -50,4 +50,20 @@ public class MapUtils {
         }
         return newMap;
     }
+
+    public static String join(Map<String, String> map, String entrySep, String keyValueSep) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Entry<String,String> entry : map.entrySet()) {
+            if(first){
+                first = false;
+            } else {
+                sb.append(entrySep);
+            }
+            sb.append(entry.getKey());
+            sb.append(keyValueSep);
+            sb.append(entry.getValue());
+        }
+        return sb.toString();
+    }
 }

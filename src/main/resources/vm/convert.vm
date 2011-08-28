@@ -51,7 +51,7 @@
     
     <div class="field-group">
         <label>$action.getText("convert.form.pageToTranslate")</label>
-        <span class="field-value"><a href="$settingsManager.globalSettings.baseUrl/$action.page.urlPath"><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</a></span>
+        <span class="field-value"><a href="$action.pageUrlAbsolutePath"><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</a></span>
     </div>    
     
     <div class="field-group">
@@ -123,16 +123,6 @@
         <div class="description">$action.getText("convert.form.postSlug.description")</div>
     </div>
 
-   <fieldset class="group">
-      <div class="checkbox">
-        <input id="allowPostOverride" name="allowPostOverride" value="true" type="checkbox" class="checkbox" #if($action.allowPostOverride)checked="checked"#end />
-        <label for="allowPostOverride">$action.getText("convert.form.allowPostOverride.label")</label>
-      </div>
-      <div class="field-group">
-        <div class="description">$action.getText("convert.form.allowPostOverride.description")</div>
-      </div>
-    </fieldset>
-    
     <div class="field-group">
         <label for="authorId">
             $action.getText("convert.form.authorId.label")
@@ -166,12 +156,24 @@
             #end
         </select>
     </div>
-        
+    
+   <fieldset class="group">
+      <div class="checkbox">
+        <input id="allowPostOverride" name="allowPostOverride" value="true" type="checkbox" class="checkbox" #if($action.allowPostOverride)checked="checked"#end />
+        <label for="allowPostOverride">$action.getText("convert.form.allowPostOverride.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("convert.form.allowPostOverride.description")</div>
+      </div>
+    </fieldset>
+            
     <div class="buttons-container">
       <div class="buttons">
         <input type="submit" class="button submit" value="$action.getText("convert.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
         <input type="submit" class="button submit" value="$action.getText("convert.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
+        #if($action.remoteUserAdmin)
         <a href="settings.action?pageUrl=convert.action?pageId=$action.pageId">$action.getText("convert.form.link.settings")</a>
+        #end
         &nbsp;|&nbsp;
         <a class="cancel texticon" href="$settingsManager.globalSettings.baseUrl/$action.page.urlPath">$action.getText("convert.form.link.cancel")</a>
       </div>

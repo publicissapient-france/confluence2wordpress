@@ -16,6 +16,7 @@
 package fr.xebia.confluence2wordpress.core.metadata;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
@@ -41,16 +42,16 @@ public class Metadata implements Serializable {
     private Integer authorId;
 
     @MetadataItem("Categories")
-    private List<String> categoryNames;
+    private List<String> categoryNames = new ArrayList<String>();
 
     @MetadataItem("Tags")
-    private List<String> tagNames;
+    private List<String> tagNames = new ArrayList<String>();
 
     @MetadataItem("Title")
     private String pageTitle;
 
     @MetadataItem("Ignore Confluence Macros")
-    private List<String> ignoreConfluenceMacros;
+    private List<String> ignoreConfluenceMacros = new ArrayList<String>();
 
     @MetadataItem("Optimize for Press Review")
     private boolean optimizeForRDP;

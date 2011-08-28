@@ -18,8 +18,6 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import java.util.Map;
-
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.ContentNode;
@@ -27,29 +25,25 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
-import fr.xebia.confluence2wordpress.util.collections.MapUtils;
-
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class SyntaxHighlighterConverter implements TagNodeVisitor {
+public class CodeMacroProcessor implements TagNodeVisitor {
 
-    /**
-        <div class="code panel" style="border-width: 1px;">
-            <div class="codeContent panelContent">
-                <script type="syntaxhighlighter" class="theme: Confluence; brush: xml; gutter: false"><![CDATA[&lt;plugin&gt;
-                code
-                ]]></script>
-            </div>
-        </div>
-
-        Converts to
-
-        [xml]
-        code
-        [/xml]
+    /*
+        Samples of XML framgments:
+        
+        <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
+        <div class="error">
+        <span class="error">Unable to find source-code formatter for language: ruby.</span> Available languages are: actionscript, html, java, javascript, none, sql, xhtml, xml</div>
+        <pre>
+        Ruby
+        Ruby
+        </pre>
+        </div></div>
+        
 
      */
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
@@ -63,7 +57,7 @@ public class SyntaxHighlighterConverter implements TagNodeVisitor {
                     if(code != null) {
                         String brush = findBrush(divCodeContent);
                         StringBuilder sb = new StringBuilder();
-                        String replacement = sb.append('[').append(brush).append("]\n").append(code).append("\n[/").append(brush).append(']').toString();
+                        String replacement = sb.append("<![CDATA[[").append(brush).append("]\n").append(code).append("\n[/").append(brush).append("]]]>").toString();
                         parentNode.replaceChild(divCodePanel, new ContentNode(replacement));
                     }
                 }
@@ -78,22 +72,18 @@ public class SyntaxHighlighterConverter implements TagNodeVisitor {
         if(divError != null) {
             brush = StringUtils.substringBetween(divError.getText().toString(), ": ", ".");
         } else {
-            TagNode script = divCodeContent.findElementByName("script", false);
-            if(script != null && "syntaxhighlighter".equalsIgnoreCase(script.getAttributeByName("type"))) {
-                String className = script.getAttributeByName("class");
-                if(className != null) {
-                    Map<String, String> map = MapUtils.split(className, ";", ":");
-                    brush = map.get("brush");
-                }
+            TagNode pre = divCodeContent.findElementByName("pre", false);
+            if(pre != null && pre.getAttributeByName("class").startsWith("code-")) {
+                brush = StringUtils.substringAfter(pre.getAttributeByName("class"), "code-");
             }
         }
         return brush;
     }
 
     private String findCode(TagNode divCodeContent) {
-        TagNode script = divCodeContent.findElementByName("script", false);
-        if(script != null && "syntaxhighlighter".equalsIgnoreCase(script.getAttributeByName("type"))) {
-            String code = script.getText().toString();
+        TagNode pre = divCodeContent.findElementByName("pre", false);
+        if(pre != null) {
+            String code = pre.getText().toString();
             if(code.startsWith("<![CDATA[") && code.endsWith("]]>")) {
                 code = StringUtils.substringBetween(code, "<![CDATA[", "]]>");
             }

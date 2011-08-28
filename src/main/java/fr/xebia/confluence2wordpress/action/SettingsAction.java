@@ -12,6 +12,8 @@
  */
 package fr.xebia.confluence2wordpress.action;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.atlassian.confluence.core.ConfluenceActionSupport;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.user.UserManager;
@@ -24,7 +26,9 @@ import fr.xebia.confluence2wordpress.core.PluginSettingsManager;
  */
 public class SettingsAction extends ConfluenceActionSupport {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5175072542211533080L;
+
+    private static final String ERRORS_REQUIRED_KEY = "settings.errors.required.field";
 
     private UserManager userManager;
 
@@ -51,6 +55,28 @@ public class SettingsAction extends ConfluenceActionSupport {
         this.pluginSettingsManager.setPluginSettingsFactory(pluginSettingsFactory);
     }
 
+    @Override
+    public void validate() {
+        if (StringUtils.isBlank(getWordpressRootUrl())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressRootUrl.label"));
+        }
+        if (StringUtils.isBlank(getWordpressXmlRpcUrl())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressXmlRpcUrl.label"));
+        }
+        if (StringUtils.isBlank(getEditPostUrl())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.editPostUrl.label"));
+        }
+        if (StringUtils.isBlank(getWordpressUserName())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressUserName.label"));
+        }
+        if (StringUtils.isBlank(getWordpressPassword())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressPassword.label"));
+        }
+        if (StringUtils.isBlank(getWordpressBlogId())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressBlogId.label"));
+        }
+    }
+    
     public String input() throws Exception {
 
         User remoteUser = getRemoteUser();
@@ -77,6 +103,16 @@ public class SettingsAction extends ConfluenceActionSupport {
 
         if (!userManager.isAdmin(remoteUser.getName())) {
             return LOGIN;
+        }
+
+        if( ! wordpressRootUrl.endsWith("/")){
+            wordpressRootUrl += "/";
+        }
+        if(wordpressXmlRpcUrl.startsWith("/")){
+            wordpressXmlRpcUrl = wordpressXmlRpcUrl.substring(1);
+        }
+        if(editPostUrl.startsWith("/")){
+            editPostUrl = editPostUrl.substring(1);
         }
 
         pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
