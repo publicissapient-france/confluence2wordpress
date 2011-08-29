@@ -27,7 +27,7 @@ public class ConverterOptions {
 
     private boolean useCdataForScriptAndStyle = false;
 
-    private boolean omitComments = true;
+    private boolean omitComments = false;
 
     private boolean useEmptyElementTags = false;
 

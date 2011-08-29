@@ -34,7 +34,8 @@
         <property key="content-type" value="image/png"/>
     </resource>
     
-    <web-item key="confluence2wordpress-link" name="Confluence-to-Wordpress Converter Link" section="system.content.action/primary"  weight="100">
+    <web-item key="confluence2wordpress-link" name="Confluence-to-Wordpress Converter Link" 
+        section="system.content.action/primary"  weight="100">
         <label key="link.label" />
         <link>/confluence2wordpress/convert.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
@@ -42,6 +43,12 @@
             <link>/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png</link>
         </icon>
     </web-item>
+    
+    <macro name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" key="confluence2wordpress-more-macro" 
+        icon="/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png">
+        <description>Generates a Wordpress "more" markup.</description>
+        <category name="external-content"/>
+    </macro>
     
     <xwork key="confluence2wordpress-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
@@ -68,16 +75,6 @@
         </package>
     </xwork>
 
-    <rpc-xmlrpc key="confluence2wordpress-xmlrpc"
-                name="Confluence-to-Wordpress Converter XML-RPC API"
-                class="fr.xebia.confluence2wordpress.rpc.ConvertRpcImpl">
-        <description>Confluence-to-Wordpress Converter XML-RPC service</description>
-        <service-name>Confluence2WordpressConverter</service-name>
-        <service-path>confluence2wordpress</service-path>
-        <published-interface>fr.xebia.confluence2wordpress.rpc.ConvertRpc</published-interface>
-        <authenticate>true</authenticate>
-    </rpc-xmlrpc>
-    
     <component-import key="salUserManager" interface="com.atlassian.sal.api.user.UserManager" />
 
     <component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
