@@ -16,8 +16,6 @@
 package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -171,10 +169,6 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     public void setPageId(long pageId){
         this.setPage(pageManager.getPage(pageId));
-    }
-
-    public String getPageUrlAbsolutePath() throws MalformedURLException{
-        return new URL(new URL(settingsManager.getGlobalSettings().getBaseUrl()), getPage().getUrlPath()).getPath();
     }
 
     public boolean isAllowPostOverride() {
@@ -363,16 +357,19 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private void mergeLocalAndRemoteTags() {
         List<String> tagNames = metadata.getTagNames();
-        for (String tagName : tagNames) {
-            boolean found = false;
-            for (WordpressTag tag : getWordpressTags()) {
-                if(tag.getName().equals(tagName)){
-                    found = true;
-                    break;
+        if(tagNames != null){
+            for (String tagName : tagNames) {
+                boolean found = false;
+                Set<WordpressTag> wordpressTags = getWordpressTags();
+                for (WordpressTag tag : wordpressTags) {
+                    if(tag.getName().equals(tagName)){
+                        found = true;
+                        break;
+                    }
                 }
-            }
-            if( ! found){
-                getWordpressTags().add(new WordpressTag(tagName));
+                if( ! found){
+                    wordpressTags.add(new WordpressTag(tagName));
+                }
             }
         }
     }

@@ -24,68 +24,68 @@ import com.atlassian.confluence.labels.LabelManager;
 
 /**
  * @author Alexandre Dutra
- *
  */
 public class PageLabelsSynchronizer {
 
     private LabelManager labelManager;
-    
+
     public PageLabelsSynchronizer(LabelManager labelManager) {
         this.labelManager = labelManager;
     }
 
-
     public void tagNamesToPageLabels(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
-        for (String tagName : tagNames) {
-            boolean found = false;
-            List<Label> labels = page.getLabels();
-            for (Label label : labels) {
-                if(label.getName().equals(tagName)){
-                    found = true;
-                    break;
+        if (tagNames != null) {
+            for (String tagName : tagNames) {
+                boolean found = false;
+                List<Label> labels = page.getLabels();
+                for (Label label : labels) {
+                    if (label.getName().equals(tagName)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    labelManager.addLabel(page, new Label(tagName));
                 }
             }
-            if(!found){
-                labelManager.addLabel(page, new Label(tagName));
-            }
         }
-
         List<Label> deletedLabels = new ArrayList<Label>();
         for (Label label : page.getLabels()) {
             boolean found = false;
-            for (String tagName : tagNames) {
-                if(label.getName().equals(tagName)){
-                    found = true;
-                    break;
+            if (tagNames != null) {
+                for (String tagName : tagNames) {
+                    if (label.getName().equals(tagName)) {
+                        found = true;
+                        break;
+                    }
                 }
             }
-            if(!found){
+            if (!found) {
                 deletedLabels.add(label);
             }
         }
-        if( ! deletedLabels.isEmpty()){
+        if (!deletedLabels.isEmpty()) {
             labelManager.removeLabels(page, deletedLabels);
         }
     }
-    
-    
+
     public void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
         List<Label> labels = page.getLabels();
-        if(labels != null && ! labels.isEmpty()){
-            if(tagNames == null){
+        if (labels != null && !labels.isEmpty()) {
+            if (tagNames == null) {
                 tagNames = new ArrayList<String>();
                 metadata.setTagNames(tagNames);
             }
             for (Label label : labels) {
-                if(! "wordpressmetadata".equalsIgnoreCase(label.getName()) && ! tagNames.contains(label.getName())){
+                if (!"wordpressmetadata".equalsIgnoreCase(label.getName())
+                    && !tagNames.contains(label.getName())) {
                     tagNames.add(label.getName());
                 }
             }
         }
         metadata.setTagNames(tagNames);
     }
-
 
 }

@@ -210,6 +210,7 @@ public class MetadataManager {
         StringBuilder sb = new StringBuilder();
         if(includeMacroDelimiter) {
             sb.append(LINE_SEPARATOR);
+            sb.append(LINE_SEPARATOR);
             sb.append(WORDPRESS_META_START);
         }
         sb.append(LINE_SEPARATOR);

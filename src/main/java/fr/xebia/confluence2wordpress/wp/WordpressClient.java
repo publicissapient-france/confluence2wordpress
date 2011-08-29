@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
@@ -15,6 +14,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.xmlrpc.XmlRpcClient;
 import org.apache.xmlrpc.XmlRpcException;
 
+import fr.xebia.confluence2wordpress.util.collections.CollectionUtils;
 import fr.xebia.confluence2wordpress.wp.transport.DefaultProxyAwareXmlRpcTransportFactory;
 
 /**
@@ -233,7 +233,7 @@ public class WordpressClient {
         List<String> categoryNames = (List<String>) map.get("categories");
         post.setCategoryNames(categoryNames);
 
-        List<String> tagNames = Arrays.asList(((String) map.get("mt_keywords")).split(",\\s*"));
+        List<String> tagNames = CollectionUtils.split((String) map.get("mt_keywords"), ",");
         post.setTagNames(tagNames);
 
         String slug = (String) map.get("wp_slug");
@@ -289,23 +289,19 @@ public class WordpressClient {
         params.add(wordpressConnection.getPassword());
 
         Hashtable<String,Object> map = new Hashtable<String,Object>();
-        if(post.getTitle() != null) {
-            map.put("title", post.getTitle());
-        }
-        if(post.getCategoryNames() != null) {
+        map.put("title", post.getTitle());
+        map.put("description", post.getBody());
+        map.put("wp_author_id", post.getAuthorId());
+        map.put("wp_slug", post.getPostSlug());
+        if (post.getCategoryNames() != null) {
             map.put("categories", new Vector<String>(post.getCategoryNames()));
+        } else {
+            map.put("categories", new Vector<String>());
         }
-        if(post.getBody() != null) {
-            map.put("description", post.getBody());
-        }
-        if(post.getTagNames() != null) {
+        if (post.getTagNames() != null) {
             map.put("mt_keywords", new Vector<String>(post.getTagNames()));
-        }
-        if(post.getAuthorId() != null) {
-            map.put("wp_author_id", post.getAuthorId());
-        }
-        if(post.getPostSlug() != null) {
-            map.put("wp_slug", post.getPostSlug());
+        } else {
+            map.put("mt_keywords", new Vector<String>());
         }
         params.add(map);
 

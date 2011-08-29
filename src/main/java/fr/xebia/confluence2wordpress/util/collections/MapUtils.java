@@ -32,6 +32,9 @@ import org.apache.commons.lang.StringUtils;
 public class MapUtils {
 
     public static Map<String, String> split(String str, String entrySep, String keyValueSep) {
+        if(StringUtils.isEmpty(str)){
+            return null;
+        }
         String[] tokens = StringUtils.splitPreserveAllTokens(str, entrySep);
         Map<String, String> map = new HashMap<String, String>(tokens.length);
         for (String token : tokens) {
