@@ -16,7 +16,7 @@
 <html>
 
   <head>
-    <title>$action.getText("confluence2wordpress.converter")</title>
+    <title>$action.getText("settings.title")</title>
     <meta name="decorator" content="atl.admin">
     #requireResource("fr.xebia.confluence2wordpress:confluence2wordpress-resources")
   </head>
@@ -107,7 +107,7 @@
         <div class="buttons">
           <input class="button submit" type="submit" value="$action.getText("settings.form.button.submit")">
           &nbsp;|&nbsp;
-          <a class="cancel texticon" href="#if($action.pageUrl)$action.pageUrl#{else}${action.confluenceRootUrl}/admin/console.action#end">$action.getText("settings.form.button.cancel")</a>
+          <a class="cancel texticon" href="${settingsManager.globalSettings.baseUrl}#if($action.pageUrl)$action.pageUrl#{else}/admin/console.action#end">$action.getText("settings.form.button.cancel")</a>
         </div>
       </div>
       

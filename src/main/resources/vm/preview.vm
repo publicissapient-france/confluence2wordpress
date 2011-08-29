@@ -15,7 +15,7 @@
  *#
 <html>
 <head>
-    <title>$action.getText("confluence2wordpress.converter")</title>
+    <title>$action.page.displayTitle - $action.getText("preview.title")</title>
     <meta name="decorator" content="atl.popup"/>
     #requireResource("fr.xebia.confluence2wordpress:confluence2wordpress-resources")
 </head>
