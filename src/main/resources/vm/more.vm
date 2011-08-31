@@ -1,0 +1,12 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="5" id="c2w-readMore"> 
+    <tbody>
+        <tr> 
+            <td width="50%"><hr></td> 
+            <td width="0" style="white-space:nowrap">
+                <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" width="32" height="32" align="absmiddle" alt="" border="0">
+                $i18n.getText("macro.more.text")
+            </td>
+            <td width="50%"><hr></td>
+        </tr> 
+    </tbody>
+</table>

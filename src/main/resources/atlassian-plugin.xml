@@ -24,17 +24,17 @@
         <param name="configure.url">/confluence2wordpress/settings.action</param>
     </plugin-info>
 
-    <web-resource key="confluence2wordpress-resources">
+    <web-resource key="c2w-resources">
         <resource type="download" name="confluence2wordpress.css" location="css/confluence2wordpress.css"/>
     </web-resource>
 
-    <resource key="confluence2wordpress-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
+    <resource key="c2w-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
-    <resource key="confluence2wordpress-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">
+    <resource key="c2w-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">
         <property key="content-type" value="image/png"/>
     </resource>
     
-    <web-item key="confluence2wordpress-link" name="Confluence-to-Wordpress Converter Link" 
+    <web-item key="c2w-link" name="Confluence-to-Wordpress Converter Link" 
         section="system.content.action/primary"  weight="100">
         <label key="link.label" />
         <link>/confluence2wordpress/convert.action?pageId=$page.id</link>
@@ -44,13 +44,15 @@
         </icon>
     </web-item>
     
-    <macro name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" key="confluence2wordpress-more-macro" 
+    <macro name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" key="c2w-more-macro" 
         icon="/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png">
         <description>Generates a Wordpress "more" markup.</description>
         <category name="external-content"/>
     </macro>
     
-    <xwork key="confluence2wordpress-action" name="Confluence-to-Wordpress Converter Action">
+    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" key="c2w-sync-info-macro" hidden="true" />
+    
+    <xwork key="c2w-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
             <action name="convert" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="input">

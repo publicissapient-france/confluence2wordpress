@@ -5,6 +5,8 @@ package fr.xebia.confluence2wordpress.macro;
 
 import java.util.Map;
 
+import com.atlassian.confluence.core.ContentEntityObject;
+import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.RenderContext;
 import com.atlassian.renderer.TokenType;
 import com.atlassian.renderer.v2.RenderMode;
@@ -18,13 +20,19 @@ import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
 /**
  *
  */
-public class MoreMacro extends BaseMacro {
+public class MetadataMacro extends BaseMacro {
 
 	private VelocityHelper velocityHelper = new VelocityHelper();
     
+	@SuppressWarnings("unchecked")
 	@Override
     public String execute(@SuppressWarnings("rawtypes") Map parameters, String body, RenderContext renderContext) throws MacroException {
-		return velocityHelper.generateReadMoreHtml();
+		// retrieve a reference to the body object this macro is in
+		if (!(renderContext instanceof PageContext)) {
+			throw new MacroException("This macro can only be used in a page");
+		}
+		ContentEntityObject page = ((PageContext) renderContext).getEntity();
+		return velocityHelper.generateMetadataHtml(parameters, page);
     }
 
     @Override

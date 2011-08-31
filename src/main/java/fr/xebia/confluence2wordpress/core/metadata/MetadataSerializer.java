@@ -22,7 +22,7 @@ public class MetadataSerializer {
      * The guy that invented it is a genius :)
      * @see "http://stackoverflow.com/questions/1757065/java-splitting-a-comma-separated-string-but-ignoring-commas-in-quotes"
      */
-    private static final String PATTERN = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
+    private static final String CSV_PATTERN = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
 
     public String serialize(Object value){
         if(value == null){
@@ -61,7 +61,7 @@ public class MetadataSerializer {
 
     @SuppressWarnings("unchecked")
     private <T> List<T> deserializeList(String value, Class<T> componentType) {
-        String[] items = value.split(PATTERN, -1);
+        String[] items = value.split(CSV_PATTERN, -1);
         for (int i = 0; i < items.length; i++) {
             items[i] = unescape(items[i]);
         }
@@ -80,7 +80,7 @@ public class MetadataSerializer {
         if(s == null){
             return "";
         }
-        if(s.contains(",") || s.contains("\"")){
+        if(s.contains(",") || s.contains("|") || s.contains("\"")){
             StringBuilder sb = new StringBuilder();
             sb.append("\"");
             sb.append(s.replace("\"","\"\""));

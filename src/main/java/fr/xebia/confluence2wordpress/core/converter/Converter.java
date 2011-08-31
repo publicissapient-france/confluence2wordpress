@@ -41,6 +41,7 @@ import fr.xebia.confluence2wordpress.core.converter.visitors.CdataStripper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.NewCodeMacroProcessor;
 
 public class Converter {
@@ -175,6 +176,7 @@ public class Converter {
         //regular visitors
         visitors.add(new CssClassNameCleaner());
         visitors.add(new EmptySpanStripper());
+        visitors.add(new MoreMacroProcessor());
         return visitors;
     }
     
