@@ -46,8 +46,6 @@ public class PluginSettingsManager {
 
     private static final String DEFAULT_WP_EDIT_POST_URL = "/wp-admin/post.php?action=edit&post={0}";
 
-    private static final long serialVersionUID = 1L;
-
     private PluginSettingsFactory pluginSettingsFactory;
 
     public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
