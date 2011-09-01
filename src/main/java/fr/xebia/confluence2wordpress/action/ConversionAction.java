@@ -187,12 +187,12 @@ public class ConversionAction extends AbstractPageAwareAction {
         return metadata;
     }
 
-    public String getIgnoreConfluenceMacros() {
-      return StringUtils.join(getMetadata().getIgnoreConfluenceMacros(), ' ');
+    public String getIgnoredConfluenceMacros() {
+      return StringUtils.join(getMetadata().getIgnoredConfluenceMacros(), ' ');
     }
     
     public void setIgnoreConfluenceMacros(String ignoreConfluenceMacros) {
-      getMetadata().setIgnoreConfluenceMacros(Arrays.asList(StringUtils.split(ignoreConfluenceMacros)));
+      getMetadata().setIgnoredConfluenceMacros(Arrays.asList(StringUtils.split(ignoreConfluenceMacros)));
     }
 
     public String getHtml() {
@@ -382,7 +382,7 @@ public class ConversionAction extends AbstractPageAwareAction {
                     getPage(), 
                     getWordpressUsers(), 
                     getWordpressCategories(),
-                    pluginSettingsManager.getDefaultIgnoreConfluenceMacrosAsList()
+                    pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList()
                 );
             }
         }
@@ -409,6 +409,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
+        options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
         options.setDisabledConfluenceMacros(metadata.getIgnoreConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         if( ! preview){

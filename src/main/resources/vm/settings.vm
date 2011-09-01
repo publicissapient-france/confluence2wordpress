@@ -30,11 +30,11 @@
       <h2>$action.getText("settings.form.section.confluence.section")</h2>
       
       <div class="field-group">
-        <label for="ignoreConfluenceMacros">
-            $action.getText("settings.form.ignoreConfluenceMacros.label")
+        <label for="ignoredConfluenceMacros">
+            $action.getText("settings.form.ignoredConfluenceMacros.label")
         </label>
-        <input class="text long-field" type="text" id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" value="$action.ignoreConfluenceMacros" title="$action.getText("settings.form.ignoreConfluenceMacros.label")">
-        <div class="description">$action.getText("settings.form.ignoreConfluenceMacros.description")</div>
+        <input class="text long-field" type="text" id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" value="$action.ignoredConfluenceMacros" title="$action.getText("settings.form.ignoredConfluenceMacros.label")">
+        <div class="description">$action.getText("settings.form.ignoredConfluenceMacros.description")</div>
       </div>
     
       <h2>$action.getText("settings.form.section.wordpress.section")</h2>

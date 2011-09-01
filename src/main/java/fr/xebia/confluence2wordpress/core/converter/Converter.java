@@ -36,7 +36,7 @@ import com.atlassian.renderer.WikiStyleRenderer;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
-import fr.xebia.confluence2wordpress.core.converter.preprocessors.DisabledMacrosPreProcessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosPreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
@@ -161,7 +161,7 @@ public class Converter {
 
     protected List<PreProcessor> getPreProcessors(ConverterOptions options) {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
-        processors.add(new DisabledMacrosPreProcessor());
+        processors.add(new IgnoredMacrosPreProcessor());
         return processors;
 	}
 

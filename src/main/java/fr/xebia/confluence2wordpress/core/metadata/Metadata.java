@@ -50,7 +50,7 @@ public class Metadata implements Serializable {
     private String pageTitle;
 
     @MetadataItem("Ignore Confluence Macros")
-    private List<String> ignoreConfluenceMacros;
+    private List<String> ignoredConfluenceMacros;
 
     @MetadataItem("Optimize for Press Review")
     private boolean optimizeForRDP;
@@ -72,12 +72,12 @@ public class Metadata implements Serializable {
         this.pageTitle = pageTitle;
     }
 
-    public List<String> getIgnoreConfluenceMacros() {
-        return ignoreConfluenceMacros;
+    public List<String> getIgnoredConfluenceMacros() {
+        return ignoredConfluenceMacros;
     }
 
-    public void setIgnoreConfluenceMacros(List<String> ignoreConfluenceMacros) {
-        this.ignoreConfluenceMacros = ignoreConfluenceMacros;
+    public void setIgnoredConfluenceMacros(List<String> ignoredConfluenceMacros) {
+        this.ignoredConfluenceMacros = ignoredConfluenceMacros;
     }
 
     public Integer getPostId() {

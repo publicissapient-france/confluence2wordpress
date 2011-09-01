@@ -35,7 +35,7 @@ public class ConverterOptions {
 
     private Map<String, String> tagTransformations = null;
 
-    private List<String> disabledConfluenceMacros = null;
+    private List<String> ignoredConfluenceMacros = null;
 
     private boolean optimizeForRDP = false;
 
@@ -106,12 +106,12 @@ public class ConverterOptions {
         this.tagTransformations = MapUtils.trimValues(tagTransformations);
     }
 
-    public List<String> getDisableConfluenceMacros() {
-        return disabledConfluenceMacros;
+    public List<String> getIgnoredConfluenceMacros() {
+        return ignoredConfluenceMacros;
     }
 
-    public void setDisabledConfluenceMacros(List<String> disabledConfluenceMacros) {
-        this.disabledConfluenceMacros = disabledConfluenceMacros;
+    public void setIgnoredConfluenceMacros(List<String> disabledConfluenceMacros) {
+        this.ignoredConfluenceMacros = disabledConfluenceMacros;
     }
 
     public boolean isOptimizeForRDP() {

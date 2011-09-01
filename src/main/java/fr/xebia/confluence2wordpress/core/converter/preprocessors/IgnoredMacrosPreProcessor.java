@@ -6,12 +6,12 @@ import java.util.regex.Pattern;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 
 
-public class DisabledMacrosPreProcessor implements PreProcessor {
+public class IgnoredMacrosPreProcessor implements PreProcessor {
 
     @Override
     public String preProcess(String wiki, ConverterOptions options) {
-    	if(options.getDisableConfluenceMacros() != null) {
-            for (String macro : options.getDisableConfluenceMacros()) {
+    	if(options.getIgnoredConfluenceMacros() != null) {
+            for (String macro : options.getIgnoredConfluenceMacros()) {
             	Pattern p = Pattern.compile("\\{" + macro + "(:[^\\}]+)?\\}");
             	Matcher matcher = p.matcher(wiki);
                 StringBuffer sb = new StringBuffer();

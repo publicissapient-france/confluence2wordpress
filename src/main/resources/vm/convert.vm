@@ -63,9 +63,9 @@
     </div>    
     
     <div class="field-group">
-        <label for="ignoreConfluenceMacros">$action.getText("convert.form.ignoreConfluenceMacros.label")</label>
-        <input id="ignoreConfluenceMacros" name="ignoreConfluenceMacros" type="text" value="$action.ignoreConfluenceMacros" class="text" />
-        <div class="description">$action.getText("convert.form.ignoreConfluenceMacros.description")</div>
+        <label for="ignoredConfluenceMacros">$action.getText("convert.form.ignoredConfluenceMacros.label")</label>
+        <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" type="text" value="$action.ignoredConfluenceMacros" class="text" />
+        <div class="description">$action.getText("convert.form.ignoredConfluenceMacros.description")</div>
     </div>    
     
     <fieldset class="group">

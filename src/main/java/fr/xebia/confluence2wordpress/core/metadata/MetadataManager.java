@@ -109,7 +109,7 @@ public class MetadataManager {
         ContentEntityObject page, 
         List<WordpressUser> users, 
         Set<WordpressCategory> categories, 
-        List<String> ignoreConfluenceMacros) {
+        List<String> ignoredConfluenceMacros) {
         Metadata metadata = new Metadata();
         String pageTitle = page.getTitle();
         Matcher matcher = DRAFT_PREFIX_PATTERN.matcher(pageTitle);
@@ -151,7 +151,7 @@ public class MetadataManager {
                 }
             }
         }
-        metadata.setIgnoreConfluenceMacros(ignoreConfluenceMacros);
+        metadata.setIgnoredConfluenceMacros(ignoredConfluenceMacros);
         return metadata;
     }
 

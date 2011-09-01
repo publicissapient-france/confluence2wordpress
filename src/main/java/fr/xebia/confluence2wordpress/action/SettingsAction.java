@@ -42,6 +42,7 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private String wordpressBlogId;
 
+    private String ignoredConfluenceMacros;
     private String ignoreConfluenceMacros;
 
     private String wordpressRootUrl;
@@ -86,6 +87,7 @@ public class SettingsAction extends ConfluenceActionSupport {
         }
 
         wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
+        ignoredConfluenceMacros = pluginSettingsManager.getDefaultIgnoredConfluenceMacros();
         ignoreConfluenceMacros = pluginSettingsManager.getDefaultIgnoreConfluenceMacros();
         wordpressXmlRpcUrl = pluginSettingsManager.getWordpressXmlRpcUrl();
         wordpressUserName = pluginSettingsManager.getWordpressUserName();
@@ -116,6 +118,7 @@ public class SettingsAction extends ConfluenceActionSupport {
         }
 
         pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
+        pluginSettingsManager.setDefaultIgnoredConfluenceMacros(ignoredConfluenceMacros);
         pluginSettingsManager.setDefaultIgnoreConfluenceMacros(ignoreConfluenceMacros);
         pluginSettingsManager.setWordpressXmlRpcUrl(wordpressXmlRpcUrl);
         pluginSettingsManager.setWordpressUserName(wordpressUserName);
@@ -176,12 +179,12 @@ public class SettingsAction extends ConfluenceActionSupport {
         this.wordpressBlogId = wordpressBlogId;
     }
 
-    public String getIgnoreConfluenceMacros() {
-        return ignoreConfluenceMacros;
+    public String getIgnoredConfluenceMacros() {
+        return ignoredConfluenceMacros;
     }
 
-    public void setIgnoreConfluenceMacros(String ignoreConfluenceMacros) {
-        this.ignoreConfluenceMacros = ignoreConfluenceMacros;
+    public void setIgnoredConfluenceMacros(String ignoredConfluenceMacros) {
+        this.ignoredConfluenceMacros = ignoredConfluenceMacros;
     }
 
     public String getWordpressRootUrl() {
