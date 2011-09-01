@@ -30,6 +30,7 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
+import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.util.collections.MapUtils;
 
 
@@ -39,13 +40,12 @@ import fr.xebia.confluence2wordpress.util.collections.MapUtils;
  */
 public class NewCodeMacroProcessor implements TagNodeVisitor {
 
-    private Map<String, String> substitutionMap;
+    private SyntaxHighlighterPlugin plugin;
     
-    public NewCodeMacroProcessor(Map<String, String> substitutionMap) {
+    public NewCodeMacroProcessor(SyntaxHighlighterPlugin plugin) {
         super();
-        this.substitutionMap = substitutionMap;
+        this.plugin = plugin;
     }
-
 
     /*
         <div class="code panel" style="border-width: 1px;">
@@ -60,6 +60,7 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
         Converts to
 
         [xml gutter=false]
+        <plugin>
         code
         [/xml]
 
@@ -75,20 +76,21 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
                     String code = findCode(divCodeContent);
                     if(code != null) {
                         Map<String, String> shOptions = findSHOptions(divCodeContent);
-                        String brush = shOptions.get("brush");
                         StringBuilder sb = new StringBuilder();
-                        sb.append("\n[").append(brush);
+                        sb.append("\n[");
+                        String pluginTagName = plugin.getTagName(shOptions);
+						sb.append(pluginTagName);
                         Iterator<Entry<String, String>> it = shOptions.entrySet().iterator();
                         while(it.hasNext()){
                             Entry<String, String> entry = it.next();
-                            if(substitutionMap.containsKey(entry.getKey())){
-                                sb.append(' ').append(substitutionMap.get(entry.getKey())).append('=').append(entry.getValue());
+                            if(plugin.getSubstitutionMap().containsKey(entry.getKey())){
+                                sb.append(' ').append(plugin.getSubstitutionMap().get(entry.getKey())).append('=').append(entry.getValue());
                             }
                         }
                         String replacement = sb.append("]\n").
                             append(code).
                             append("\n[/").
-                            append(brush).
+                            append(pluginTagName).
                             append("]\n").toString();
                         parentNode.replaceChild(divCodePanel, new ContentNode(replacement));
                     }
@@ -98,7 +100,7 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
         return true;
     }
 
-    private Map<String, String> findSHOptions(TagNode divCodeContent) {
+    protected Map<String, String> findSHOptions(TagNode divCodeContent) {
         String brush = "text";
         TagNode divError = divCodeContent.findElementByAttValue("class", "error", false, true);
         if(divError != null) {
@@ -117,7 +119,7 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
         return map;
     }
 
-    private String findCode(TagNode divCodeContent) {
+    protected String findCode(TagNode divCodeContent) {
         TagNode script = divCodeContent.findElementByName("script", false);
         if(script != null && "syntaxhighlighter".equalsIgnoreCase(script.getAttributeByName("type"))) {
             String code = script.getText().toString();

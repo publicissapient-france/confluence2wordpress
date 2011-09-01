@@ -6,7 +6,7 @@ import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
 
 
-public class PressReviewHeaderPostProcessor implements ConversionPostProcessor {
+public class PressReviewHeaderPostProcessor implements PostProcessor {
     
     private VelocityHelper velocityHelper = new VelocityHelper();
 

@@ -50,7 +50,7 @@
         <category name="external-content"/>
     </macro>
     
-    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" key="c2w-sync-info-macro" hidden="true" />
+    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" key="c2w-sync-info-macro" hidden="true" />
     
     <xwork key="c2w-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">

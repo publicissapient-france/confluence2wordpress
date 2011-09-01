@@ -4,8 +4,8 @@ import org.htmlcleaner.TagNode;
 
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 
-public interface ConversionPostProcessor {
+public interface PostProcessor {
 
-    public abstract String postProcess(String html, TagNode body, ConverterOptions options);
+    String postProcess(String html, TagNode body, ConverterOptions options);
 
 }

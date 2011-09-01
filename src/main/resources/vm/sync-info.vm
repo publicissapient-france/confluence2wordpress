@@ -1,4 +1,4 @@
-<div class="panelMacro">
+<div class="panelMacro" id="c2w-syncInfo">
     <table class="infoMacro">
         <colgroup>
             <col width="48"><col>
@@ -10,8 +10,8 @@
                 </td>
                 <td>
                     <b>$i18n.getText("macro.metadata.heading")</b><br/>
-                    #if ($permalink)
-                    <a href="$permalink" target="wp-preview">$action.getText("macro.metadata.link.viewPost")</a> |
+                    #if ($metadata.permalink)
+                    <a href="$metadata.permalink" target="wp-preview">$action.getText("macro.metadata.link.viewPost")</a> |
                     #end
                     <a href="${settingsManager.globalSettings.baseUrl}/confluence2wordpress/convert.action?pageId=$page.id">$action.getText("macro.metadata.link.sync")</a><br/>
                     <img src="${settingsManager.globalSettings.baseUrl}/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0">

@@ -16,21 +16,30 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.util.string;
+package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-
-
+import org.htmlcleaner.HtmlNode;
+import org.htmlcleaner.TagNode;
+import org.htmlcleaner.TagNodeVisitor;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class XmlEscapeUtils{
+public class SyncInfoMacroProcessor implements TagNodeVisitor {
 
-    public static String escapeText(String text) {
-        //better than StringEscapeUtils.escapeXml(text);
-        return text.replace("<", "&lt;").replace("&", "&amp;");
+    /**
+     * @inheritdoc
+     */
+    public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
+        if (htmlNode instanceof TagNode) {
+            TagNode tag = (TagNode) htmlNode;
+            if("c2w-syncInfo".equals(tag.getAttributeByName("id"))){
+                parentNode.removeChild(tag);
+            }
+        }
+        return true;
     }
 
 }

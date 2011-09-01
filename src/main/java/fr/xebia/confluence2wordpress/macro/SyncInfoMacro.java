@@ -15,16 +15,20 @@ import com.atlassian.renderer.v2.macro.MacroException;
 import com.atlassian.renderer.v2.macro.WysiwygBodyType;
 
 import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
+import fr.xebia.confluence2wordpress.core.metadata.Metadata;
+import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
+import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
 
 
 /**
  *
  */
-public class MetadataMacro extends BaseMacro {
+public class SyncInfoMacro extends BaseMacro {
 
 	private VelocityHelper velocityHelper = new VelocityHelper();
+	
+	private MetadataManager metadataManager = new MetadataManager();
     
-	@SuppressWarnings("unchecked")
 	@Override
     public String execute(@SuppressWarnings("rawtypes") Map parameters, String body, RenderContext renderContext) throws MacroException {
 		// retrieve a reference to the body object this macro is in
@@ -32,7 +36,13 @@ public class MetadataMacro extends BaseMacro {
 			throw new MacroException("This macro can only be used in a page");
 		}
 		ContentEntityObject page = ((PageContext) renderContext).getEntity();
-		return velocityHelper.generateMetadataHtml(parameters, page);
+		Metadata metadata;
+		try {
+			metadata = metadataManager.extractMetadata(page);
+		} catch (MetadataException e) {
+			throw new MacroException("Cannot extract metadata", e);
+		}
+		return velocityHelper.generateMetadataHtml(page, metadata);
     }
 
     @Override

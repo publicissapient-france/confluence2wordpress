@@ -7,7 +7,7 @@ import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.HeadingsCollector;
 
 
-public class TableOfContentsPostProcessor implements ConversionPostProcessor {
+public class TableOfContentsPostProcessor implements PostProcessor {
 
     private VelocityHelper velocityHelper = new VelocityHelper();
 

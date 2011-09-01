@@ -55,9 +55,7 @@ public class MetadataManager {
 
     protected static final String WORDPRESS_META_END = "{details}";
 
-    private static final String WORDPRESS_SYNC_INFO_START = "{wordpress-sync-info";
-
-    private static final String WORDPRESS_SYNC_INFO_END = "}";
+    private static final String WORDPRESS_SYNC_INFO = "{wordpress-sync-info}";
 
     private static final Pattern DRAFT_PREFIX_PATTERN = Pattern.compile("(DRAFT\\s*-\\s*).+");
 
@@ -85,9 +83,9 @@ public class MetadataManager {
         String content = page.getContent();
     	Map<String, String> macroParameters = getMacroParameters(metadata);
         StringBuilder newContent = new StringBuilder();
-        if(metadata.getPostId() != null && content.indexOf(WORDPRESS_SYNC_INFO_START) == -1) {
-			StringBuilder syncInfoBody = writeWordpressSyncInfoMacroBody(metadata);
-			newContent.append(syncInfoBody);
+        if(metadata.getPostId() != null && content.indexOf(WORDPRESS_SYNC_INFO) == -1) {
+			newContent.append(WORDPRESS_SYNC_INFO);
+			newContent.append(LINE_SEPARATOR);
 			newContent.append(LINE_SEPARATOR);
         }
         StringBuilder metadataMacroBody = writeMetadataMacroBody(macroParameters);
@@ -107,16 +105,11 @@ public class MetadataManager {
         page.setContent(newContent.toString());
     }
 
-	protected String storeWordpressSyncInfo(String content, Metadata metadata) {
-		
-		return content;
-	}
-
     public Metadata createMetadata(
         ContentEntityObject page, 
         List<WordpressUser> users, 
         Set<WordpressCategory> categories, 
-        List<String> ignoreConfluenceMacros) throws MetadataException {
+        List<String> ignoreConfluenceMacros) {
         Metadata metadata = new Metadata();
         String pageTitle = page.getTitle();
         Matcher matcher = DRAFT_PREFIX_PATTERN.matcher(pageTitle);
@@ -216,7 +209,7 @@ public class MetadataManager {
         return macroParameters;
     }
     
-    public Map<String, String> readMetadataMacroBody(String macroBody) throws MetadataException {
+    public Map<String, String> readMetadataMacroBody(String macroBody) {
         Map<String, String> macroParameters = new HashMap<String, String>();
         BufferedReader br = new BufferedReader(new StringReader(macroBody));
         String line = null;
@@ -234,7 +227,7 @@ public class MetadataManager {
         return macroParameters;
     }
 
-    public StringBuilder writeMetadataMacroBody(Map<String,String> macroParameters) throws MetadataException {
+    public StringBuilder writeMetadataMacroBody(Map<String,String> macroParameters) {
         StringBuilder sb = new StringBuilder();
         sb.append(WORDPRESS_META_START);
         sb.append(LINE_SEPARATOR);
@@ -257,18 +250,6 @@ public class MetadataManager {
         sb.append(WORDPRESS_META_END);
         return sb;
     }
-
-    public StringBuilder writeWordpressSyncInfoMacroBody(Metadata metadata) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(WORDPRESS_SYNC_INFO_START);
-		String permalink = metadata.getPermalink();
-		if(permalink != null) {
-		    sb.append(":permalink=");
-		    sb.append(permalink.replace("|", "&#124;"));
-		}
-		sb.append(WORDPRESS_SYNC_INFO_END);
-		return sb;
-	}
 
 
 }

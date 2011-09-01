@@ -5,8 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.beanutils.ConvertUtils;
-
-import com.atlassian.gzipfilter.org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
@@ -56,7 +55,7 @@ public class MetadataSerializer {
         for (Object item : coll) {
             items.add(escape(ConvertUtils.convert(item)));
         }
-        return StringUtils.join(items, ',');
+        return StringUtils.trimToNull(StringUtils.join(items, ','));
     }
 
     @SuppressWarnings("unchecked")

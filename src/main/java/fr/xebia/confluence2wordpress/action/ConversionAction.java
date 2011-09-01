@@ -409,7 +409,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
-        options.setDisableConfluenceMacros(metadata.getIgnoreConfluenceMacros());
+        options.setDisabledConfluenceMacros(metadata.getIgnoreConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         if( ! preview){
             Map<String, String> attachmentsMap = uploadAttachments();

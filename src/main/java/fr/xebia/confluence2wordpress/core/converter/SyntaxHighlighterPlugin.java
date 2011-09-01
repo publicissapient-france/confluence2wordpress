@@ -24,6 +24,11 @@ public enum SyntaxHighlighterPlugin {
             map.put("gutter", "gutter");
             return map;
         }
+        
+        @Override
+		public String getTagName(Map<String, String> shOptions) {
+			return shOptions.get("brush");
+		}
     },
     
     /**
@@ -35,14 +40,23 @@ public enum SyntaxHighlighterPlugin {
         @Override
         public Map<String, String> getSubstitutionMap() {
             Map<String, String> map = new HashMap<String, String>();
+            map.put("brush", "language");
             map.put("first-line", "firstline");
             map.put("collapse", "collapse");
             map.put("gutter", "gutter");
             return map;
         }
+
+		@Override
+		public String getTagName(Map<String, String> shOptions) {
+			return "sourcecode";
+		}
     }
     
     ;
 
     public abstract Map<String, String> getSubstitutionMap();
+
+	public abstract String getTagName(Map<String, String> shOptions);
+	
 }

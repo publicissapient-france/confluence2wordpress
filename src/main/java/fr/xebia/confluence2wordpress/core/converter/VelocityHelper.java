@@ -8,15 +8,21 @@ import com.atlassian.confluence.renderer.radeox.macros.MacroUtils;
 import com.atlassian.confluence.util.velocity.VelocityUtils;
 
 import fr.xebia.confluence2wordpress.core.converter.visitors.Heading;
+import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 
 
 public class VelocityHelper {
 
-    public String generateHeader() {
+    private static final String MORE_VM = "/vm/more.vm";
+	private static final String SYNC_INFO_VM = "/vm/sync-info.vm";
+	private static final String TOC_VM = "/vm/toc.vm";
+	private static final String RDP_HEADER_VM = "/vm/rdp-header.vm";
+
+	public String generateHeader() {
         // Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         // Render the Template
-        String result = VelocityUtils.getRenderedTemplate("/vm/rdp-header.vm", context);
+        String result = VelocityUtils.getRenderedTemplate(RDP_HEADER_VM, context);
         return result;
     }
 
@@ -25,16 +31,16 @@ public class VelocityHelper {
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         context.put("headings", headings);
         // Render the Template
-        String result = VelocityUtils.getRenderedTemplate("/vm/toc.vm", context);
+        String result = VelocityUtils.getRenderedTemplate(TOC_VM, context);
         return result;
     }
     
-    public String generateMetadataHtml(Map<String,String> parameters, ContentEntityObject page) {
+    public String generateMetadataHtml(ContentEntityObject page, Metadata metadata) {
     	Map<String,Object> context = MacroUtils.defaultVelocityContext();
-        context.putAll(parameters);
         context.put("page", page);
+        context.put("metadata", metadata);
         // Render the Template
-        String result = VelocityUtils.getRenderedTemplate("/vm/metadata.vm", context);
+        String result = VelocityUtils.getRenderedTemplate(SYNC_INFO_VM, context);
         return result;
     }
 
@@ -42,7 +48,7 @@ public class VelocityHelper {
 		// Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         // Render the Template
-        String result = VelocityUtils.getRenderedTemplate("/vm/more.vm", context);
+        String result = VelocityUtils.getRenderedTemplate(MORE_VM, context);
         return result;
 	}
 

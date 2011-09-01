@@ -33,13 +33,9 @@ public class ConverterOptions {
 
     private boolean convertFontTagToSpan = true;
 
-    private boolean convertCdata = true;
-
-    private boolean convertScriptsToWordpressFormat = false;
-
     private Map<String, String> tagTransformations = null;
 
-    private List<String> disableConfluenceMacros = null;
+    private List<String> disabledConfluenceMacros = null;
 
     private boolean optimizeForRDP = false;
 
@@ -101,22 +97,6 @@ public class ConverterOptions {
         this.convertFontTagToSpan = convertFontTagToSpan;
     }
 
-    public boolean isConvertCdata() {
-        return convertCdata;
-    }
-
-    public void setConvertCdata(boolean convertCdata) {
-        this.convertCdata = convertCdata;
-    }
-
-    public boolean isConvertScriptsToWordpressFormat() {
-        return convertScriptsToWordpressFormat;
-    }
-
-    public void setConvertScriptsToWordpressFormat(boolean convertScriptsToWordpressFormat) {
-        this.convertScriptsToWordpressFormat = convertScriptsToWordpressFormat;
-    }
-
     public Map<String, String> getTagTransformations() {
         return tagTransformations;
     }
@@ -127,11 +107,11 @@ public class ConverterOptions {
     }
 
     public List<String> getDisableConfluenceMacros() {
-        return disableConfluenceMacros;
+        return disabledConfluenceMacros;
     }
 
-    public void setDisableConfluenceMacros(List<String> ignoreConfluenceMacros) {
-        this.disableConfluenceMacros = ignoreConfluenceMacros;
+    public void setDisabledConfluenceMacros(List<String> disabledConfluenceMacros) {
+        this.disabledConfluenceMacros = disabledConfluenceMacros;
     }
 
     public boolean isOptimizeForRDP() {

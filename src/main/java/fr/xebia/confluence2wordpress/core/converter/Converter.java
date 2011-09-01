@@ -28,21 +28,24 @@ import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 import org.htmlcleaner.TagTransformation;
+import org.htmlcleaner.WhitespaceTolerantTagInfoProvider;
 
 import com.atlassian.confluence.core.ContentEntityObject;
-import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.renderer.WikiStyleRenderer;
 
-import fr.xebia.confluence2wordpress.core.converter.postprocessors.ConversionPostProcessor;
+import fr.xebia.confluence2wordpress.core.converter.postprocessors.PostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.DisabledMacrosPreProcessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CdataStripper;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.LegacyCodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.NewCodeMacroProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
 
 public class Converter {
 
@@ -54,68 +57,51 @@ public class Converter {
     }
 
     public String convert(ContentEntityObject page, ConverterOptions options) {
-        String wiki = processWiki(page.getContent(), options);
-        String confluenceHtml = processConfluenceHtml(page.toPageContext(), wiki, options);
-        String wordpressHtml = processWordpressHtml(confluenceHtml, options);
-        return wordpressHtml;
-    }
-
-    protected String processWiki(String wiki, ConverterOptions options) {
-        if(options.getDisableConfluenceMacros() != null) {
-            for (String macro : options.getDisableConfluenceMacros()) {
-                MacroDisabler disabler = MacroDisabler.forMacro(macro);
-                wiki = disabler.disableMacro(wiki);
-            }
+    	
+        String wiki = page.getContent();
+        
+        //Wiki pre-processing
+        List<PreProcessor> preProcessors = getPreProcessors(options);
+        for (PreProcessor preProcessor : preProcessors) {
+        	wiki = preProcessor.preProcess(wiki, options);
         }
-        return wiki;
-    }
+        
+        //wiki -> html conversion
+        String confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(page.toPageContext(), wiki);
 
-    protected String processConfluenceHtml(PageContext pageContext, String wiki, ConverterOptions options) {
-        //see DefaultWysiwygConverter and RenderContext
-        /*
-         * Can't play with some classes here:
-         * java.lang.LinkageError: loader constraint violation: when resolving method
-         * "com.atlassian.confluence.renderer.PageContext.pushRenderMode(Lcom/atlassian/renderer/v2/RenderMode;)V"
-         * the class loader (instance of org/apache/felix/framework/ModuleImpl$ModuleClassLoader) of the current class,
-         * fr/dutra/xebia/confluence2wordpress/rpc/ConvertRpcImpl$1, and the class loader (instance of org/apache/catalina/loader/WebappClassLoader)
-         * for resolved class, com/atlassian/confluence/renderer/PageContext,
-         * have different Class objects for the type com/atlassian/renderer/v2/RenderMode used in the signature
-         */
-        //pageContext.pushRenderMode(RenderMode.ALL_WITH_NO_MACRO_ERRORS);
-        String confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(pageContext, wiki);
-        return confluenceHtml;
-    }
-
-    protected String processWordpressHtml(String confluenceHtml, ConverterOptions options) {
-
-        //HtmlCleaner is NOT thread-safe
-        CleanerProperties cleanerProps = getCleanerProperties(options);
-        HtmlCleaner cleaner = new HtmlCleaner(cleanerProps);
-
-        CleanerTransformations transformations = getCleanerTransformations(options);
-        cleaner.setTransformations(transformations);
-
+        //HTML cleanup
+        HtmlCleaner cleaner = getHtmlCleaner(options);
         TagNode root = cleaner.clean(confluenceHtml);
         TagNode body = root.findElementByName("body", false);
 
-        //tree transformations
+        //DOM traversal
         List<TagNodeVisitor> visitors = getTagNodeVisitors(options);
         for (TagNodeVisitor visitor : visitors) {
             body.traverse(visitor);
         }
         
-        String html = serialize(body, cleanerProps);
+        //serialization
+        String html = serialize(body, cleaner.getProperties());
 
-        List<ConversionPostProcessor> postProcessors = getPostProcessors(options);
-        for (ConversionPostProcessor conversionPostProcessor : postProcessors) {
-            html = conversionPostProcessor.postProcess(html, body, options);
+        //HTML post-processing
+        List<PostProcessor> postProcessors = getPostProcessors(options);
+        for (PostProcessor postProcessor : postProcessors) {
+            html = postProcessor.postProcess(html, body, options);
         }
         
         return html;
     }
 
-    protected String serialize(TagNode body, CleanerProperties cleanerProps) {
-        
+    protected HtmlCleaner getHtmlCleaner(ConverterOptions options) {
+        //HtmlCleaner is NOT thread-safe
+    	CleanerProperties cleanerProps = getCleanerProperties(options);
+        HtmlCleaner cleaner = new HtmlCleaner(new WhitespaceTolerantTagInfoProvider(), cleanerProps);
+        CleanerTransformations transformations = getCleanerTransformations(options);
+        cleaner.setTransformations(transformations);
+		return cleaner;
+	}
+
+	protected String serialize(TagNode body, CleanerProperties cleanerProps) {
         try {
             //PrettyHtmlSerializer does not work very well
             //JTidy is too violent and Jericho almost OK but no
@@ -125,7 +111,6 @@ public class Converter {
             // should not occur with string writers
             return null;
         }
-        
     }
     
     protected CleanerProperties getCleanerProperties(ConverterOptions options) {
@@ -138,16 +123,13 @@ public class Converter {
     }
 
     protected CleanerTransformations getCleanerTransformations(ConverterOptions options) {
-
         CleanerTransformations transformations = new CleanerTransformations();
-
         //tag transformations
         if(options.getTagTransformations() != null) {
             for (Entry<String,String> entry : options.getTagTransformations().entrySet()) {
                 transformations.addTransformation(new TagTransformation(entry.getKey(), entry.getValue()));
             }
         }
-
         //font -> span
         if(options.isConvertFontTagToSpan()) {
             TagTransformation tt = new TagTransformation("font", "span", true);
@@ -159,34 +141,35 @@ public class Converter {
                 );
             transformations.addTransformation(tt);
         }
-
         return transformations;
     }
 
     protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
-        visitors.add(new CodeMacroProcessor());
-        visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin().getSubstitutionMap()));
-        if(options.isConvertCdata()) {
-            visitors.add(new CdataStripper());
-        }
+        visitors.add(new MoreMacroProcessor());
+        visitors.add(new SyncInfoMacroProcessor());
+        visitors.add(new LegacyCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
+        visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
         if(options.getAttachmentsMap() != null) {
             visitors.add(new AttachmentsProcessor(options.getAttachmentsMap()));
         }
-        //regular visitors
+        visitors.add(new CdataProcessor());
         visitors.add(new CssClassNameCleaner());
         visitors.add(new EmptySpanStripper());
-        visitors.add(new MoreMacroProcessor());
         return visitors;
     }
-    
-    protected List<ConversionPostProcessor> getPostProcessors(ConverterOptions options) {
 
-        List<ConversionPostProcessor> processors = new ArrayList<ConversionPostProcessor>();
+    protected List<PreProcessor> getPreProcessors(ConverterOptions options) {
+        List<PreProcessor> processors = new ArrayList<PreProcessor>();
+        processors.add(new DisabledMacrosPreProcessor());
+        return processors;
+	}
+
+    protected List<PostProcessor> getPostProcessors(ConverterOptions options) {
+        List<PostProcessor> processors = new ArrayList<PostProcessor>();
         processors.add(new TableOfContentsPostProcessor());
         processors.add(new PressReviewHeaderPostProcessor());
         return processors;
-        
     }
 
 
