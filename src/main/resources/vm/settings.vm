@@ -47,13 +47,25 @@
       </div>
     
       <div class="field-group">
-        <label for="resourcesBaseUrl">
+        <label for="editPostUrl">
             $action.getText("settings.form.editPostUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
         <input class="text long-field" type="text" id="editPostUrl" name="editPostUrl" value="$action.editPostUrl" title="$action.getText("settings.form.editPostUrl.label")">
         <div class="description">$action.getText("settings.form.editPostUrl.description")</div>
       </div>
-    
+      
+        
+    <fieldset class="group">
+      <legend><span>$action.getText("settings.form.syntaxHighlighterPlugin.label")</span></legend>
+      #foreach ($plugin in $action.syntaxHighlighterPlugins)
+      <div class="radio">
+        <input class="radio" type="radio" id="syntaxHighlighterPlugin_$plugin.name()" name="syntaxHighlighterPlugin" value="$plugin.name()" #if($action.syntaxHighlighterPlugin == $plugin.name())checked="checked"#end />
+        <label for="syntaxHighlighterPlugin_$plugin.name()">$action.getText("settings.form.syntaxHighlighterPlugin.${plugin.name()}.label")</label>
+        <div class="description">$action.getText("settings.form.syntaxHighlighterPlugin.${plugin.name()}.description")</div>
+      </div>
+      #end
+    </fieldset>
+
       <h3>$action.getText("settings.form.section.wordpress.xmlrpc")</h2>
       
       <div class="field-group">

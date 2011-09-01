@@ -19,7 +19,8 @@ import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.user.User;
 
-import fr.xebia.confluence2wordpress.core.PluginSettingsManager;
+import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
+import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 
 /**
  * @author Alexandre Dutra
@@ -43,11 +44,12 @@ public class SettingsAction extends ConfluenceActionSupport {
     private String wordpressBlogId;
 
     private String ignoredConfluenceMacros;
-    private String ignoreConfluenceMacros;
 
     private String wordpressRootUrl;
 
     private String editPostUrl;
+
+    private String syntaxHighlighterPlugin;
 
     private PluginSettingsManager pluginSettingsManager;
 
@@ -76,6 +78,9 @@ public class SettingsAction extends ConfluenceActionSupport {
         if (StringUtils.isBlank(getWordpressBlogId())) {
             addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressBlogId.label"));
         }
+        if (StringUtils.isBlank(getSyntaxHighlighterPlugin())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.syntaxHighlighterPlugin.label"));
+        }
     }
     
     public String input() throws Exception {
@@ -88,12 +93,12 @@ public class SettingsAction extends ConfluenceActionSupport {
 
         wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
         ignoredConfluenceMacros = pluginSettingsManager.getDefaultIgnoredConfluenceMacros();
-        ignoreConfluenceMacros = pluginSettingsManager.getDefaultIgnoreConfluenceMacros();
         wordpressXmlRpcUrl = pluginSettingsManager.getWordpressXmlRpcUrl();
         wordpressUserName = pluginSettingsManager.getWordpressUserName();
         wordpressPassword = pluginSettingsManager.getWordpressPassword();
         wordpressBlogId = pluginSettingsManager.getWordpressBlogId();
         editPostUrl = pluginSettingsManager.getWordpressEditPostUrl();
+        syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
 
         return SUCCESS;
     }
@@ -119,12 +124,12 @@ public class SettingsAction extends ConfluenceActionSupport {
 
         pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
         pluginSettingsManager.setDefaultIgnoredConfluenceMacros(ignoredConfluenceMacros);
-        pluginSettingsManager.setDefaultIgnoreConfluenceMacros(ignoreConfluenceMacros);
         pluginSettingsManager.setWordpressXmlRpcUrl(wordpressXmlRpcUrl);
         pluginSettingsManager.setWordpressUserName(wordpressUserName);
         pluginSettingsManager.setWordpressPassword(wordpressPassword);
         pluginSettingsManager.setWordpressBlogId(wordpressBlogId);
         pluginSettingsManager.setWordpressEditPostUrl(editPostUrl);
+        pluginSettingsManager.setWordpressSyntaxHighlighterPlugin(syntaxHighlighterPlugin);
 
         return SUCCESS;
     }
@@ -203,5 +208,16 @@ public class SettingsAction extends ConfluenceActionSupport {
         this.editPostUrl = editPostUrl;
     }
 
+	public String getSyntaxHighlighterPlugin() {
+		return syntaxHighlighterPlugin;
+	}
+
+	public void setSyntaxHighlighterPlugin(String syntaxHighlighterPlugin) {
+		this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
+	}
+
+	public SyntaxHighlighterPlugin[] getSyntaxHighlighterPlugins() {
+		return SyntaxHighlighterPlugin.values();
+	}
 
 }

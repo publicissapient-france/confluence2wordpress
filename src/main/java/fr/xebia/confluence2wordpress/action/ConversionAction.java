@@ -40,13 +40,13 @@ import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
-import fr.xebia.confluence2wordpress.core.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
 import fr.xebia.confluence2wordpress.core.metadata.PageLabelsSynchronizer;
+import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
 import fr.xebia.confluence2wordpress.wp.WordpressFile;
@@ -410,8 +410,8 @@ public class ConversionAction extends AbstractPageAwareAction {
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
-        options.setDisabledConfluenceMacros(metadata.getIgnoreConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
+        options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
         if( ! preview){
             Map<String, String> attachmentsMap = uploadAttachments();
             options.setAttachmentsMap(attachmentsMap);

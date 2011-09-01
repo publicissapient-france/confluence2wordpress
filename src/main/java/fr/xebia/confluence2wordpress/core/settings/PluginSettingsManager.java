@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core;
+package fr.xebia.confluence2wordpress.core.settings;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,6 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 
+import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
 import fr.xebia.confluence2wordpress.wp.WordpressConnection;
 
@@ -38,13 +39,15 @@ public class PluginSettingsManager {
 
     private static final String DEFAULT_WP_XML_RPC_BLOG_ID = "1";
 
-    private static final String DEFAULT_IGNORE_CONFLUENCE_MACROS = "tip info note warning";
+    private static final String DEFAULT_IGNORED_CONFLUENCE_MACROS = "tip info note warning";
 
     private static final String DEFAULT_WORDPRESS_ROOT_URL = "http://localhost/wordpress";
 
     private static final String DEFAULT_WP_XML_RPC_URL = "/xmlrpc.php";
 
     private static final String DEFAULT_WP_EDIT_POST_URL = "/wp-admin/post.php?action=edit&post={0}";
+
+    private static final String DEFAULT_WP_SH_PLUGIN = SyntaxHighlighterPlugin.SH_EVOLVED.name();
 
     private PluginSettingsFactory pluginSettingsFactory;
 
@@ -124,16 +127,16 @@ public class PluginSettingsManager {
         return retrieveSettings("wordpressBlogId", DEFAULT_WP_XML_RPC_BLOG_ID);
     }
 
-    public void setDefaultIgnoreConfluenceMacros(String ignoreConfluenceMacros){
-        storeSettings("ignoreConfluenceMacros", ignoreConfluenceMacros);
+    public void setDefaultIgnoredConfluenceMacros(String ignoreConfluenceMacros){
+        storeSettings("ignoredConfluenceMacros", ignoreConfluenceMacros);
     }
 
-    public String getDefaultIgnoreConfluenceMacros(){
-        return retrieveSettings("ignoreConfluenceMacros", DEFAULT_IGNORE_CONFLUENCE_MACROS);
+    public String getDefaultIgnoredConfluenceMacros(){
+        return retrieveSettings("ignoredConfluenceMacros", DEFAULT_IGNORED_CONFLUENCE_MACROS);
     }
 
-    public List<String> getDefaultIgnoreConfluenceMacrosAsList(){
-        return Arrays.asList(StringUtils.split(getDefaultIgnoreConfluenceMacros()));
+    public List<String> getDefaultIgnoredConfluenceMacrosAsList(){
+        return Arrays.asList(StringUtils.split(getDefaultIgnoredConfluenceMacros()));
     }
 
     public void setWordpressRootUrl(String wordpressRootUrl){
@@ -143,6 +146,18 @@ public class PluginSettingsManager {
     public String getWordpressRootUrl(){
         return retrieveSettings("wordpressRootUrl", DEFAULT_WORDPRESS_ROOT_URL);
     }
+    
+    public void setWordpressSyntaxHighlighterPlugin(String wordpressSyntaxHighlighterPlugin){
+        storeSettings("wordpressSyntaxHighlighterPlugin", wordpressSyntaxHighlighterPlugin);
+    }
+
+    public String getWordpressSyntaxHighlighterPlugin(){
+        return retrieveSettings("wordpressSyntaxHighlighterPlugin", DEFAULT_WP_SH_PLUGIN);
+    }
+
+	public SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum() {
+		return SyntaxHighlighterPlugin.valueOf(getWordpressSyntaxHighlighterPlugin());
+	}
 
     public WordpressClient newWordpressClient() {
         WordpressConnection wordpressConnection = new WordpressConnection(
