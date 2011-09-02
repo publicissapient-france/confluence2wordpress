@@ -49,7 +49,7 @@ public class Metadata implements Serializable {
     @MetadataItem("Title")
     private String pageTitle;
 
-    @MetadataItem("Ignore Confluence Macros")
+    @MetadataItem("Ignored Confluence Macros")
     private List<String> ignoredConfluenceMacros;
 
     @MetadataItem("Optimize for Press Review")

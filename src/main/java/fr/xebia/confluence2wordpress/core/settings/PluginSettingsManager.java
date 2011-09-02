@@ -127,8 +127,8 @@ public class PluginSettingsManager {
         return retrieveSettings("wordpressBlogId", DEFAULT_WP_XML_RPC_BLOG_ID);
     }
 
-    public void setDefaultIgnoredConfluenceMacros(String ignoreConfluenceMacros){
-        storeSettings("ignoredConfluenceMacros", ignoreConfluenceMacros);
+    public void setDefaultIgnoredConfluenceMacros(String ignoredConfluenceMacros){
+        storeSettings("ignoredConfluenceMacros", ignoredConfluenceMacros);
     }
 
     public String getDefaultIgnoredConfluenceMacros(){
