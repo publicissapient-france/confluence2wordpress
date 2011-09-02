@@ -16,6 +16,8 @@
 package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -188,11 +190,11 @@ public class ConversionAction extends AbstractPageAwareAction {
     }
 
     public String getIgnoredConfluenceMacros() {
-      return StringUtils.join(getMetadata().getIgnoredConfluenceMacros(), ' ');
+    	return StringUtils.join(getMetadata().getIgnoredConfluenceMacros(), ' ');
     }
     
-    public void setIgnoreConfluenceMacros(String ignoreConfluenceMacros) {
-      getMetadata().setIgnoredConfluenceMacros(Arrays.asList(StringUtils.split(ignoreConfluenceMacros)));
+    public void setIgnoredConfluenceMacros(String ignoredConfluenceMacros) {
+    	getMetadata().setIgnoredConfluenceMacros(Arrays.asList(StringUtils.split(ignoredConfluenceMacros)));
     }
 
     public String getHtml() {
@@ -250,6 +252,15 @@ public class ConversionAction extends AbstractPageAwareAction {
         if(getMetadata().getPostId() != null){
             WordpressClient client = pluginSettingsManager.newWordpressClient();
             WordpressPost post = client.findPostById(getMetadata().getPostId());
+            System.out.println("post body null = " + (post.getBody() == null ? "true" : "false"));
+            System.out.println("post digest = " + post.getDigest());
+            System.out.println("metadata digest = " + getMetadata().getDigest());
+            try {
+            	System.out.println("digest = " + MessageDigest.getInstance("SHA-256"));
+            	System.out.println("digest = " + MessageDigest.getInstance("SHA-256").getClass());
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
             if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
                 addActionError(getText(ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY));
             }
