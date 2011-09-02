@@ -64,7 +64,7 @@
     
     <div class="field-group">
         <label for="ignoredConfluenceMacros">$action.getText("convert.form.ignoredConfluenceMacros.label")</label>
-        <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" type="text" value="$action.ignoredConfluenceMacros" class="text" />
+        <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" type="text" value="$!action.ignoredConfluenceMacros" class="text" />
         <div class="description">$action.getText("convert.form.ignoredConfluenceMacros.description")</div>
     </div>    
     
