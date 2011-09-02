@@ -31,6 +31,8 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private static final String ERRORS_REQUIRED_KEY = "settings.errors.required.field";
 
+    private static final String ERRORS_INTEGER_KEY = "settings.errors.integer.field";
+
     private UserManager userManager;
 
     private String pageUrl;
@@ -84,6 +86,13 @@ public class SettingsAction extends ConfluenceActionSupport {
         }
         if (StringUtils.isBlank(getSyntaxHighlighterPlugin())) {
             addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.syntaxHighlighterPlugin.label"));
+        }
+        if (StringUtils.isNotBlank(getProxyPort())) {
+        	try {
+				Integer.decode(getProxyPort());
+			} catch (NumberFormatException e) {
+				addActionError(getText(ERRORS_INTEGER_KEY, "settings.form.proxyPort.label"));
+			}
         }
     }
     
