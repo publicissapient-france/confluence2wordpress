@@ -87,11 +87,11 @@ public class PluginSettingsManager {
         return retrieveSettings("proxyHost", null);
     }
     
-    public void setProxyPort(Integer proxyPort){
+    public void setProxyPort(String proxyPort){
         storeSettings("proxyPort", proxyPort);
     }
 
-    public Integer getProxyPort(){
+    public String getProxyPort(){
         return retrieveSettings("proxyPort", null);
     }
 
@@ -165,6 +165,9 @@ public class PluginSettingsManager {
             getWordpressUserName(),
             getWordpressPassword(),
             getWordpressBlogId());
+        wordpressConnection.setProxyHost(getProxyHost());
+        String proxyPort = getProxyPort();
+		wordpressConnection.setProxyPort(proxyPort == null ? null : Integer.valueOf(proxyPort));
         return new WordpressClient(wordpressConnection);
     }
 

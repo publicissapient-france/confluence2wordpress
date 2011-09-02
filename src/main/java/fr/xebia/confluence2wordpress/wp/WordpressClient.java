@@ -366,16 +366,14 @@ public class WordpressClient {
     private XmlRpcClient getClientInstance() throws MalformedURLException {
         if(this.client == null){
             URL wordpressUrl = new URL(wordpressConnection.getUrl());
-            if(this.wordpressConnection.getProxyHost() == null){
-                this.client = new XmlRpcClient(wordpressUrl);
-            } else {
-                this.client = new XmlRpcClient(
-                    wordpressUrl,
+            if(this.wordpressConnection.getProxyHost() != null && this.wordpressConnection.getProxyPort() != null){
+                this.client = new XmlRpcClient(wordpressUrl,
                     new DefaultProxyAwareXmlRpcTransportFactory(
                         wordpressUrl, 
                         wordpressConnection.getProxyHost(), 
                         wordpressConnection.getProxyPort()));
-                
+            } else {
+                this.client = new XmlRpcClient(wordpressUrl);
             }
         }
         return this.client;

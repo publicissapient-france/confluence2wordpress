@@ -51,6 +51,10 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private String syntaxHighlighterPlugin;
 
+    private String proxyHost;
+
+    private String proxyPort;
+
     private PluginSettingsManager pluginSettingsManager;
 
     public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
@@ -98,8 +102,9 @@ public class SettingsAction extends ConfluenceActionSupport {
         wordpressPassword = pluginSettingsManager.getWordpressPassword();
         wordpressBlogId = pluginSettingsManager.getWordpressBlogId();
         editPostUrl = pluginSettingsManager.getWordpressEditPostUrl();
+        proxyHost = pluginSettingsManager.getProxyHost();
+        proxyPort = pluginSettingsManager.getProxyPort();
         syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
-
         return SUCCESS;
     }
 
@@ -129,6 +134,8 @@ public class SettingsAction extends ConfluenceActionSupport {
         pluginSettingsManager.setWordpressPassword(wordpressPassword);
         pluginSettingsManager.setWordpressBlogId(wordpressBlogId);
         pluginSettingsManager.setWordpressEditPostUrl(editPostUrl);
+        pluginSettingsManager.setProxyHost(proxyHost);
+        pluginSettingsManager.setProxyPort(proxyPort);
         pluginSettingsManager.setWordpressSyntaxHighlighterPlugin(syntaxHighlighterPlugin);
 
         return SUCCESS;
@@ -214,6 +221,22 @@ public class SettingsAction extends ConfluenceActionSupport {
 
 	public void setSyntaxHighlighterPlugin(String syntaxHighlighterPlugin) {
 		this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
+	}
+	
+	public String getProxyHost() {
+		return proxyHost;
+	}
+
+	public void setProxyHost(String proxyHost) {
+		this.proxyHost = proxyHost;
+	}
+
+	public String getProxyPort() {
+		return proxyPort;
+	}
+
+	public void setProxyPort(String proxyPort) {
+		this.proxyPort = proxyPort;
 	}
 
 	public SyntaxHighlighterPlugin[] getSyntaxHighlighterPlugins() {

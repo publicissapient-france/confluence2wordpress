@@ -25,7 +25,7 @@ public class WordpressConnection {
     
     private String proxyHost;
     
-    private int proxyPort = -1;
+    private Integer proxyPort;
 
     public WordpressConnection(String url, String username, String password) {
         //default (bogus) blog ID
@@ -54,24 +54,20 @@ public class WordpressConnection {
     public String getUrl() {
         return url;
     }
-
     
     public String getProxyHost() {
         return proxyHost;
     }
-
     
     public void setProxyHost(String proxyHost) {
         this.proxyHost = proxyHost;
     }
-
     
-    public int getProxyPort() {
+    public Integer getProxyPort() {
         return proxyPort;
     }
-    
-    
-    public void setProxyPort(int proxyPort) {
+        
+    public void setProxyPort(Integer proxyPort) {
         this.proxyPort = proxyPort;
     }
 
