@@ -221,8 +221,15 @@ public class WordpressClient {
         Date dateCreated = (Date) map.get("dateCreated");
         post.setDateCreated(dateCreated);
 
-        String body = (String) map.get("description");
-        post.setBody(body);
+        StringBuilder body = new StringBuilder();
+        if(map.get("description") != null){
+        	body.append((String) map.get("description"));
+        }
+        if(map.get("mt_text_more") != null){
+        	body.append("<!--more-->");
+        	body.append((String) map.get("mt_text_more"));
+        }
+        post.setBody(body.toString());
 
         String title = (String) map.get("title");
         post.setTitle(title);
