@@ -1,4 +1,4 @@
-package fr.xebia.confluence2wordpress.core.converter;
+package fr.xebia.confluence2wordpress.core.velocity;
 
 import java.util.List;
 import java.util.Map;
@@ -14,11 +14,14 @@ import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 public class VelocityHelper {
 
     private static final String MORE_VM = "/vm/more.vm";
+    
 	private static final String SYNC_INFO_VM = "/vm/sync-info.vm";
+	
 	private static final String TOC_VM = "/vm/toc.vm";
+	
 	private static final String RDP_HEADER_VM = "/vm/rdp-header.vm";
 
-	public String generateHeader() {
+    public String generateHeader() {
         // Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         // Render the Template
@@ -35,16 +38,17 @@ public class VelocityHelper {
         return result;
     }
     
-    public String generateMetadataHtml(ContentEntityObject page, Metadata metadata) {
+    public String generateMetadataHtml(ContentEntityObject page, boolean userHasPluginUsagePermission, Metadata metadata) {
     	Map<String,Object> context = MacroUtils.defaultVelocityContext();
         context.put("page", page);
         context.put("metadata", metadata);
+        context.put("userHasPluginUsagePermission", userHasPluginUsagePermission);
         // Render the Template
         String result = VelocityUtils.getRenderedTemplate(SYNC_INFO_VM, context);
         return result;
     }
 
-	public String generateReadMoreHtml() {
+    public String generateReadMoreHtml() {
 		// Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         // Render the Template

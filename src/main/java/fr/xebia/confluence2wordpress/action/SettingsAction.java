@@ -15,11 +15,9 @@ package fr.xebia.confluence2wordpress.action;
 import org.apache.commons.lang.StringUtils;
 
 import com.atlassian.confluence.core.ConfluenceActionSupport;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
-import com.atlassian.sal.api.user.UserManager;
-import com.atlassian.user.User;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
+import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 
 /**
@@ -32,8 +30,6 @@ public class SettingsAction extends ConfluenceActionSupport {
     private static final String ERRORS_REQUIRED_KEY = "settings.errors.required.field";
 
     private static final String ERRORS_INTEGER_KEY = "settings.errors.integer.field";
-
-    private UserManager userManager;
 
     private String pageUrl;
 
@@ -57,11 +53,25 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private String proxyPort;
 
-    private PluginSettingsManager pluginSettingsManager;
+    private String allowedConfluenceGroups;
+    
+    private String allowedConfluenceSpaceKeys;
+    
+    private PluginPermissionsManager pluginPermissionsManager;
 
-    public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
-        this.pluginSettingsManager = new PluginSettingsManager();
-        this.pluginSettingsManager.setPluginSettingsFactory(pluginSettingsFactory);
+    private PluginSettingsManager pluginSettingsManager;
+    
+    public void setPluginSettingsManager(PluginSettingsManager pluginSettingsManager) {
+        this.pluginSettingsManager = pluginSettingsManager;
+    }
+    
+    public void setPluginPermissionManager(PluginPermissionsManager pluginPermissionsManager) {
+        this.pluginPermissionsManager = pluginPermissionsManager;
+    }
+
+    @Override
+    public boolean isPermitted() {
+        return super.isPermitted() && pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
     }
 
     @Override
@@ -97,13 +107,6 @@ public class SettingsAction extends ConfluenceActionSupport {
     }
     
     public String input() throws Exception {
-
-        User remoteUser = getRemoteUser();
-
-        if (!userManager.isAdmin(remoteUser.getName())) {
-            return LOGIN;
-        }
-
         wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
         ignoredConfluenceMacros = pluginSettingsManager.getDefaultIgnoredConfluenceMacros();
         wordpressXmlRpcUrl = pluginSettingsManager.getWordpressXmlRpcUrl();
@@ -114,18 +117,14 @@ public class SettingsAction extends ConfluenceActionSupport {
         proxyHost = pluginSettingsManager.getProxyHost();
         proxyPort = pluginSettingsManager.getProxyPort();
         syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
+        allowedConfluenceGroups = pluginSettingsManager.getAllowedConfluenceGroups();
+        allowedConfluenceSpaceKeys = pluginSettingsManager.getAllowedConfluenceSpaceKeys();
+        
         return SUCCESS;
     }
 
     @Override
     public String execute() throws Exception {
-
-        User remoteUser = getRemoteUser();
-
-        if (!userManager.isAdmin(remoteUser.getName())) {
-            return LOGIN;
-        }
-
         if( ! wordpressRootUrl.endsWith("/")){
             wordpressRootUrl += "/";
         }
@@ -146,18 +145,10 @@ public class SettingsAction extends ConfluenceActionSupport {
         pluginSettingsManager.setProxyHost(proxyHost);
         pluginSettingsManager.setProxyPort(proxyPort);
         pluginSettingsManager.setWordpressSyntaxHighlighterPlugin(syntaxHighlighterPlugin);
-
+        pluginSettingsManager.setAllowedConfluenceGroups(allowedConfluenceGroups);
+        pluginSettingsManager.setAllowedConfluenceSpaceKeys(allowedConfluenceSpaceKeys);
+        
         return SUCCESS;
-    }
-
-
-    /**
-     * Beware that the property "userManager" would be mapped to com.atlassian.user.UserManager
-     * instead of com.atlassian.sal.api.user.UserManager.
-     * @param userManager
-     */
-    public void setSalUserManager(UserManager userManager) {
-        this.userManager = userManager;
     }
 
     public String getPageUrl() {
@@ -251,5 +242,21 @@ public class SettingsAction extends ConfluenceActionSupport {
 	public SyntaxHighlighterPlugin[] getSyntaxHighlighterPlugins() {
 		return SyntaxHighlighterPlugin.values();
 	}
+    
+    public String getAllowedConfluenceGroups() {
+        return allowedConfluenceGroups;
+    }
+    
+    public void setAllowedConfluenceGroups(String allowedConfluenceGroups) {
+        this.allowedConfluenceGroups = allowedConfluenceGroups;
+    }
+
+    public String getAllowedConfluenceSpaceKeys() {
+        return allowedConfluenceSpaceKeys;
+    }
+
+    public void setAllowedConfluenceSpaceKeys(String allowedConfluenceSpaceKeys) {
+        this.allowedConfluenceSpaceKeys = allowedConfluenceSpaceKeys;
+    }
 
 }

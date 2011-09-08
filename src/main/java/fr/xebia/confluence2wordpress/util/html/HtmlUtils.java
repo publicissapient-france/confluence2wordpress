@@ -20,10 +20,6 @@ package fr.xebia.confluence2wordpress.util.html;
 
 import org.apache.commons.lang.StringUtils;
 
-
-
-
-
 /**
  * @author Alexandre Dutra
  *

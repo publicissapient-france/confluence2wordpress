@@ -364,9 +364,9 @@ public class WordpressClient {
         try {
             return (T) getClientInstance().execute(methodName, params);
         } catch (XmlRpcException e) {
-            throw new WordpressXmlRpcException("Error invoking method: " + methodName, e);
+            throw new WordpressXmlRpcException("Error invoking method: " + methodName + ": " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new WordpressXmlRpcException("Error invoking method: " + methodName, e);
+            throw new WordpressXmlRpcException("Error invoking method: " + methodName + ": " + e.getMessage(), e);
         }
     }
 

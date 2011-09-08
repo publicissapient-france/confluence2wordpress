@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core.metadata;
+package fr.xebia.confluence2wordpress.core.labels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +22,23 @@ import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.labels.Label;
 import com.atlassian.confluence.labels.LabelManager;
 
+import fr.xebia.confluence2wordpress.core.metadata.Metadata;
+
 /**
  * @author Alexandre Dutra
  */
-public class PageLabelsSynchronizer {
+public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
 
     private LabelManager labelManager;
 
-    public PageLabelsSynchronizer(LabelManager labelManager) {
+    public DefaultPageLabelsSynchronizer(LabelManager labelManager) {
         this.labelManager = labelManager;
     }
 
+    /* (non-Javadoc)
+     * @see fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer#tagNamesToPageLabels(com.atlassian.confluence.core.ContentEntityObject, fr.xebia.confluence2wordpress.core.metadata.Metadata)
+     */
+    @Override
     public void tagNamesToPageLabels(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
         if (tagNames != null) {
@@ -70,6 +76,10 @@ public class PageLabelsSynchronizer {
         }
     }
 
+    /* (non-Javadoc)
+     * @see fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer#pageLabelsToTagNames(com.atlassian.confluence.core.ContentEntityObject, fr.xebia.confluence2wordpress.core.metadata.Metadata)
+     */
+    @Override
     public void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
         List<Label> labels = page.getLabels();

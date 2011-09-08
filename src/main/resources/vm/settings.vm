@@ -30,6 +30,22 @@
       <h2>$action.getText("settings.form.section.confluence.section")</h2>
       
       <div class="field-group">
+        <label for="allowedConfluenceGroups">
+            $action.getText("settings.form.allowedConfluenceGroups.label")
+        </label>
+        <input class="text long-field" type="text" id="allowedConfluenceGroups" name="allowedConfluenceGroups" value="$!action.allowedConfluenceGroups" title="$action.getText("settings.form.allowedConfluenceGroups.label")">
+        <div class="description">$action.getText("settings.form.allowedConfluenceGroups.description")</div>
+      </div>
+
+      <div class="field-group">
+        <label for="allowedConfluenceSpaceKeys">
+            $action.getText("settings.form.allowedConfluenceSpaceKeys.label")
+        </label>
+        <input class="text long-field" type="text" id="allowedConfluenceSpaceKeys" name="allowedConfluenceSpaceKeys" value="$!action.allowedConfluenceSpaceKeys" title="$action.getText("settings.form.allowedConfluenceSpaceKeys.label")">
+        <div class="description">$action.getText("settings.form.allowedConfluenceSpaceKeys.description")</div>
+      </div>
+
+      <div class="field-group">
         <label for="ignoredConfluenceMacros">
             $action.getText("settings.form.ignoredConfluenceMacros.label")
         </label>

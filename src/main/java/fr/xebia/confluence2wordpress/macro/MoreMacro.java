@@ -12,7 +12,7 @@ import com.atlassian.renderer.v2.macro.BaseMacro;
 import com.atlassian.renderer.v2.macro.MacroException;
 import com.atlassian.renderer.v2.macro.WysiwygBodyType;
 
-import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
+import fr.xebia.confluence2wordpress.core.velocity.VelocityHelper;
 
 
 /**
@@ -22,7 +22,7 @@ public class MoreMacro extends BaseMacro {
 
 	private VelocityHelper velocityHelper = new VelocityHelper();
     
-	@Override
+    @Override
     public String execute(@SuppressWarnings("rawtypes") Map parameters, String body, RenderContext renderContext) throws MacroException {
 		return velocityHelper.generateReadMoreHtml();
     }

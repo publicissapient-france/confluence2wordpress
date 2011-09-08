@@ -28,24 +28,23 @@ import java.util.TreeSet;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
-import com.atlassian.confluence.labels.LabelManager;
 import com.atlassian.confluence.pages.AbstractPage;
 import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
 import com.atlassian.renderer.WikiStyleRenderer;
-import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
+import fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer;
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
-import fr.xebia.confluence2wordpress.core.metadata.PageLabelsSynchronizer;
+import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
@@ -93,8 +92,10 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private AttachmentManager attachmentManager;
 
-    private PluginSettingsManager pluginSettingsManager;
+    private PluginPermissionsManager pluginPermissionsManager;
 
+    private PluginSettingsManager pluginSettingsManager;
+    
     private UserManager userManager;
 
     private final MetadataManager metadataManager = new MetadataManager();
@@ -106,6 +107,7 @@ public class ConversionAction extends AbstractPageAwareAction {
     private PageLabelsSynchronizer pageLabelsSynchronizer;
     
     private boolean allowPostOverride = false;
+
 
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -119,16 +121,18 @@ public class ConversionAction extends AbstractPageAwareAction {
         this.converter = new Converter(wikiStyleRenderer);
     }
 
-    public void setPluginSettingsFactory(PluginSettingsFactory pluginSettingsFactory) {
-        this.pluginSettingsManager = new PluginSettingsManager();
-        this.pluginSettingsManager.setPluginSettingsFactory(pluginSettingsFactory);
-    }
-
-    public void setLabelManager(LabelManager labelManager) {
-        super.setLabelManager(labelManager);
-        this.pageLabelsSynchronizer = new PageLabelsSynchronizer(labelManager);
+    public void setPluginSettingsManager(PluginSettingsManager pluginSettingsManager) {
+        this.pluginSettingsManager = pluginSettingsManager;
     }
     
+    public void setPluginPermissionManager(PluginPermissionsManager pluginPermissionsManager) {
+        this.pluginPermissionsManager = pluginPermissionsManager;
+    }
+
+    public void setPageLabelsSynchronizer(PageLabelsSynchronizer pageLabelsSynchronizer) {
+        this.pageLabelsSynchronizer = pageLabelsSynchronizer;
+    }
+
     public void setSalUserManager(UserManager userManager) {
         this.userManager = userManager;
     }
@@ -219,7 +223,12 @@ public class ConversionAction extends AbstractPageAwareAction {
     public String getConfluenceRootUrl(){
         return settingsManager.getGlobalSettings().getBaseUrl();
     }
-    
+
+    @Override
+    public boolean isPermitted() {
+        return super.isPermitted() && pluginPermissionsManager.checkUsagePermission(getRemoteUser(), getPage());
+    }
+
     @Override
     public void validate() {
         try {

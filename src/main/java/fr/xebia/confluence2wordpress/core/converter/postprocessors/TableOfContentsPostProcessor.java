@@ -3,8 +3,8 @@ package fr.xebia.confluence2wordpress.core.converter.postprocessors;
 import org.htmlcleaner.TagNode;
 
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
-import fr.xebia.confluence2wordpress.core.converter.VelocityHelper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.HeadingsCollector;
+import fr.xebia.confluence2wordpress.core.velocity.VelocityHelper;
 
 
 public class TableOfContentsPostProcessor implements PostProcessor {
