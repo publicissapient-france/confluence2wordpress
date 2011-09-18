@@ -77,6 +77,11 @@
                 <result name="success" type="redirect">settings.action?pageUrl=${pageUrl}</result>
                 <result name="input" type="velocity">/vm/settings.vm</result>
             </action>
+            <action name="testConnection" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="testConnection">
+                <interceptor-ref name="validatingStack" />
+                <result name="success" type="velocity">/vm/settings.vm</result>
+                <result name="input" type="velocity">/vm/settings.vm</result>
+            </action>
         </package>
     </xwork>
 

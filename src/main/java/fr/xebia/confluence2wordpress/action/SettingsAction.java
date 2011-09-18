@@ -17,13 +17,18 @@ import org.apache.commons.lang.StringUtils;
 import com.atlassian.confluence.core.ConfluenceActionSupport;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
+import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
 import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
+import fr.xebia.confluence2wordpress.wp.WordpressClient;
+import fr.xebia.confluence2wordpress.wp.WordpressClientFactory;
+import fr.xebia.confluence2wordpress.wp.WordpressConnectionProperties;
+import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
 
 /**
  * @author Alexandre Dutra
  */
-public class SettingsAction extends ConfluenceActionSupport {
+public class SettingsAction extends ConfluenceActionSupport implements WordpressConnectionProperties {
 
     private static final long serialVersionUID = 5175072542211533080L;
 
@@ -31,9 +36,15 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private static final String ERRORS_INTEGER_KEY = "settings.errors.integer.field";
 
+    private static final String ERRORS_PING = "settings.errors.ping";
+
+    private static final String MSG_PING = "settings.msg.ping";
+
+    private static final String MSG_UPDATE = "settings.msg.update";
+
     private String pageUrl;
 
-    private String wordpressXmlRpcUrl;
+    private String wordpressXmlRpcRelativePath;
 
     private String wordpressUserName;
 
@@ -45,7 +56,7 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private String wordpressRootUrl;
 
-    private String editPostUrl;
+    private String editPostRelativePath;
 
     private String syntaxHighlighterPlugin;
 
@@ -60,6 +71,10 @@ public class SettingsAction extends ConfluenceActionSupport {
     private PluginPermissionsManager pluginPermissionsManager;
 
     private PluginSettingsManager pluginSettingsManager;
+    
+    private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
+    
+    private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
     
     public void setPluginSettingsManager(PluginSettingsManager pluginSettingsManager) {
         this.pluginSettingsManager = pluginSettingsManager;
@@ -77,78 +92,104 @@ public class SettingsAction extends ConfluenceActionSupport {
     @Override
     public void validate() {
         if (StringUtils.isBlank(getWordpressRootUrl())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressRootUrl.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY), getText("settings.form.wordpressRootUrl.label"));
         }
-        if (StringUtils.isBlank(getWordpressXmlRpcUrl())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressXmlRpcUrl.label"));
+        if (StringUtils.isBlank(getWordpressXmlRpcRelativePath())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressXmlRpcRelativePath.label")));
         }
-        if (StringUtils.isBlank(getEditPostUrl())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.editPostUrl.label"));
+        if (StringUtils.isBlank(getEditPostRelativePath())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.editPostRelativePath.label")));
         }
         if (StringUtils.isBlank(getWordpressUserName())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressUserName.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressUserName.label")));
         }
         if (StringUtils.isBlank(getWordpressPassword())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressPassword.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressPassword.label")));
         }
         if (StringUtils.isBlank(getWordpressBlogId())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.wordpressBlogId.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressBlogId.label")));
         }
         if (StringUtils.isBlank(getSyntaxHighlighterPlugin())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, "settings.form.syntaxHighlighterPlugin.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.syntaxHighlighterPlugin.label")));
         }
         if (StringUtils.isNotBlank(getProxyPort())) {
         	try {
 				Integer.decode(getProxyPort());
 			} catch (NumberFormatException e) {
-				addActionError(getText(ERRORS_INTEGER_KEY, "settings.form.proxyPort.label"));
+				addActionError(getText(ERRORS_INTEGER_KEY, getText("settings.form.proxyPort.label")));
 			}
         }
     }
     
     public String input() throws Exception {
+        actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);        
         wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
         ignoredConfluenceMacros = pluginSettingsManager.getDefaultIgnoredConfluenceMacros();
-        wordpressXmlRpcUrl = pluginSettingsManager.getWordpressXmlRpcUrl();
+        wordpressXmlRpcRelativePath = pluginSettingsManager.getWordpressXmlRpcRelativePath();
         wordpressUserName = pluginSettingsManager.getWordpressUserName();
         wordpressPassword = pluginSettingsManager.getWordpressPassword();
         wordpressBlogId = pluginSettingsManager.getWordpressBlogId();
-        editPostUrl = pluginSettingsManager.getWordpressEditPostUrl();
+        editPostRelativePath = pluginSettingsManager.getWordpressEditPostRelativePath();
         proxyHost = pluginSettingsManager.getProxyHost();
         proxyPort = pluginSettingsManager.getProxyPort();
         syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
         allowedConfluenceGroups = pluginSettingsManager.getAllowedConfluenceGroups();
         allowedConfluenceSpaceKeys = pluginSettingsManager.getAllowedConfluenceSpaceKeys();
-        
         return SUCCESS;
     }
 
     @Override
     public String execute() throws Exception {
-        if( ! wordpressRootUrl.endsWith("/")){
-            wordpressRootUrl += "/";
-        }
-        if(wordpressXmlRpcUrl.startsWith("/")){
-            wordpressXmlRpcUrl = wordpressXmlRpcUrl.substring(1);
-        }
-        if(editPostUrl.startsWith("/")){
-            editPostUrl = editPostUrl.substring(1);
-        }
-
+        normalizeUrls();
         pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
         pluginSettingsManager.setDefaultIgnoredConfluenceMacros(ignoredConfluenceMacros);
-        pluginSettingsManager.setWordpressXmlRpcUrl(wordpressXmlRpcUrl);
+        pluginSettingsManager.setWordpressXmlRpcRelativePath(wordpressXmlRpcRelativePath);
         pluginSettingsManager.setWordpressUserName(wordpressUserName);
         pluginSettingsManager.setWordpressPassword(wordpressPassword);
         pluginSettingsManager.setWordpressBlogId(wordpressBlogId);
-        pluginSettingsManager.setWordpressEditPostUrl(editPostUrl);
+        pluginSettingsManager.setWordpressEditPostRelativePath(editPostRelativePath);
         pluginSettingsManager.setProxyHost(proxyHost);
         pluginSettingsManager.setProxyPort(proxyPort);
         pluginSettingsManager.setWordpressSyntaxHighlighterPlugin(syntaxHighlighterPlugin);
         pluginSettingsManager.setAllowedConfluenceGroups(allowedConfluenceGroups);
         pluginSettingsManager.setAllowedConfluenceSpaceKeys(allowedConfluenceSpaceKeys);
-        
+        this.addActionMessage(getText(MSG_UPDATE));
+        actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
         return SUCCESS;
+    }
+
+    public String testConnection(){
+        normalizeUrls();
+        WordpressClient client = wordpressClientFactory.newWordpressClient(this);
+        try {
+            String expected = Long.toString(System.currentTimeMillis());
+            String actual = client.ping(expected);
+            if(expected.equals(actual)){
+                addActionMessage(getText(MSG_PING));
+            } else {
+                addActionError(getText(ERRORS_PING), "Expected: " + expected + ", actual: " + actual);
+            }
+        } catch (WordpressXmlRpcException e) {
+            addActionError(getText(ERRORS_PING), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+        }
+        return SUCCESS;
+    }
+
+    private void normalizeUrls() {
+        if( ! wordpressRootUrl.endsWith("/")){
+            wordpressRootUrl += "/";
+        }
+        if(wordpressXmlRpcRelativePath.startsWith("/")){
+            wordpressXmlRpcRelativePath = wordpressXmlRpcRelativePath.substring(1);
+        }
+        if(editPostRelativePath.startsWith("/")){
+            editPostRelativePath = editPostRelativePath.substring(1);
+        }
+    }
+
+    @Override
+    public String getWordpressXmlRpcUrl() {
+        return getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
     }
 
     public String getPageUrl() {
@@ -159,12 +200,28 @@ public class SettingsAction extends ConfluenceActionSupport {
         this.pageUrl = pageUrl;
     }
 
-    public String getWordpressXmlRpcUrl() {
-        return wordpressXmlRpcUrl;
+    public String getWordpressRootUrl() {
+        return wordpressRootUrl;
     }
 
-    public void setWordpressXmlRpcUrl(String wordpressXmlRpcUrl) {
-        this.wordpressXmlRpcUrl = wordpressXmlRpcUrl;
+    public void setWordpressRootUrl(String wordpressRootUrl) {
+        this.wordpressRootUrl = wordpressRootUrl;
+    }
+
+    public String getEditPostRelativePath() {
+        return editPostRelativePath;
+    }
+
+    public void setEditPostRelativePath(String editPostRelativePath) {
+        this.editPostRelativePath = editPostRelativePath;
+    }
+
+    public String getWordpressXmlRpcRelativePath() {
+        return wordpressXmlRpcRelativePath;
+    }
+
+    public void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath) {
+        this.wordpressXmlRpcRelativePath = wordpressXmlRpcRelativePath;
     }
 
     public String getWordpressUserName() {
@@ -197,22 +254,6 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     public void setIgnoredConfluenceMacros(String ignoredConfluenceMacros) {
         this.ignoredConfluenceMacros = ignoredConfluenceMacros;
-    }
-
-    public String getWordpressRootUrl() {
-        return wordpressRootUrl;
-    }
-
-    public void setWordpressRootUrl(String wordpressRootUrl) {
-        this.wordpressRootUrl = wordpressRootUrl;
-    }
-
-    public String getEditPostUrl() {
-        return editPostUrl;
-    }
-
-    public void setEditPostUrl(String editPostUrl) {
-        this.editPostUrl = editPostUrl;
     }
 
 	public String getSyntaxHighlighterPlugin() {

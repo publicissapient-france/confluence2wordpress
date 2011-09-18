@@ -41,6 +41,7 @@ import com.opensymphony.util.TextUtils;
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer;
+import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
@@ -48,6 +49,7 @@ import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
+import fr.xebia.confluence2wordpress.wp.WordpressClientFactory;
 import fr.xebia.confluence2wordpress.wp.WordpressFile;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 import fr.xebia.confluence2wordpress.wp.WordpressTag;
@@ -82,10 +84,6 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private static final String WP_USERS_KEY = "C2W_WP_USERS";
 
-    private static final String ACTION_ERRORS_KEY = "C2W_ACTION_ERRORS";
-    
-    private static final String ACTION_MESSAGES_KEY = "C2W_ACTION_MESSAGES";
-    
     private Converter converter;
 
     private PageManager pageManager;
@@ -108,7 +106,10 @@ public class ConversionAction extends AbstractPageAwareAction {
     
     private boolean allowPostOverride = false;
 
+    private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
 
+    private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
+    
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
     }
@@ -217,7 +218,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     public String getEditLink() {
         return pluginSettingsManager.getWordpressRootUrl() + 
-        MessageFormat.format(pluginSettingsManager.getWordpressEditPostUrl(), metadata.getPostId());
+        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId());
     }
 
     public String getConfluenceRootUrl(){
@@ -248,7 +249,7 @@ public class ConversionAction extends AbstractPageAwareAction {
     }
 
     private void checkPostSlugAvailability() throws WordpressXmlRpcException {
-        WordpressClient client = pluginSettingsManager.newWordpressClient();
+        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         Integer retrievedPostId = client.findPageIdBySlug(getMetadata().getPostSlug());
         if (retrievedPostId != null && ! retrievedPostId.equals(getMetadata().getPostId())){
             addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY), retrievedPostId);
@@ -257,7 +258,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private void checkConcurrentPostModification() throws WordpressXmlRpcException {
         if(getMetadata().getPostId() != null){
-            WordpressClient client = pluginSettingsManager.newWordpressClient();
+            WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
             WordpressPost post = client.findPostById(getMetadata().getPostId());
             if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
                 addActionError(getText(ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY));
@@ -278,7 +279,7 @@ public class ConversionAction extends AbstractPageAwareAction {
      * @throws WordpressXmlRpcException 
      */
     public String input() throws MetadataException, WordpressXmlRpcException {
-        restoreActionErrorsAndMessagesFromSession();
+        actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);
         initFormElements();
         initMetadata();
         mergeLocalAndRemoteTags();
@@ -307,7 +308,7 @@ public class ConversionAction extends AbstractPageAwareAction {
         boolean creation = this.metadata.getPostId() == null;
         WordpressPost post = metadata.createPost(createPostBody(false));
         //post it
-        WordpressClient client = pluginSettingsManager.newWordpressClient();
+        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         post = client.post(post);
         //update metadata
         metadata.updateFromPost(post);
@@ -315,37 +316,13 @@ public class ConversionAction extends AbstractPageAwareAction {
         metadataManager.storeMetadata(getPage(), metadata);
         if(creation) addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
         else addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
-        storeActionErrorsAndMessagesInSession();
+        actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
         return SUCCESS;
     }
 
-    @SuppressWarnings("unchecked")
-    private void storeActionErrorsAndMessagesInSession() {
-        getSession().put(ACTION_ERRORS_KEY, getActionErrors());
-        getSession().put(ACTION_MESSAGES_KEY, getActionMessages());
-    }
-    
-    @SuppressWarnings("unchecked")
-    private void restoreActionErrorsAndMessagesFromSession() {
-        List<String> errors = (List<String>) getSession().get(ACTION_ERRORS_KEY);
-        if(errors != null){
-            for (String error : errors) {
-                addActionError(error);
-            }
-            getSession().put(ACTION_ERRORS_KEY, null);
-        }
-        List<String> messages = (List<String>) getSession().get(ACTION_MESSAGES_KEY);
-        if(messages != null){
-            for (String message : messages) {
-                addActionMessage(message);
-            }
-            getSession().put(ACTION_MESSAGES_KEY, null);
-        }
-    }
-        
     private void initFormElements() throws WordpressXmlRpcException {
         if(getWordpressUsers() == null) {
-            WordpressClient client = pluginSettingsManager.newWordpressClient();
+            WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
             setWordpressUsers(client.getUsers());
             TreeSet<WordpressCategory> categories = new TreeSet<WordpressCategory>(new Comparator<WordpressCategory>() {
                 @Override public int compare(WordpressCategory o1, WordpressCategory o2) {
@@ -402,7 +379,7 @@ public class ConversionAction extends AbstractPageAwareAction {
     private Map<String, String> uploadAttachments() throws WordpressXmlRpcException, IOException {
         AbstractPage page = getPage();
         Map<String, String> attachmentsMap = new HashMap<String, String>();
-        WordpressClient client = pluginSettingsManager.newWordpressClient();
+        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         List<Attachment> attachments = attachmentManager.getAttachments(page);
         for (Attachment attachment : attachments) {
             byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());

@@ -24,8 +24,6 @@ import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
-import fr.xebia.confluence2wordpress.wp.WordpressClient;
-import fr.xebia.confluence2wordpress.wp.WordpressConnection;
 
 /**
  * @author Alexandre Dutra
@@ -41,11 +39,11 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private static final String DEFAULT_IGNORED_CONFLUENCE_MACROS = "tip info note warning";
 
-    private static final String DEFAULT_WORDPRESS_ROOT_URL = "http://localhost/wordpress";
+    private static final String DEFAULT_WORDPRESS_ROOT_URL = "http://localhost/wordpress/";
 
-    private static final String DEFAULT_WP_XML_RPC_URL = "/xmlrpc.php";
+    private static final String DEFAULT_WP_XML_RPC_RELATIVE_PATH = "xmlrpc.php";
 
-    private static final String DEFAULT_WP_EDIT_POST_URL = "/wp-admin/post.php?action=edit&post={0}";
+    private static final String DEFAULT_WP_EDIT_POST_RELATIVE_PATH = "wp-admin/post.php?action=edit&post={0}";
 
     private static final String DEFAULT_WP_SH_PLUGIN = SyntaxHighlighterPlugin.SH_EVOLVED.name();
 
@@ -55,10 +53,9 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
         this.pluginSettingsFactory = pluginSettingsFactory;
     }
 
-    private <T> T retrieveSettings(String settingsKey, T defaultValue) {
+    private String retrieveSettings(String settingsKey, String defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        @SuppressWarnings("unchecked")
-        T value = (T) pluginSettings.get("fr.xebia.confluence2wordpress:" + settingsKey);
+        String value = (String) pluginSettings.get("fr.xebia.confluence2wordpress:" + settingsKey);
         if(value == null) {
             storeSettings(settingsKey, defaultValue);
             value = defaultValue;
@@ -66,25 +63,31 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
         return value;
     }
 
-    private void storeSettings(String settingsKey, Object value) {
+    private void storeSettings(String settingsKey, String value) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
         pluginSettings.put("fr.xebia.confluence2wordpress:" + settingsKey, value);
     }
 
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressXmlRpcUrl(java.lang.String)
-     */
+
     @Override
-    public void setWordpressXmlRpcUrl(String wordpressXmlRpcUrl){
-        storeSettings("wordpressXmlRpcUrl", wordpressXmlRpcUrl);
+    public String getWordpressXmlRpcUrl() {
+        return getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
     }
 
     /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressXmlRpcUrl()
+     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressXmlRpcRelativePath(java.lang.String)
      */
     @Override
-    public String getWordpressXmlRpcUrl(){
-        return retrieveSettings("wordpressXmlRpcUrl", DEFAULT_WP_XML_RPC_URL);
+    public void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath){
+        storeSettings("wordpressXmlRpcRelativePath", wordpressXmlRpcRelativePath);
+    }
+
+    /* (non-Javadoc)
+     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressXmlRpcRelativePath()
+     */
+    @Override
+    public String getWordpressXmlRpcRelativePath(){
+        return retrieveSettings("wordpressXmlRpcRelativePath", DEFAULT_WP_XML_RPC_RELATIVE_PATH);
     }
 
     /* (non-Javadoc)
@@ -120,19 +123,19 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressEditPostUrl(java.lang.String)
+     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressEditPostRelativePath(java.lang.String)
      */
     @Override
-    public void setWordpressEditPostUrl(String wordpressXmlRpcUrl){
-        storeSettings("wordpressEditPostUrl", wordpressXmlRpcUrl);
+    public void setWordpressEditPostRelativePath(String wordpressXmlRpcRelativePath){
+        storeSettings("wordpressEditPostRelativePath", wordpressXmlRpcRelativePath);
     }
 
     /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressEditPostUrl()
+     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressEditPostRelativePath()
      */
     @Override
-    public String getWordpressEditPostUrl(){
-        return retrieveSettings("wordpressEditPostUrl", DEFAULT_WP_EDIT_POST_URL);
+    public String getWordpressEditPostRelativePath(){
+        return retrieveSettings("wordpressEditPostRelativePath", DEFAULT_WP_EDIT_POST_RELATIVE_PATH);
     }
 
     /* (non-Javadoc)
@@ -306,21 +309,5 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     public SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum() {
 		return SyntaxHighlighterPlugin.valueOf(getWordpressSyntaxHighlighterPlugin());
 	}
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#newWordpressClient()
-     */
-    @Override
-    public WordpressClient newWordpressClient() {
-        WordpressConnection wordpressConnection = new WordpressConnection(
-            getWordpressRootUrl() + getWordpressXmlRpcUrl(),
-            getWordpressUserName(),
-            getWordpressPassword(),
-            getWordpressBlogId());
-        wordpressConnection.setProxyHost(getProxyHost());
-        String proxyPort = getProxyPort();
-		wordpressConnection.setProxyPort(StringUtils.isEmpty(proxyPort) ? null : Integer.valueOf(proxyPort));
-        return new WordpressClient(wordpressConnection);
-    }
 
 }

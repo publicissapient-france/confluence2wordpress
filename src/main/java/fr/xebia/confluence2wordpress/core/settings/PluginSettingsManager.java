@@ -3,13 +3,17 @@ package fr.xebia.confluence2wordpress.core.settings;
 import java.util.List;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
-import fr.xebia.confluence2wordpress.wp.WordpressClient;
+import fr.xebia.confluence2wordpress.wp.WordpressConnectionProperties;
 
-public interface PluginSettingsManager {
+public interface PluginSettingsManager extends WordpressConnectionProperties {
 
-    void setWordpressXmlRpcUrl(String wordpressXmlRpcUrl);
+    void setWordpressRootUrl(String wordpressRootUrl);
 
-    String getWordpressXmlRpcUrl();
+    String getWordpressRootUrl();
+    
+    void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath);
+
+    String getWordpressXmlRpcRelativePath();
 
     void setProxyHost(String proxyHost);
 
@@ -19,9 +23,9 @@ public interface PluginSettingsManager {
 
     String getProxyPort();
 
-    void setWordpressEditPostUrl(String wordpressXmlRpcUrl);
+    void setWordpressEditPostRelativePath(String wordpressXmlRpcRelativePath);
 
-    String getWordpressEditPostUrl();
+    String getWordpressEditPostRelativePath();
 
     void setWordpressUserName(String wordpressUserName);
 
@@ -53,16 +57,10 @@ public interface PluginSettingsManager {
 
     List<String> getAllowedConfluenceSpaceKeysAsList();
 
-    void setWordpressRootUrl(String wordpressRootUrl);
-
-    String getWordpressRootUrl();
-
     void setWordpressSyntaxHighlighterPlugin(String wordpressSyntaxHighlighterPlugin);
 
     String getWordpressSyntaxHighlighterPlugin();
 
     SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum();
-
-    WordpressClient newWordpressClient();
 
 }

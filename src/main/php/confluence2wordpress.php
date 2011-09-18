@@ -29,7 +29,6 @@ require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 require_once(ABSPATH . 'wp-includes/post.php');
 
 add_filter('xmlrpc_methods', 'c2w_add_xmlrpc_methods');
-
 add_filter('upload_mimes', 'c2w_add_mime_types');
 
 /**
@@ -38,6 +37,7 @@ add_filter('upload_mimes', 'c2w_add_mime_types');
  * @return array
  */
 function c2w_add_xmlrpc_methods( $methods ) {
+    $methods['c2w.ping'] = 'c2w_ping';
     $methods['c2w.getAuthors'] = 'c2w_get_authors';
     $methods['c2w.findPageIdBySlug'] = 'c2w_get_page_id_by_slug';
     $methods['c2w.uploadFile'] = 'c2w_upload_file';
@@ -52,6 +52,37 @@ function c2w_add_xmlrpc_methods( $methods ) {
 function c2w_add_mime_types( $mimes ) {
     $mimes['xml'] = 'text/xml';
     return $mimes;
+}
+
+/**
+ * Ping method (useful to test the connection between Confluence and Wordpress).
+ * @param array $args
+ * @return IXR_Error|string
+ */
+function c2w_ping($args){
+	// Parse the arguments, assuming they're in the correct order
+	
+	//please see http://core.trac.wordpress.org/ticket/10513
+	//WP version MUST be >= 2.9
+	global $wp_xmlrpc_server;
+
+	$wp_xmlrpc_server->escape($args);
+
+	$blog_id	= (int) $args[0];
+	$username	= $args[1];
+	$password	= $args[2];
+	$text	    = $args[3];
+	
+    // Let's run a check to see if credentials are okay
+	if ( !$user = $wp_xmlrpc_server->login($username, $password) ) {
+		return $wp_xmlrpc_server->error;
+	}
+	
+	if(!current_user_can("edit_posts")) {
+		return(new IXR_Error(401, __("Sorry, you cannot access this API.")));
+	}
+	
+	return $text;
 }
 
 /**

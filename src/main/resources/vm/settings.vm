@@ -23,7 +23,33 @@
   
   <body>
   
-    <form action="updateSettings.action" method="post" class="aui long-label">
+#if ( $action.hasActionMessages())
+    <div class="aui-message success closeable shadowed">
+        <p class="title">
+            <span class="aui-icon icon-success"></span>
+            <strong>
+            #foreach ($message in $action.actionMessages)
+            $message
+            #end
+            </strong>
+        </p>
+    </div>   
+#end
+
+#if ( $action.hasActionErrors())
+    <div class="aui-message error closeable shadowed">
+        <p class="title">
+            <span class="aui-icon icon-error"></span>
+            <strong>
+            #foreach ($message in $action.actionErrors)
+            $message
+            #end
+            </strong>
+        </p>
+    </div>   
+#end  
+
+<form action="updateSettings.action" method="post" class="aui long-label">
 
       <input type="hidden" name="pageUrl" value="$!action.pageUrl" />
         
@@ -63,11 +89,11 @@
       </div>
     
       <div class="field-group">
-        <label for="editPostUrl">
-            $action.getText("settings.form.editPostUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        <label for="editPostRelativePath">
+            $action.getText("settings.form.editPostRelativePath.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
-        <input class="text long-field" type="text" id="editPostUrl" name="editPostUrl" value="$action.editPostUrl" title="$action.getText("settings.form.editPostUrl.label")">
-        <div class="description">$action.getText("settings.form.editPostUrl.description")</div>
+        <input class="text long-field" type="text" id="editPostRelativePath" name="editPostRelativePath" value="$action.editPostRelativePath" title="$action.getText("settings.form.editPostRelativePath.label")">
+        <div class="description">$action.getText("settings.form.editPostRelativePath.description")</div>
       </div>
       
         
@@ -85,11 +111,11 @@
       <h3>$action.getText("settings.form.section.wordpress.xmlrpc")</h2>
       
       <div class="field-group">
-        <label for="wordpressXmlRpcUrl">
-            $action.getText("settings.form.wordpressXmlRpcUrl.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        <label for="wordpressXmlRpcRelativePath">
+            $action.getText("settings.form.wordpressXmlRpcRelativePath.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
         </label>
-        <input class="text long-field" type="text" id="wordpressXmlRpcUrl" name="wordpressXmlRpcUrl" value="$action.wordpressXmlRpcUrl" title="$action.getText("settings.form.wordpressXmlRpcUrl.label")">
-        <div class="description">$action.getText("settings.form.wordpressXmlRpcUrl.description")</div>
+        <input class="text long-field" type="text" id="wordpressXmlRpcRelativePath" name="wordpressXmlRpcRelativePath" value="$action.wordpressXmlRpcRelativePath" title="$action.getText("settings.form.wordpressXmlRpcRelativePath.label")">
+        <div class="description">$action.getText("settings.form.wordpressXmlRpcRelativePath.description")</div>
       </div>
 
       <div class="field-group">
@@ -133,8 +159,8 @@
       
       <div class="buttons-container">
         <div class="buttons">
-          <input class="button submit" type="submit" value="$action.getText("settings.form.button.submit")">
-          &nbsp;|&nbsp;
+          <input class="button submit" type="submit" value="$action.getText("settings.form.button.submit")">|&nbsp;
+          <input class="button submit" type="submit" value="$action.getText("settings.form.button.testConnection")" onclick="this.form.action='testConnection.action'">|&nbsp;
           <a class="cancel texticon" href="${settingsManager.globalSettings.baseUrl}#if($action.pageUrl)$action.pageUrl#{else}/admin/console.action#end">$action.getText("settings.form.button.cancel")</a>
         </div>
       </div>

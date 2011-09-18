@@ -42,21 +42,7 @@ public class WordpressClient {
     
     private static final String FIND_PAGE_ID_BY_SLUG_METHOD_NAME = "c2w.findPageIdBySlug";
     
-
-
-    /*
-        Sample of XML-RPC invocation with curl:
-        curl -d "<methodCall> \
-           <methodName>wp.getAuthors</methodName> \
-              <params> \
-                 <param> \
-                    <value><int>1</int></value> \
-                    <value><string>admin</string></value> \
-                    <value><string>admin</string></value> \
-                 </param> \
-              </params> \
-        </methodCall>" http://localhost/~alexandre/wordpress/xmlrpc.php
-     */
+    private static final String PING_METHOD_NAME = "c2w.ping";
     
     /**
      * Very, VERY old version of the lib bundled with Confluence.
@@ -70,9 +56,17 @@ public class WordpressClient {
     public WordpressClient(WordpressConnection wordpressConnection) {
         this.wordpressConnection = wordpressConnection;
     }
-
-
     
+    public String ping(String text) throws WordpressXmlRpcException {
+        Vector<Object> params = new Vector<Object>();
+        params.add(wordpressConnection.getBlogId());
+        params.add(wordpressConnection.getUsername());
+        params.add(wordpressConnection.getPassword());
+        params.add(text);
+        return invoke(PING_METHOD_NAME, params);
+    }
+
+
     /**
      * @see "http://codex.wordpress.org/XML-RPC_wp#wp.getAuthors"
      * @return the list of {@link WordpressUser}s of the blog.
