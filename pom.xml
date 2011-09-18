@@ -6,11 +6,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.xebia</groupId>
     <artifactId>confluence2wordpress</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <version>0.9</version>
     <packaging>atlassian-plugin</packaging>
 
-    <name>Confluence to Wordpress Converter</name>
-    <description>This plugin allows Confluence pages to be converted into Wordpress posts.</description>
+    <name>Confluence to Wordpress Synchronizer</name>
+    <description>This plugin allows Confluence pages to be synchronized with Wordpress posts.</description>
     
     <url>https://github.com/adutra/confluence2wordpress</url>
     
