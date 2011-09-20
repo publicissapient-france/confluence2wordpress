@@ -18,7 +18,7 @@
   <head>
     <title>$action.getText("settings.title")</title>
     <meta name="decorator" content="atl.admin">
-    #requireResource("fr.xebia.confluence2wordpress:confluence2wordpress-resources")
+    #requireResource("fr.xebia.confluence2wordpress:c2w-resources")
   </head>
   
   <body>

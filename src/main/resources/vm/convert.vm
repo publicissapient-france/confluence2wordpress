@@ -17,7 +17,7 @@
 <head>
     <title>$action.page.displayTitle - $action.getText("convert.title")</title>
     <meta name="decorator" content="atl.general"/>
-    #requireResource("fr.xebia.confluence2wordpress:confluence2wordpress-resources")
+    #requireResource("fr.xebia.confluence2wordpress:c2w-resources")
 </head>
 <body>
 
@@ -90,15 +90,16 @@
 
     <h2>$action.getText("convert.form.title.syncOptions")</h2>
 
+    <input name="metadata.draft" value="$action.metadata.draft" type="hidden" />
     <fieldset class="group">
         <legend><span>$action.getText("convert.form.draft.label")</legend>
         <div class="matrix">
           <div class="radio" style="width:8em">
-            <input id="draft.true" name="metadata.draft" value="true" type="radio" class="radio" #if($action.metadata.draft)checked="checked"#end />
+            <input id="draft.true" value="true" type="radio" class="radio" #if($action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
             <label for="draft.true">$action.getText("convert.form.draft.true.label")</label>
           </div>
           <div class="radio">
-            <input id="draft.false" name="metadata.draft" value="false" type="radio" class="radio" #if( ! $action.metadata.draft)checked="checked"#end />
+            <input id="draft.false" value="false" type="radio" class="radio" disabled="true" #if( ! $action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
             <label for="draft.false">$action.getText("convert.form.draft.false.label")</label>
           </div>
       </div>
