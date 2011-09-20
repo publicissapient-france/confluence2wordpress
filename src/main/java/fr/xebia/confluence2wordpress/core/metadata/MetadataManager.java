@@ -107,7 +107,7 @@ public class MetadataManager {
 
     public Metadata createMetadata(
         ContentEntityObject page, 
-        List<WordpressUser> users, 
+        Set<WordpressUser> users, 
         Set<WordpressCategory> categories, 
         List<String> ignoredConfluenceMacros) {
         Metadata metadata = new Metadata();

@@ -130,7 +130,7 @@
         </label>
         <select id="authorId" name="metadata.authorId" class="select">
             #foreach($wordpressUser in $action.wordpressUsers)
-                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$!wordpressUser.displayName $!wordpressUser.firstName $!wordpressUser.lastName</option>
+                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$!wordpressUser.lastName $!wordpressUser.firstName</option>
             #end
         </select>
     </div>

@@ -27,6 +27,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.CompareToBuilder;
 
 import com.atlassian.confluence.pages.AbstractPage;
 import com.atlassian.confluence.pages.Attachment;
@@ -143,12 +144,12 @@ public class ConversionAction extends AbstractPageAwareAction {
     }
     
     @SuppressWarnings("unchecked")
-    public List<WordpressUser> getWordpressUsers() {
-        return (List<WordpressUser>) getSession().get(WP_USERS_KEY);
+    public Set<WordpressUser> getWordpressUsers() {
+        return (Set<WordpressUser>) getSession().get(WP_USERS_KEY);
     }
 
     @SuppressWarnings("unchecked")
-    private void setWordpressUsers(List<WordpressUser> users) {
+    private void setWordpressUsers(Set<WordpressUser> users) {
         getSession().put(WP_USERS_KEY, users);
     }
 
@@ -323,17 +324,30 @@ public class ConversionAction extends AbstractPageAwareAction {
     private void initFormElements() throws WordpressXmlRpcException {
         if(getWordpressUsers() == null) {
             WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
-            setWordpressUsers(client.getUsers());
-            TreeSet<WordpressCategory> categories = new TreeSet<WordpressCategory>(new Comparator<WordpressCategory>() {
+            Set<WordpressUser> users = new TreeSet<WordpressUser>(new Comparator<WordpressUser>(){
+                @Override public int compare(WordpressUser o1, WordpressUser o2) {
+                    return new CompareToBuilder().
+                        append(StringUtils.lowerCase(o1.getLastName()), StringUtils.lowerCase(o2.getLastName())).
+                        append(StringUtils.lowerCase(o1.getFirstName()), StringUtils.lowerCase(o2.getFirstName())).
+                        toComparison();
+                }
+            });
+            users.addAll(client.getUsers());
+            setWordpressUsers(users);
+            Set<WordpressCategory> categories = new TreeSet<WordpressCategory>(new Comparator<WordpressCategory>() {
                 @Override public int compare(WordpressCategory o1, WordpressCategory o2) {
-                    return o1.getCategoryName().compareTo(o2.getCategoryName());
+                    return new CompareToBuilder().
+                    append(StringUtils.lowerCase(o1.getCategoryName()), StringUtils.lowerCase(o2.getCategoryName())).
+                    toComparison();
                 }
             });
             categories.addAll(client.getCategories());
             setWordpressCategories(categories);
             Set<WordpressTag> tags = new TreeSet<WordpressTag>(new Comparator<WordpressTag>() {
                 @Override public int compare(WordpressTag o1, WordpressTag o2) {
-                    return o1.getName().compareTo(o2.getName());
+                    return new CompareToBuilder().
+                    append(StringUtils.lowerCase(o1.getName()), StringUtils.lowerCase(o2.getName())).
+                    toComparison();
                 }
             });
             tags.addAll(client.getTags()); 
