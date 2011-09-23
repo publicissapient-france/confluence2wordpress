@@ -219,7 +219,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     public String getEditLink() {
         return pluginSettingsManager.getWordpressRootUrl() + 
-        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId());
+        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId().toString());
     }
 
     public String getConfluenceRootUrl(){
