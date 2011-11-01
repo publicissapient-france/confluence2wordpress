@@ -3,8 +3,10 @@ package fr.xebia.confluence2wordpress.core.metadata;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
 
 
@@ -21,6 +23,14 @@ public class MetadataSerializerTest {
     }
 
     @Test
+    public void testDeserializeBoolean() {
+        assertEquals(Boolean.TRUE, s.deserialize("true", boolean.class, null));
+        assertEquals(Boolean.FALSE, s.deserialize("false", boolean.class, null));
+        assertEquals(Boolean.TRUE, s.deserialize("true", Boolean.class, null));
+        assertEquals(Boolean.FALSE, s.deserialize("false", Boolean.class, null));
+    }
+
+    @Test
     public void testSerializeInteger() {
         assertEquals("0", s.serialize(0));
         assertEquals("0", s.serialize(Integer.valueOf(0)));
@@ -34,6 +44,20 @@ public class MetadataSerializerTest {
         assertEquals("-1.23", s.serialize(Float.valueOf("-1.23")));
     }
 
+    @Test
+    public void testSerializeDate() {
+        Date date = new Date();
+        String expected = ISODateTimeFormat.dateTime().print(date.getTime());
+        assertEquals(expected, s.serialize(date));
+    }
+    
+    @Test
+    public void testDeserializeDate() {
+        String date = "2011-10-18T17:40:18.886+02:00";
+        Date expected = ISODateTimeFormat.dateTime().parseDateTime(date).toDate();
+        assertEquals(expected, s.deserialize(date, Date.class, null));
+    }
+    
     @Test
     public void testSerializeString() {
         assertEquals("foo", s.serialize("foo"));

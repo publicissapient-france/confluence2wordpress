@@ -8,14 +8,15 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.xmlrpc.XmlRpcClient;
 import org.apache.xmlrpc.XmlRpcException;
 
-import fr.xebia.confluence2wordpress.util.collections.CollectionUtils;
-import fr.xebia.confluence2wordpress.wp.transport.DefaultProxyAwareXmlRpcTransportFactory;
+import fr.xebia.confluence2wordpress.transport.EnhancedXmlRpcTransportFactory;
+import fr.xebia.confluence2wordpress.util.CollectionUtils;
 
 /**
  * 
@@ -294,6 +295,15 @@ public class WordpressClient {
         map.put("description", post.getBody());
         map.put("wp_author_id", post.getAuthorId());
         map.put("wp_slug", post.getPostSlug());
+        Date dateCreated = post.getDateCreated();
+        if(dateCreated != null){
+            //the date will be printed as is, without time zone information,
+            //since it is believed to be in GMT time.
+            TimeZone zone = TimeZone.getDefault();  
+            long time = dateCreated.getTime();
+            Date dateUtc = new Date(time - zone.getOffset(time)); 
+            map.put("dateCreated", dateUtc);
+        }
         if (post.getCategoryNames() != null) {
             map.put("categories", new Vector<String>(post.getCategoryNames()));
         } else {
@@ -369,12 +379,12 @@ public class WordpressClient {
             URL wordpressUrl = new URL(wordpressConnection.getUrl());
             if(this.wordpressConnection.getProxyHost() != null && this.wordpressConnection.getProxyPort() != null){
                 this.client = new XmlRpcClient(wordpressUrl,
-                    new DefaultProxyAwareXmlRpcTransportFactory(
+                    new EnhancedXmlRpcTransportFactory(
                         wordpressUrl, 
                         wordpressConnection.getProxyHost(), 
                         wordpressConnection.getProxyPort()));
             } else {
-                this.client = new XmlRpcClient(wordpressUrl);
+                this.client = new XmlRpcClient(wordpressUrl, new EnhancedXmlRpcTransportFactory(wordpressUrl));
             }
         }
         return this.client;

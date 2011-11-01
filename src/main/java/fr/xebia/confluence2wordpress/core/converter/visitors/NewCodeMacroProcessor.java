@@ -31,7 +31,7 @@ import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
-import fr.xebia.confluence2wordpress.util.collections.MapUtils;
+import fr.xebia.confluence2wordpress.util.MapUtils;
 
 
 /**

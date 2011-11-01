@@ -17,8 +17,11 @@ package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
 import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,6 @@ import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
 import com.atlassian.renderer.WikiStyleRenderer;
-import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
@@ -79,6 +81,8 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private static final String ERRORS_PAGE_TITLE_EMPTY_KEY = "convert.errors.pageTitle.empty";
 
+    private static final String ERRORS_DATE_CREATED_KEY = "convert.errors.dateCreated.invalid";
+    
     private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
 
     private static final String WP_CATEGORIES_KEY = "C2W_WP_CATEGORIES";
@@ -95,8 +99,6 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private PluginSettingsManager pluginSettingsManager;
     
-    private UserManager userManager;
-
     private final MetadataManager metadataManager = new MetadataManager();
 
     private Metadata metadata;
@@ -110,6 +112,10 @@ public class ConversionAction extends AbstractPageAwareAction {
     private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
 
     private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
+    
+    private String dateCreated;
+    
+    private String tagNamesAsString;
     
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -135,12 +141,8 @@ public class ConversionAction extends AbstractPageAwareAction {
         this.pageLabelsSynchronizer = pageLabelsSynchronizer;
     }
 
-    public void setSalUserManager(UserManager userManager) {
-        this.userManager = userManager;
-    }
-
-    public boolean isRemoteUserAdmin(){
-        return userManager.isAdmin(getRemoteUser().getName());
+    public boolean isRemoteUserHasConfigurationPermission(){
+        return pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
     }
     
     @SuppressWarnings("unchecked")
@@ -183,6 +185,22 @@ public class ConversionAction extends AbstractPageAwareAction {
     
     public void setAllowPostOverride(boolean allowPostOverride) {
         this.allowPostOverride = allowPostOverride;
+    }
+
+    public String getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(String dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public String getTagNamesAsString() {
+        return tagNamesAsString;
+    }
+
+    public void setTagNamesAsString(String tagNamesAsString) {
+        this.tagNamesAsString = tagNamesAsString;
     }
 
     @ParameterSafe
@@ -244,6 +262,17 @@ public class ConversionAction extends AbstractPageAwareAction {
             if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
                 checkConcurrentPostModification();
             }
+            
+            if(StringUtils.isNotBlank(dateCreated)){
+                try {
+                    String pattern = getText("convert.js.datepicker.format");
+                    Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
+                    getMetadata().setDateCreated(dateCreated);
+                } catch (ParseException e) {
+                    addActionError(getText(ERRORS_DATE_CREATED_KEY));
+                }
+            }
+            
         } catch (WordpressXmlRpcException e) {
             addActionError(getText(ERRORS_CONNECTION_FAILED_KEY), e.getMessage());
         }
@@ -283,6 +312,7 @@ public class ConversionAction extends AbstractPageAwareAction {
         actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);
         initFormElements();
         initMetadata();
+        updateFormFields();
         mergeLocalAndRemoteTags();
         return SUCCESS;
     }
@@ -303,11 +333,13 @@ public class ConversionAction extends AbstractPageAwareAction {
      * @throws IOException 
      * @throws WordpressXmlRpcException 
      * @throws MetadataException 
+     * @throws ParseException 
      */
-    public String sync() throws IOException, WordpressXmlRpcException, MetadataException {
+    public String sync() throws IOException, WordpressXmlRpcException, MetadataException, ParseException {
         //create the post
         boolean creation = this.metadata.getPostId() == null;
-        WordpressPost post = metadata.createPost(createPostBody(false));
+        WordpressPost post = metadata.createPost();
+        post.setBody(createPostBody(false));
         //post it
         WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         post = client.post(post);
@@ -388,6 +420,11 @@ public class ConversionAction extends AbstractPageAwareAction {
         }
         pageLabelsSynchronizer.pageLabelsToTagNames(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
+    }
+
+    private void updateFormFields() {
+        String pattern = getText("convert.js.datepicker.format");
+        this.dateCreated = new SimpleDateFormat(pattern).format(getMetadata().getDateCreated());
     }
 
     private Map<String, String> uploadAttachments() throws WordpressXmlRpcException, IOException {

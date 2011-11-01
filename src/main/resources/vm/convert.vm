@@ -17,7 +17,8 @@
 <head>
     <title>$action.page.displayTitle - $action.getText("convert.title")</title>
     <meta name="decorator" content="atl.general"/>
-    #requireResource("fr.xebia.confluence2wordpress:c2w-resources")
+    #requireResource("fr.xebia.confluence2wordpress:c2w-conversion-resources")
+    #requireResource($action.getText("convert.js.datepicker.resource"))
 </head>
 <body>
 
@@ -117,6 +118,27 @@
     </div>
     
     <div class="field-group">
+        <label for="dateCreated">
+            $action.getText("convert.form.dateCreated.label")
+        </label>
+        <input id="dateCreated" name="dateCreated" type="text" value="$!action.dateCreated" class="text"/>
+        <div class="description">$action.getText("convert.form.dateCreated.description")</div>
+    </div>
+
+    <script type="text/javascript">
+    jQuery(document).ready(function() {
+        jQuery('#dateCreated').datetimepicker({
+            timeFormat: 'hh:mm',
+            stepMinute: 10,
+            hourGrid: 4,
+            minuteGrid: 10,
+            showTime: false,
+            constrainInput: false
+        });
+     });
+    </script>
+    
+    <div class="field-group">
         <label for="postSlug">
             $action.getText("convert.form.postSlug.label")
         </label>
@@ -148,15 +170,22 @@
     </div>
     
     <div class="field-group">
-        <label for="tagNames">
+        <label for="tagNamesAsString">
             $action.getText("convert.form.tagNames.label")
         </label>
-        <select id="wordpressTagIds" name="metadata.tagNames" multiple="true" class="multi-select">
-            #foreach($wordpressTag in $action.wordpressTags)
-                <option value="$wordpressTag.name" #if( $action.metadata.tagNames.contains($wordpressTag.name) ) selected="true" #end >$wordpressTag.name</option>
-            #end
-        </select>
+        <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text" />
     </div>
+    
+    <script type="text/javascript">
+        var availableTags = [
+            #foreach($wordpressTag in $action.wordpressTags)
+                "$wordpressTag.name" #if($velocityCount < $action.wordpressTags.size()),#end
+            #end
+        ];
+        jQuery(document).ready(function() {
+            autoCompleteMultiple('tagNamesAsString', availableTags);
+         });
+    </script>
     
    <fieldset class="group">
       <div class="checkbox">
@@ -172,10 +201,11 @@
       <div class="buttons">
         <input type="submit" class="button submit" value="$action.getText("convert.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
         <input type="submit" class="button submit" value="$action.getText("convert.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
-        #if($action.remoteUserAdmin)
+        #if($action.remoteUserHasConfigurationPermission)
         <a href="settings.action?pageUrl=/confluence2wordpress/convert.action?pageId=$action.pageId">$action.getText("convert.form.link.settings")</a>
+        &nbsp;
         #end
-        &nbsp;|&nbsp;
+        |&nbsp;
         <a class="cancel texticon" href="${settingsManager.globalSettings.baseUrl}${action.page.urlPath}">$action.getText("convert.form.link.cancel")</a>
       </div>
     </div>

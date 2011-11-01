@@ -134,7 +134,7 @@ public class MetadataManager {
             metadata.setPostSlug(String.format("revue-de-presse-xebia-%1$tY-%2$02d", now.getTime(), now.get(Calendar.WEEK_OF_YEAR)));
             if(users != null) {
             	for (WordpressUser user : users) {
-	                if("xebia-france".equals(user.getDisplayName())){
+	                if("xebia-france".equals(user.getLogin())){
 	                    metadata.setAuthorId(user.getId());
 	                    break;
 	                }

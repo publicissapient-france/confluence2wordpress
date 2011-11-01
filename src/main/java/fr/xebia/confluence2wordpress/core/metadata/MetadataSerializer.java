@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
+import org.joda.convert.StringConvert;
+
+import fr.xebia.confluence2wordpress.util.ClassUtils;
 
 
 /**
@@ -33,7 +36,7 @@ public class MetadataSerializer {
         if(value instanceof List){
             return serializeList((List<?>) value);
         }
-        return ConvertUtils.convert(value);
+        return StringConvert.INSTANCE.convertToString(value);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,7 +50,12 @@ public class MetadataSerializer {
         if(List.class.isAssignableFrom(destinationType)){
             return (T) deserializeList(value, componentType);
         }
-        return (T) ConvertUtils.convert(value, destinationType);
+        if(destinationType.isPrimitive()){
+            //joda convert framework cannot handle primitive types
+            destinationType = (Class<T>) ClassUtils.getPrimitiveWrapperType(destinationType);
+        }
+        T convertFromString = StringConvert.INSTANCE.convertFromString(destinationType, value);
+        return convertFromString;
     }
 
     private String serializeList(List<?> coll) {

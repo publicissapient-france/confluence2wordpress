@@ -24,7 +24,7 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
-import fr.xebia.confluence2wordpress.util.html.HtmlUtils;
+import fr.xebia.confluence2wordpress.util.HtmlUtils;
 
 
 /**

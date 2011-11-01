@@ -16,7 +16,7 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.util.html;
+package fr.xebia.confluence2wordpress.util;
 
 import org.apache.commons.lang.StringUtils;
 

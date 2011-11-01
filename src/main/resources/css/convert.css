@@ -13,33 +13,20 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-/**
- * 
- */
-package fr.xebia.confluence2wordpress.util;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-
-
-/**
- * @author Alexandre Dutra
- *
- */
-public class CollectionUtils {
-
-    public static List<String> split(String str, String sep) {
-        if(StringUtils.isEmpty(str)){
-            return null;
-        }
-        String[] tokens = StringUtils.splitPreserveAllTokens(str, sep);
-        List<String> list = new ArrayList<String>(tokens.length);
-        for (String token : tokens) {
-            list.add(StringUtils.trimToNull(token));
-        }
-        return list;
-    }
-
+ 
+/* jQuery overrides */
+.ui-datepicker { 
+	width: 17em; 
+	padding: .2em .2em 0; 
+	display: none; 
+	font-size: 12px;
+    font-family: arial,tahoma,verdana,sans-serif;
 }
+
+.ui-datepicker table { 
+    font-size: 10px !important;
+    font-family: arial,tahoma,verdana,sans-serif;
+}
+
+.ui-timepicker-div td { font-size: 0.8em; }
+

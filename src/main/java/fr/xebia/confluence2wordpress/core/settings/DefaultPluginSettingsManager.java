@@ -31,6 +31,8 @@ import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
  */
 public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
+    private static final String KEY_PREFIX = "fr.xebia.confluence2wordpress:";
+
     private static final String DEFAULT_WP_XML_RPC_USERNAME = "admin";
 
     private static final String DEFAULT_WP_XML_RPC_PASSWORD = "admin";
@@ -55,7 +57,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private String retrieveSettings(String settingsKey, String defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        String value = (String) pluginSettings.get("fr.xebia.confluence2wordpress:" + settingsKey);
+        String value = (String) pluginSettings.get(KEY_PREFIX + settingsKey);
         if(value == null) {
             storeSettings(settingsKey, defaultValue);
             value = defaultValue;
@@ -65,7 +67,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private void storeSettings(String settingsKey, String value) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        pluginSettings.put("fr.xebia.confluence2wordpress:" + settingsKey, value);
+        pluginSettings.put(KEY_PREFIX + settingsKey, value);
     }
 
 

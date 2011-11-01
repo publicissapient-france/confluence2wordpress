@@ -19,7 +19,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
-import fr.xebia.confluence2wordpress.util.collections.MapUtils;
+import fr.xebia.confluence2wordpress.util.MapUtils;
 
 public class ConverterOptions {
 

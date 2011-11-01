@@ -1,4 +1,4 @@
-package fr.xebia.confluence2wordpress.wp.transport;
+package fr.xebia.confluence2wordpress.transport;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,22 +7,33 @@ import java.net.Proxy;
 import java.net.URL;
 
 import org.apache.xmlrpc.DefaultXmlRpcTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class DefaultProxyAwareXmlRpcTransport extends DefaultXmlRpcTransport {
+import fr.xebia.confluence2wordpress.util.XmlRpcUtils;
 
+public class EnhancedXmlRpcTransport extends DefaultXmlRpcTransport {
+
+    private static final Logger LOG = LoggerFactory.getLogger(EnhancedXmlRpcTransport.class);
+    
     private Proxy proxy;
 
-    public DefaultProxyAwareXmlRpcTransport(URL url, Proxy proxy) {
+    public EnhancedXmlRpcTransport(URL url, Proxy proxy) {
         super(url);
         this.proxy = proxy;
     }
 
     @Override
     public InputStream sendXmlRpc(byte[] request) throws IOException {
-        if(proxy == null) {
-            return super.sendXmlRpc(request);
+        if(LOG.isDebugEnabled()){
+            XmlRpcUtils.logRequest(LOG, request);
         }
-        this.con = this.url.openConnection(proxy);
+        if(proxy == null) {
+            //return super.sendXmlRpc(request);
+            this.con = this.url.openConnection();
+        } else {
+            this.con = this.url.openConnection(proxy);
+        }
         this.con.setDoInput(true);
         this.con.setDoOutput(true);
         this.con.setUseCaches(false);
@@ -36,6 +47,10 @@ public class DefaultProxyAwareXmlRpcTransport extends DefaultXmlRpcTransport {
         out.write(request);
         out.flush();
         out.close();
-        return this.con.getInputStream();
+        InputStream response = this.con.getInputStream();
+        if(LOG.isDebugEnabled()){
+            response = XmlRpcUtils.logResponse(LOG, response);
+        }
+        return response;
     }
 }

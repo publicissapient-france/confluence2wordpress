@@ -16,7 +16,7 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.util.collections;
+package fr.xebia.confluence2wordpress.util;
 
 import java.util.HashMap;
 import java.util.Map;

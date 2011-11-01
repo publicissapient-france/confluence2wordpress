@@ -24,10 +24,35 @@
         <param name="configure.url">/confluence2wordpress/settings.action</param>
     </plugin-info>
 
-    <web-resource key="c2w-resources">
-        <resource type="download" name="confluence2wordpress.css" location="css/confluence2wordpress.css"/>
+    <web-resource key="c2w-conversion-resources">
+        <!-- jQuery UI + Redmond theme -->
+        <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="js/jquery-ui-1.8.16.custom.min.js"/>
+        <resource type="download" name="jquery-ui-1.8.16.custom.css" location="css/redmond/jquery-ui-1.8.16.custom.css"/>
+        <resource type="download" name="images/" location="css/redmond/images"/>
+        <!-- jQuery TimePicker add-on -->
+        <resource type="download" name="jquery-ui-timepicker-addon.js" location="js/jquery-ui-timepicker-addon.js"/>
+        <resource type="download" name="jquery-ui-timepicker-addon.css" location="css/jquery-ui-timepicker-addon.css"/>
+        <!-- multiple autocomplete feature -->
+        <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
+        <!-- customizations -->
+        <resource type="download" name="convert.css" location="css/convert.css"/>
+        <dependency>confluence.web.resources:ajs</dependency>
     </web-resource>
 
+    <web-resource key="c2w-datepicker-en-GB">
+        <resource type="download" name="jquery.ui.datepicker-en-GB.js" location="js/jquery.ui.datepicker-en-GB.js"/>
+    </web-resource>
+    <web-resource key="c2w-datepicker-fr">
+        <resource type="download" name="jquery.ui.datepicker-fr.js" location="js/jquery.ui.datepicker-fr.js"/>
+    </web-resource>
+    <web-resource key="c2w-datepicker-nl">
+        <resource type="download" name="jquery.ui.datepicker-nl.js" location="js/jquery.ui.datepicker-nl.js"/>
+    </web-resource>
+
+    <web-resource key="c2w-preview-resources">
+        <resource type="download" name="preview.css" location="css/preview.css"/>
+    </web-resource>
+ 
     <resource key="c2w-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
     
     <resource key="c2w-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">

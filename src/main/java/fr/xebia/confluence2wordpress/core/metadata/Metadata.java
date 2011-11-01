@@ -16,6 +16,8 @@
 package fr.xebia.confluence2wordpress.core.metadata;
 
 import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
@@ -63,6 +65,9 @@ public class Metadata implements Serializable {
 
     @MetadataItem("Digest")    
     private String digest;
+    
+    @MetadataItem("Date Created")    
+    private Date dateCreated;
 
     public String getPageTitle() {
         return pageTitle;
@@ -173,14 +178,24 @@ public class Metadata implements Serializable {
         this.digest = digest;
     }
 
-    public WordpressPost createPost(String body){
+    
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public WordpressPost createPost() throws ParseException{
         WordpressPost post = new WordpressPost();
         post.setDraft(this.isDraft());
         post.setPostId(this.getPostId());
         post.setAuthorId(this.getAuthorId());
         post.setTitle(this.getPageTitle());
-        post.setBody(body);
         post.setPostSlug(this.getPostSlug());
+        post.setDateCreated(this.getDateCreated());
         if(this.getCategoryNames()!=null){
             post.setCategoryNames(this.getCategoryNames()); //categories must exist.
         }
@@ -196,6 +211,7 @@ public class Metadata implements Serializable {
         this.setPageTitle(post.getTitle());
         this.setPostSlug(post.getPostSlug());
         this.setAuthorId(post.getAuthorId());
+        this.setDateCreated(post.getDateCreated());
         this.setCategoryNames(post.getCategoryNames());
         this.setTagNames(post.getTagNames());
         this.setPermalink(post.getLink());
