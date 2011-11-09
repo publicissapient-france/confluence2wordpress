@@ -25,28 +25,41 @@
     </plugin-info>
 
     <web-resource key="c2w-conversion-resources">
-        <!-- jQuery UI + Redmond theme -->
-        <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="js/jquery-ui-1.8.16.custom.min.js"/>
-        <resource type="download" name="jquery-ui-1.8.16.custom.css" location="css/redmond/jquery-ui-1.8.16.custom.css"/>
-        <resource type="download" name="images/" location="css/redmond/images"/>
+        <!-- jQuery UI + theme -->
+        <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="jquery/jquery-ui-1.8.16.custom.min.js"/>
+        <resource type="download" name="jquery-ui-1.8.16.custom.css" location="jquery/jquery-ui-1.8.16.custom.css"/>
+        <resource type="download" name="images/" location="jquery/images"/>
         <!-- jQuery TimePicker add-on -->
-        <resource type="download" name="jquery-ui-timepicker-addon.js" location="js/jquery-ui-timepicker-addon.js"/>
-        <resource type="download" name="jquery-ui-timepicker-addon.css" location="css/jquery-ui-timepicker-addon.css"/>
-        <!-- multiple autocomplete feature -->
+        <resource type="download" name="jquery-ui-timepicker-addon.js" location="jquery/jquery-ui-timepicker-addon.js"/>
+        <resource type="download" name="jquery-ui-timepicker-addon.css" location="jquery/jquery-ui-timepicker-addon.css"/>
+        <!-- autocomplete extensions -->
+        <resource type="download" name="autocomplete-combobox.js" location="js/autocomplete-combobox.js"/>
         <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
         <!-- customizations -->
-        <resource type="download" name="convert.css" location="css/convert.css"/>
+        <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
         <dependency>confluence.web.resources:ajs</dependency>
     </web-resource>
 
+    <web-resource key="c2w-settings-resources">
+        <!-- jQuery UI + theme -->
+        <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="jquery/jquery-ui-1.8.16.custom.min.js"/>
+        <resource type="download" name="jquery-ui-1.8.16.custom.css" location="jquery/jquery-ui-1.8.16.custom.css"/>
+        <resource type="download" name="images/" location="jquery/images"/>
+        <!-- autocomplete extensions -->
+        <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
+        <!-- customizations -->
+        <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
+        <dependency>confluence.web.resources:ajs</dependency>
+    </web-resource>
+    
     <web-resource key="c2w-datepicker-en-GB">
-        <resource type="download" name="jquery.ui.datepicker-en-GB.js" location="js/jquery.ui.datepicker-en-GB.js"/>
+        <resource type="download" name="jquery.ui.datepicker-en-GB.js" location="jquery/jquery.ui.datepicker-en-GB.js"/>
     </web-resource>
     <web-resource key="c2w-datepicker-fr">
-        <resource type="download" name="jquery.ui.datepicker-fr.js" location="js/jquery.ui.datepicker-fr.js"/>
+        <resource type="download" name="jquery.ui.datepicker-fr.js" location="jquery/jquery.ui.datepicker-fr.js"/>
     </web-resource>
     <web-resource key="c2w-datepicker-nl">
-        <resource type="download" name="jquery.ui.datepicker-nl.js" location="js/jquery.ui.datepicker-nl.js"/>
+        <resource type="download" name="jquery.ui.datepicker-nl.js" location="jquery/jquery.ui.datepicker-nl.js"/>
     </web-resource>
 
     <web-resource key="c2w-preview-resources">

@@ -13,20 +13,31 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+.ui-menu {
+    max-height: 185px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
  
 /* jQuery overrides */
 .ui-datepicker { 
-	width: 17em; 
-	padding: .2em .2em 0; 
-	display: none; 
-	font-size: 12px;
-    font-family: arial,tahoma,verdana,sans-serif;
+	font-size: 12px !important;
+    width: 250px;
 }
-
-.ui-datepicker table { 
-    font-size: 10px !important;
-    font-family: arial,tahoma,verdana,sans-serif;
+.ui-datepicker-calendar th { 
+    font-size: 12px;
 }
-
-.ui-timepicker-div td { font-size: 0.8em; }
+.ui-datepicker-calendar td { 
+    font-size: 12px;
+}
+.ui-datepicker-trigger { 
+    vertical-align:text-bottom;
+    cursor:pointer;
+}
+.ui-autocomplete {
+    width:500px; /* long-field width */
+}
+.ui-tpicker-grid-label td { 
+	font-size: 10px; 
+}
 
