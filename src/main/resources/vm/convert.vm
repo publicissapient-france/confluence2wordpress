@@ -146,16 +146,19 @@
         <label for="dateCreated">
             $action.getText("convert.form.dateCreated.label")
         </label>
-        <input id="dateCreated" name="dateCreated" type="text" value="$!action.dateCreated" class="text"/>
+        <input id="dateCreated" name="dateCreated" type="text medium-field" value="$!action.dateCreated" class="text"/>
         <div class="description">$action.getText("convert.form.dateCreated.description")</div>
     </div>
 
     <script type="text/javascript">
     jQuery(document).ready(function() {
         jQuery('#dateCreated').datetimepicker({
-            timeFormat: 'hh:mm',
-            stepMinute: 10,
-            hourGrid: 4,
+            dateFormat: '$action.getText("convert.js.datepicker.format.js.date")',
+            timeFormat: '$action.getText("convert.js.datepicker.format.js.time")',
+            hour: #if( "$!action.metadata.dateCreated" == "") 10 #else ${action.getText("convert.js.datepicker.js.regex.hours")}.exec('$action.dateCreated')[1] #end,
+            minute: #if( "$!action.metadata.dateCreated" == "") 0 #else ${action.getText("convert.js.datepicker.js.regex.minutes")}.exec('$action.dateCreated')[1] #end,
+            stepMinute: 5,
+            hourGrid: 5,
             minuteGrid: 10,
             showTime: false,
             constrainInput: false
