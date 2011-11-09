@@ -21,6 +21,7 @@ import java.util.List;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.labels.Label;
 import com.atlassian.confluence.labels.LabelManager;
+import com.atlassian.confluence.util.LabelUtil;
 
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 
@@ -29,6 +30,7 @@ import fr.xebia.confluence2wordpress.core.metadata.Metadata;
  */
 public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
 
+    private static final String WORDPRESSMETADATA = "wordpressmetadata";
     private LabelManager labelManager;
 
     public DefaultPageLabelsSynchronizer(LabelManager labelManager) {
@@ -45,30 +47,33 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
             for (String tagName : tagNames) {
                 boolean found = false;
                 List<Label> labels = page.getLabels();
+                String sanitized = sanitize(tagName);
                 for (Label label : labels) {
-                    if (label.getName().equals(tagName)) {
+                    if (label.getName().equals(sanitized)) {
                         found = true;
                         break;
                     }
                 }
                 if (!found) {
-                    labelManager.addLabel(page, new Label(tagName));
+                    LabelUtil.addLabel(sanitized, labelManager, page);
                 }
             }
         }
         List<Label> deletedLabels = new ArrayList<Label>();
         for (Label label : page.getLabels()) {
-            boolean found = false;
-            if (tagNames != null) {
-                for (String tagName : tagNames) {
-                    if (label.getName().equals(tagName)) {
-                        found = true;
-                        break;
+            if(!WORDPRESSMETADATA.equals(label.getName())){
+                boolean found = false;
+                if (tagNames != null) {
+                    for (String tagName : tagNames) {
+                        if (label.getName().equals(sanitize(tagName))) {
+                            found = true;
+                            break;
+                        }
                     }
                 }
-            }
-            if (!found) {
-                deletedLabels.add(label);
+                if (!found) {
+                    deletedLabels.add(label);
+                }
             }
         }
         if (!deletedLabels.isEmpty()) {
@@ -89,8 +94,7 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
                 metadata.setTagNames(tagNames);
             }
             for (Label label : labels) {
-                if (!"wordpressmetadata".equalsIgnoreCase(label.getName())
-                    && !tagNames.contains(label.getName())) {
+                if (!WORDPRESSMETADATA.equals(label.getName()) && ! contains(label.getName(), tagNames)) {
                     tagNames.add(label.getName());
                 }
             }
@@ -98,4 +102,17 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
         metadata.setTagNames(tagNames);
     }
 
+    private String sanitize(String tagName) {
+        return tagName.replaceAll("[^A-Za-z0-9-_]", "").toLowerCase();
+    }
+
+    private boolean contains(String labelName, List<String> tagNames){
+        for (String tagName : tagNames) {
+            if(labelName.equals(sanitize(tagName))){
+                return true;
+            }
+        }
+        return false;
+    }
+    
 }
