@@ -13,12 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *#
+##https://developer.atlassian.com/display/CONFDEV/Enabling+XSS+Protection+in+Plugins
+#htmlSafe()
 <html>
 
   <head>
     <title>$action.getText("settings.title")</title>
     <meta name="decorator" content="atl.admin">
-    #requireResource("fr.xebia.confluence2wordpress:c2w-resources")
+    #requireResource("fr.xebia.confluence2wordpress:c2w-settings-resources")
   </head>
   
   <body>

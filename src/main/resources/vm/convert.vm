@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *#
+#htmlSafe()
 <html>
 <head>
     <title>$action.page.displayTitle - $action.getText("convert.title")</title>
