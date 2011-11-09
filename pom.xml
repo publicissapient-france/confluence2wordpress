@@ -188,7 +188,9 @@
                     <strictCheck>true</strictCheck>
                     <excludes>
                         <exclude>LICENSE.txt</exclude>
-                        <exclude>jquery-*</exclude>
+                        <exclude>LICENSE.TXT</exclude>
+                        <exclude>src/test/resources/**</exclude>
+                        <exclude>src/main/resources/jquery/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>
