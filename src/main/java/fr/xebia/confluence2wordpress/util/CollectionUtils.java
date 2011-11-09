@@ -23,23 +23,34 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 /**
  * @author Alexandre Dutra
- *
  */
 public class CollectionUtils {
 
     public static List<String> split(String str, String sep) {
-        if(StringUtils.isEmpty(str)){
+        if (StringUtils.isEmpty(str)) {
             return null;
         }
-        String[] tokens = StringUtils.splitPreserveAllTokens(str, sep);
-        List<String> list = new ArrayList<String>(tokens.length);
-        for (String token : tokens) {
-            list.add(StringUtils.trimToNull(token));
+        Splitter splitter = Splitter.on(sep).trimResults().omitEmptyStrings();
+        List<String> list = new ArrayList<String>();
+        for (String token : splitter.split(str)) {
+            list.add(token);
+        }
+        if(list.isEmpty()){
+            return null;
         }
         return list;
+    }
+
+    public static String join(List<String> tagNames, String sep) {
+        if (tagNames == null || tagNames.isEmpty()) {
+            return null;
+        }
+        return Joiner.on(sep).join(tagNames);
     }
 
 }
