@@ -60,14 +60,21 @@
             $action.getText("convert.form.pageTitle.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
-        <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text"/>
+        <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text long-field"/>
     </div>    
     
     <div class="field-group">
         <label for="ignoredConfluenceMacros">$action.getText("convert.form.ignoredConfluenceMacros.label")</label>
-        <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" type="text" value="$!action.ignoredConfluenceMacros" class="text" />
+        <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacrosAsString" type="text" value="$!action.ignoredConfluenceMacrosAsString" class="text long-field" />
         <div class="description">$action.getText("convert.form.ignoredConfluenceMacros.description")</div>
     </div>    
+    
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var availableMacros = [#foreach($availableMacro in $action.availableMacros)"$availableMacro"#if($velocityCount < $action.availableMacros.size()),#end#end];
+            autoCompleteMultiple('ignoredConfluenceMacros', availableMacros, 2);
+         });
+    </script>
     
     <fieldset class="group">
       <div class="checkbox">
@@ -79,6 +86,24 @@
       </div>
     </fieldset>
 
+    <script type="text/javascript">
+        function toggleIncludeTOC(checked){
+            var includeTOC = jQuery("#includeTOC");
+            if(checked){
+                includeTOC.attr("checked", "checked");
+                includeTOC.attr("disabled", "disabled");
+            } else {
+                includeTOC.removeAttr("disabled");
+            }
+        }
+        jQuery("#optimizeForRDP").click(function() {
+            toggleIncludeTOC(jQuery(this).is(":checked"));
+         });
+         jQuery(document).ready(function() {
+            toggleIncludeTOC(jQuery("#optimizeForRDP").is(":checked"));
+         });
+    </script>
+    
    <fieldset class="group">
       <div class="checkbox">
         <input id="includeTOC" name="metadata.includeTOC" value="true" type="checkbox" class="checkbox" #if($action.metadata.includeTOC)checked="checked"#end />
@@ -113,7 +138,7 @@
         <label for="postId">
             $action.getText("convert.form.postId.label")
         </label>
-        <input type="text" id="postId" name="metadata.postId" class="text" value="$!action.metadata.postId" />
+        <input type="text" id="postId" name="metadata.postId" class="text short-field" value="$!action.metadata.postId" />
         <div class="description">$action.getText("convert.form.postId.description")</div>
     </div>
     
@@ -142,7 +167,7 @@
         <label for="postSlug">
             $action.getText("convert.form.postSlug.label")
         </label>
-        <input type="text" id="postSlug" name="metadata.postSlug" class="text" value="$!action.metadata.postSlug" />
+        <input type="text" id="postSlug" name="metadata.postSlug" class="text long-field" value="$!action.metadata.postSlug" />
         <div class="description">$action.getText("convert.form.postSlug.description")</div>
     </div>
 
@@ -151,38 +176,55 @@
             $action.getText("convert.form.authorId.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
-        <select id="authorId" name="metadata.authorId" class="select">
+        <select id="authorId" name="metadata.authorId" class="select long-field">
             #foreach($wordpressUser in $action.wordpressUsers)
-                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$!wordpressUser.lastName $!wordpressUser.firstName</option>
+                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$wordpressUser.niceUsername</option>
             #end
         </select>
     </div>
     
+    <script type="text/javascript">
+    jQuery(function() {
+        jQuery(document).ready(function() {
+            jQuery( "#authorId" ).autocompleteOnCombobox();
+            jQuery( "#authorId_input" ).addClass("long-field");
+        });
+    });
+    </script>
+    
     <div class="field-group">
         <label for="categoryNames">
             $action.getText("convert.form.categoryNames.label")
+            <span class="form-icon aui-icon icon-required"/>
         </label>
         <select id="categoryNames" name="metadata.categoryNames" multiple="true" class="multi-select">
             #foreach($wordpressCategory in $action.wordpressCategories)
                 <option value="$wordpressCategory.categoryName" #if( $action.metadata.categoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
             #end
         </select>
+        <div class="description">$action.getText("convert.form.categoryNames.description")</div>
     </div>
+    
+    <script type="text/javascript">
+    jQuery(function() {
+        jQuery(document).ready(function() {
+            jQuery( "#categoryNames" ).autocompleteOnCombobox();
+            jQuery( "#categoryNames_input" ).addClass("long-field");
+        });
+    });
+    </script>
     
     <div class="field-group">
         <label for="tagNamesAsString">
             $action.getText("convert.form.tagNames.label")
         </label>
-        <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text" />
+        <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text long-field" />
+        <div class="description">$action.getText("convert.form.tagNames.description")</div>
     </div>
     
     <script type="text/javascript">
-        var availableTags = [
-            #foreach($wordpressTag in $action.wordpressTags)
-                "$wordpressTag.name" #if($velocityCount < $action.wordpressTags.size()),#end
-            #end
-        ];
         jQuery(document).ready(function() {
+            var availableTags = [#foreach($wordpressTag in $action.wordpressTags)"$wordpressTag.name"#if($velocityCount < $action.wordpressTags.size()),#end#end];
             autoCompleteMultiple('tagNamesAsString', availableTags);
          });
     </script>

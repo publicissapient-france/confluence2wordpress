@@ -15,15 +15,13 @@
  */
 package fr.xebia.confluence2wordpress.core.settings;
 
-import java.util.Arrays;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
+import fr.xebia.confluence2wordpress.util.CollectionUtils;
 
 /**
  * @author Alexandre Dutra
@@ -39,7 +37,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private static final String DEFAULT_WP_XML_RPC_BLOG_ID = "1";
 
-    private static final String DEFAULT_IGNORED_CONFLUENCE_MACROS = "tip info note warning";
+    private static final String DEFAULT_IGNORED_CONFLUENCE_MACROS = "tip, info, note, warning";
 
     private static final String DEFAULT_WORDPRESS_ROOT_URL = "http://localhost/wordpress/";
 
@@ -209,11 +207,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
      */
     @Override
     public List<String> getDefaultIgnoredConfluenceMacrosAsList(){
-        String[] tokens = StringUtils.split(getDefaultIgnoredConfluenceMacros());
-        if(tokens == null){
-            return null;
-        }
-        return Arrays.asList(tokens);
+        return CollectionUtils.split(getDefaultIgnoredConfluenceMacros(), ",");
     }
 
     /* (non-Javadoc)
@@ -237,11 +231,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
      */
     @Override
     public List<String> getAllowedConfluenceGroupsAsList(){
-        String[] tokens = StringUtils.split(getAllowedConfluenceGroups());
-        if(tokens == null){
-            return null;
-        }
-        return Arrays.asList(tokens);
+        return CollectionUtils.split(getAllowedConfluenceGroups(), ",");
     }
 
     /* (non-Javadoc)
@@ -265,11 +255,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
      */
     @Override
     public List<String> getAllowedConfluenceSpaceKeysAsList() {
-        String[] tokens = StringUtils.split(getAllowedConfluenceSpaceKeys());
-        if(tokens == null){
-            return null;
-        }
-        return Arrays.asList(tokens);
+        return CollectionUtils.split(getAllowedConfluenceSpaceKeys(), ",");
     }
 
     /* (non-Javadoc)

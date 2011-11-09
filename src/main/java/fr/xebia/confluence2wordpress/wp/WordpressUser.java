@@ -122,6 +122,31 @@ public class WordpressUser {
         return level != null && level >= 8;
     }
 
+    public String getNiceUsername(){
+        boolean hasFirstName = StringUtils.isNotEmpty(getFirstName());
+        boolean hasLastName = StringUtils.isNotEmpty(getLastName());
+        boolean hasFirstAndLastName = hasFirstName && hasLastName;
+        boolean hasFirstOrLastName = hasFirstName || hasLastName;
+        StringBuilder sb = new StringBuilder();
+        if(hasLastName){
+            sb.append(getLastName());
+        }
+        if(hasFirstAndLastName){
+            sb.append(" ");
+        }
+        if(hasFirstName){
+            sb.append(getFirstName());
+        }
+        if(hasFirstOrLastName){
+            sb.append(" (");
+        }
+        sb.append(getLogin());
+        if(hasFirstOrLastName){
+            sb.append(")");
+        }
+        return sb.toString();
+    }
+    
     @Override
     public String toString() {
         return String.format(

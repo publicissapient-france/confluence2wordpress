@@ -31,6 +31,7 @@ import org.htmlcleaner.TagTransformation;
 import org.htmlcleaner.WhitespaceTolerantTagInfoProvider;
 
 import com.atlassian.confluence.core.ContentEntityObject;
+import com.atlassian.confluence.renderer.MacroManager;
 import com.atlassian.renderer.WikiStyleRenderer;
 
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PostProcessor;
@@ -50,10 +51,15 @@ import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProces
 public class Converter {
 
     private WikiStyleRenderer wikiStyleRenderer;
-    
-    public Converter(WikiStyleRenderer wikiStyleRenderer) {
+
+    private MacroManager macroManager;
+
+    public Converter(
+        WikiStyleRenderer wikiStyleRenderer,
+        MacroManager macroManager) {
         super();
         this.wikiStyleRenderer = wikiStyleRenderer;
+        this.macroManager = macroManager;
     }
 
     public String convert(ContentEntityObject page, ConverterOptions options) {
@@ -161,7 +167,7 @@ public class Converter {
 
     protected List<PreProcessor> getPreProcessors(ConverterOptions options) {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
-        processors.add(new IgnoredMacrosPreProcessor());
+        processors.add(new IgnoredMacrosPreProcessor(macroManager));
         return processors;
 	}
 

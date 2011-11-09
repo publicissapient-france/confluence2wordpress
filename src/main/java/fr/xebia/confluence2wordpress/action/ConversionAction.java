@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +36,9 @@ import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
+import com.atlassian.confluence.renderer.MacroManager;
 import com.atlassian.renderer.WikiStyleRenderer;
+import com.atlassian.renderer.v2.macro.Macro;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 
@@ -50,6 +51,7 @@ import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
 import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
+import fr.xebia.confluence2wordpress.util.CollectionUtils;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
 import fr.xebia.confluence2wordpress.wp.WordpressClientFactory;
@@ -82,12 +84,18 @@ public class ConversionAction extends AbstractPageAwareAction {
     private static final String ERRORS_PAGE_TITLE_EMPTY_KEY = "convert.errors.pageTitle.empty";
 
     private static final String ERRORS_DATE_CREATED_KEY = "convert.errors.dateCreated.invalid";
+
+    private static final String ERRORS_AUTHOR_ID_EMPTY_KEY = "convert.errors.authorId.empty";
+
+    private static final String ERRORS_CATEGORIES_EMPTY_KEY = "convert.errors.categoryNames.empty";
     
     private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
 
     private static final String WP_CATEGORIES_KEY = "C2W_WP_CATEGORIES";
 
     private static final String WP_USERS_KEY = "C2W_WP_USERS";
+    
+    private static final String MACROS_KEY = "C2W_MACROS";
 
     private Converter converter;
 
@@ -98,6 +106,10 @@ public class ConversionAction extends AbstractPageAwareAction {
     private PluginPermissionsManager pluginPermissionsManager;
 
     private PluginSettingsManager pluginSettingsManager;
+    
+    private WikiStyleRenderer wikiStyleRenderer;
+    
+    private MacroManager macroManager;
     
     private final MetadataManager metadataManager = new MetadataManager();
 
@@ -116,6 +128,8 @@ public class ConversionAction extends AbstractPageAwareAction {
     private String dateCreated;
     
     private String tagNamesAsString;
+
+    private String ignoredConfluenceMacrosAsString;
     
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -125,8 +139,12 @@ public class ConversionAction extends AbstractPageAwareAction {
         this.attachmentManager = attachmentManager;
     }
 
+    public void setMacroManager(MacroManager macroManager) {
+        this.macroManager = macroManager;
+    }
+
     public void setWikiStyleRenderer(WikiStyleRenderer wikiStyleRenderer) {
-        this.converter = new Converter(wikiStyleRenderer);
+        this.wikiStyleRenderer = wikiStyleRenderer;
     }
 
     public void setPluginSettingsManager(PluginSettingsManager pluginSettingsManager) {
@@ -143,6 +161,13 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     public boolean isRemoteUserHasConfigurationPermission(){
         return pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
+    }
+    
+    private Converter getConverter(){
+        if(converter == null){
+            converter = new Converter(wikiStyleRenderer, macroManager);
+        }
+        return converter;
     }
     
     @SuppressWarnings("unchecked")
@@ -175,6 +200,16 @@ public class ConversionAction extends AbstractPageAwareAction {
         getSession().put(WP_TAGS_KEY, tags);
     }
 
+    @SuppressWarnings("unchecked")
+    public Set<String> getAvailableMacros(){
+        return (Set<String>) getSession().get(MACROS_KEY);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private void setAvailableMacros(Set<String> macros) {
+        getSession().put(MACROS_KEY, macros);
+    }
+    
     public void setPageId(long pageId){
         this.setPage(pageManager.getPage(pageId));
     }
@@ -203,20 +238,20 @@ public class ConversionAction extends AbstractPageAwareAction {
         this.tagNamesAsString = tagNamesAsString;
     }
 
+    public String getIgnoredConfluenceMacrosAsString() {
+        return ignoredConfluenceMacrosAsString;
+    }
+
+    public void setIgnoredConfluenceMacrosAsString(String ignoredConfluenceMacrosAsString) {
+        this.ignoredConfluenceMacrosAsString = ignoredConfluenceMacrosAsString;
+    }
+
     @ParameterSafe
     public Metadata getMetadata() {
         if(metadata == null){
             metadata = new Metadata();
         }
         return metadata;
-    }
-
-    public String getIgnoredConfluenceMacros() {
-    	return StringUtils.join(getMetadata().getIgnoredConfluenceMacros(), ' ');
-    }
-    
-    public void setIgnoredConfluenceMacros(String ignoredConfluenceMacros) {
-    	getMetadata().setIgnoredConfluenceMacros(Arrays.asList(StringUtils.split(ignoredConfluenceMacros)));
     }
 
     public String getHtml() {
@@ -237,7 +272,7 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     public String getEditLink() {
         return pluginSettingsManager.getWordpressRootUrl() + 
-        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId());
+        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId().toString());
     }
 
     public String getConfluenceRootUrl(){
@@ -259,6 +294,9 @@ public class ConversionAction extends AbstractPageAwareAction {
                 checkPostSlugSyntax();
                 checkPostSlugAvailability();
             }
+            if (getMetadata().getAuthorId() == null) {
+                addActionError(getText(ERRORS_AUTHOR_ID_EMPTY_KEY));
+            }
             if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
                 checkConcurrentPostModification();
             }
@@ -273,6 +311,19 @@ public class ConversionAction extends AbstractPageAwareAction {
                 }
             }
             
+            if(getMetadata().getCategoryNames() == null || getMetadata().getCategoryNames().isEmpty()){
+                addActionError(getText(ERRORS_CATEGORIES_EMPTY_KEY));
+            }
+            
+            if(StringUtils.isNotBlank(tagNamesAsString)){
+                List<String> tagNames = CollectionUtils.split(tagNamesAsString, ",");
+                getMetadata().setTagNames(tagNames);
+            }
+            if(StringUtils.isNotBlank(ignoredConfluenceMacrosAsString)){
+                List<String> ignoredConfluenceMacros = CollectionUtils.split(ignoredConfluenceMacrosAsString, ",");
+                getMetadata().setIgnoredConfluenceMacros(ignoredConfluenceMacros);
+            }
+  
         } catch (WordpressXmlRpcException e) {
             addActionError(getText(ERRORS_CONNECTION_FAILED_KEY), e.getMessage());
         }
@@ -310,7 +361,7 @@ public class ConversionAction extends AbstractPageAwareAction {
      */
     public String input() throws MetadataException, WordpressXmlRpcException {
         actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);
-        initFormElements();
+        initSessionElements();
         initMetadata();
         updateFormFields();
         mergeLocalAndRemoteTags();
@@ -353,7 +404,7 @@ public class ConversionAction extends AbstractPageAwareAction {
         return SUCCESS;
     }
 
-    private void initFormElements() throws WordpressXmlRpcException {
+    private void initSessionElements() throws WordpressXmlRpcException {
         if(getWordpressUsers() == null) {
             WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
             Set<WordpressUser> users = new TreeSet<WordpressUser>(new Comparator<WordpressUser>(){
@@ -384,6 +435,10 @@ public class ConversionAction extends AbstractPageAwareAction {
             });
             tags.addAll(client.getTags()); 
             setWordpressTags(tags);
+        }
+        if(getAvailableMacros() == null){
+            Map<String, Macro> macros = macroManager.getMacros();
+            setAvailableMacros(new TreeSet<String>(macros.keySet()));
         }
     }
 
@@ -424,7 +479,11 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private void updateFormFields() {
         String pattern = getText("convert.js.datepicker.format");
-        this.dateCreated = new SimpleDateFormat(pattern).format(getMetadata().getDateCreated());
+        if(getMetadata().getDateCreated() != null){
+            this.dateCreated = new SimpleDateFormat(pattern).format(getMetadata().getDateCreated());
+        }
+        this.tagNamesAsString = CollectionUtils.join(getMetadata().getTagNames(), ", ");
+        this.ignoredConfluenceMacrosAsString = CollectionUtils.join(getMetadata().getIgnoredConfluenceMacros(), ", ");
     }
 
     private Map<String, String> uploadAttachments() throws WordpressXmlRpcException, IOException {
@@ -453,14 +512,7 @@ public class ConversionAction extends AbstractPageAwareAction {
             Map<String, String> attachmentsMap = uploadAttachments();
             options.setAttachmentsMap(attachmentsMap);
         }
-        AbstractPage page = getPage();
-        String originalTitle = page.getTitle();
-        try {
-            page.setTitle(metadata.getPageTitle());
-            return converter.convert(page, options);
-        } finally {
-            page.setTitle(originalTitle);
-        }
+        return getConverter().convert(getPage(), options);
     }
 
 }

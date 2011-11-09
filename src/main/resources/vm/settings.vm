@@ -36,19 +36,6 @@
     </div>   
 #end
 
-#if ( $action.hasActionErrors())
-    <div class="aui-message error closeable shadowed">
-        <p class="title">
-            <span class="aui-icon icon-error"></span>
-            <strong>
-            #foreach ($message in $action.actionErrors)
-            $message
-            #end
-            </strong>
-        </p>
-    </div>   
-#end  
-
 <form action="updateSettings.action" method="post" class="aui long-label">
 
       <input type="hidden" name="pageUrl" value="$!action.pageUrl" />
@@ -63,6 +50,13 @@
         <div class="description">$action.getText("settings.form.allowedConfluenceGroups.description")</div>
       </div>
 
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var availableConfluenceGroups = [#foreach($availableGroup in $action.availableGroups)"$availableGroup"#if($velocityCount < $action.availableGroups.size()),#end#end];
+            autoCompleteMultiple('allowedConfluenceGroups', availableConfluenceGroups);
+         });
+    </script>
+    
       <div class="field-group">
         <label for="allowedConfluenceSpaceKeys">
             $action.getText("settings.form.allowedConfluenceSpaceKeys.label")
@@ -71,6 +65,13 @@
         <div class="description">$action.getText("settings.form.allowedConfluenceSpaceKeys.description")</div>
       </div>
 
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var availableSpaceKeys = [#foreach($availableSpaceKey in $availableSpaceKeys)"$availableSpaceKey"#if($velocityCount < $action.availableSpaceKeys.size()),#end#end];
+            autoCompleteMultiple('allowedConfluenceSpaceKeys', availableSpaceKeys);
+         });
+    </script>
+    
       <div class="field-group">
         <label for="ignoredConfluenceMacros">
             $action.getText("settings.form.ignoredConfluenceMacros.label")
@@ -78,6 +79,13 @@
         <input class="text long-field" type="text" id="ignoredConfluenceMacros" name="ignoredConfluenceMacros" value="$action.ignoredConfluenceMacros" title="$action.getText("settings.form.ignoredConfluenceMacros.label")">
         <div class="description">$action.getText("settings.form.ignoredConfluenceMacros.description")</div>
       </div>
+    
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var availableMacros = [#foreach($availableMacro in $action.availableMacros)"$availableMacro"#if($velocityCount < $action.availableMacros.size()),#end#end];
+            autoCompleteMultiple('ignoredConfluenceMacros', availableMacros);
+         });
+    </script>
     
       <h2>$action.getText("settings.form.section.wordpress.section")</h2>
       

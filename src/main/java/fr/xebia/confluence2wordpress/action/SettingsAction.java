@@ -1,20 +1,36 @@
 /**
  * Copyright 2011 Alexandre Dutra
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 package fr.xebia.confluence2wordpress.action;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.atlassian.confluence.core.ConfluenceActionSupport;
+import com.atlassian.confluence.renderer.MacroManager;
+import com.atlassian.confluence.spaces.Space;
+import com.atlassian.confluence.spaces.SpaceManager;
+import com.atlassian.renderer.v2.macro.Macro;
+import com.atlassian.user.EntityException;
+import com.atlassian.user.Group;
+import com.atlassian.user.GroupManager;
+import com.atlassian.user.search.page.Pager;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
@@ -72,6 +88,12 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
 
     private PluginSettingsManager pluginSettingsManager;
     
+    private MacroManager macroManager;
+    
+    private GroupManager groupManager;
+    
+    private SpaceManager spaceManager;
+    
     private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
     
     private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
@@ -84,6 +106,44 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
         this.pluginPermissionsManager = pluginPermissionsManager;
     }
 
+    public void setMacroManager(MacroManager macroManager) {
+        this.macroManager = macroManager;
+    }
+    
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    public void setSpaceManager(SpaceManager spaceManager) {
+        this.spaceManager = spaceManager;
+    }
+
+    public Set<String> getAvailableMacros(){
+        Map<String, Macro> macros = macroManager.getMacros();
+        return new TreeSet<String>(macros.keySet());
+    }
+
+    public Set<String> getAvailableGroups(){
+        Set<String> groupNames = new TreeSet<String>();
+        try {
+            Pager<Group> groups = groupManager.getGroups();
+            for (Group group : groups) {
+                groupNames.add(group.getName());
+            }
+        } catch (EntityException e) {
+        }
+        return groupNames;
+    }
+
+    public Set<String> getAvailableSpaceKeys(){
+        Set<String> spaceKeys = new TreeSet<String>();
+        List<Space> spaces = spaceManager.getAllSpaces();
+        for (Space space: spaces) {
+            spaceKeys.add(space.getKey());
+        }
+        return spaceKeys;
+    }
+    
     @Override
     public boolean isPermitted() {
         return super.isPermitted() && pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
