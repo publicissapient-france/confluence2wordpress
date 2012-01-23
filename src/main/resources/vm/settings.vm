@@ -37,7 +37,18 @@
         </p>
     </div>   
 #end
-
+#if ( $action.hasActionErrors())
+    <div class="aui-message error closeable shadowed">
+        <p class="title">
+            <span class="aui-icon icon-error"></span>
+            <strong>
+            #foreach ($message in $action.actionErrors)
+            $message
+            #end
+            </strong>
+        </p>
+    </div>   
+#end
 <form action="updateSettings.action" method="post" class="aui long-label">
 
       <input type="hidden" name="pageUrl" value="$!action.pageUrl" />
