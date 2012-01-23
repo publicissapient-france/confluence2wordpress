@@ -66,7 +66,8 @@ public class SyncInfoMacro extends BaseMacro {
 		try {
 			metadata = metadataManager.extractMetadata(page);
 			if(metadata == null){
-			    return null;
+				//macros cannot return null
+			    return "";
 			}
 		} catch (MetadataException e) {
 			throw new MacroException("Cannot extract Wordpress metadata", e);
