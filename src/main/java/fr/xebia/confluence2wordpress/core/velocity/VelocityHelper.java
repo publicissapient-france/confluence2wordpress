@@ -44,10 +44,11 @@ public class VelocityHelper {
         return result;
     }
 
-    public String generateTOC(List<Heading> headings) {
+    public String generateTOC(List<Heading> headings, String postUrl) {
         // Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         context.put("headings", headings);
+        context.put("postUrl", postUrl);
         // Render the Template
         String result = VelocityUtils.getRenderedTemplate(TOC_VM, context);
         return result;

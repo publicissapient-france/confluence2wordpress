@@ -186,7 +186,7 @@ public class Converter {
 
     protected List<PostProcessor> getPostProcessors(ConverterOptions options) {
         List<PostProcessor> processors = new ArrayList<PostProcessor>();
-        processors.add(new TableOfContentsPostProcessor());
+        processors.add(new TableOfContentsPostProcessor(options.getPostUrl()));
         processors.add(new PressReviewHeaderPostProcessor());
         return processors;
     }

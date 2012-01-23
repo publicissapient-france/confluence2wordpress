@@ -26,6 +26,10 @@ import fr.xebia.confluence2wordpress.util.MapUtils;
 
 public class ConverterOptions {
 
+	private String pageTitle;
+
+    private String postUrl;
+    
     private boolean omitXmlDeclaration = true;
 
     private boolean useCdataForScriptAndStyle = false;
@@ -60,7 +64,23 @@ public class ConverterOptions {
         }
     }
 
-    public boolean isOmitXmlDeclaration() {
+    public String getPageTitle() {
+		return pageTitle;
+	}
+
+	public void setPageTitle(String pageTitle) {
+		this.pageTitle = pageTitle;
+	}
+
+	public String getPostUrl() {
+		return postUrl;
+	}
+
+	public void setPostUrl(String postUrl) {
+		this.postUrl = postUrl;
+	}
+
+	public boolean isOmitXmlDeclaration() {
         return omitXmlDeclaration;
     }
 

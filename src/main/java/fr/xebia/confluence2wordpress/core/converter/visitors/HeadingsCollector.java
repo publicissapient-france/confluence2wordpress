@@ -53,7 +53,7 @@ public class HeadingsCollector implements TagNodeVisitor {
                 TagNode link = tag.findElementByName("a", false);
                 if(link != null) {
                     String name = link.getAttributeByName("name");
-                    h4.setAnchor("#" + name);
+                    h4.setAnchor(name);
                 }
                 h3.addChild(h4);
             }
