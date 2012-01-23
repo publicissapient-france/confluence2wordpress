@@ -73,7 +73,20 @@ public class Converter {
         }
         
         //wiki -> html conversion
-        String confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(page.toPageContext(), wiki);
+        String originalTitle = page.getTitle();
+        String confluenceHtml;
+        try {
+        	//temporarily replace page title to get correct anchors
+        	//(I know it's ugly)
+        	//Otherwise the anchors are build by
+        	//com.atlassian.renderer.v2.macro.basic.BasicAnchorMacro.getAnchor(RenderContext, String)
+        	//basically it's GeneralUtil.urlEncode((page title + "-" + heading title).trim().replaceAll(" ", ""))
+        	//see also com.atlassian.confluence.util.GeneralUtil.urlEncode(String)
+            page.setTitle(options.getPageTitle());
+            confluenceHtml = wikiStyleRenderer.convertWikiToXHtml(page.toPageContext(), wiki);
+        } finally {
+            page.setTitle(originalTitle);
+        }
 
         //HTML cleanup
         HtmlCleaner cleaner = getHtmlCleaner(options);
