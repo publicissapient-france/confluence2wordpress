@@ -38,10 +38,10 @@ public interface PluginSettingsManager extends WordpressConnectionProperties {
 
     String getProxyPort();
 
-    void setWordpressEditPostRelativePath(String wordpressXmlRpcRelativePath);
+    void setWordpressEditPostRelativePath(String wordpressEditPostRelativePath);
 
     String getWordpressEditPostRelativePath();
-
+    
     void setWordpressUserName(String wordpressUserName);
 
     String getWordpressUserName();
