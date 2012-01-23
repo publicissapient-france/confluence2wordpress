@@ -43,23 +43,31 @@ import fr.xebia.confluence2wordpress.wp.WordpressUser;
  */
 public class MetadataManager {
 
-	protected static final String SPACE = " ";
+	private static final String SPACE = " ";
 
-    protected static final String INDENTATION = "    ";
+	private static final String INDENTATION = "    ";
 
-	protected static final String WARNING = "## PLEASE DO NOT EDIT THIS SECTION MANUALLY!";
+    private static final String WARNING = "## PLEASE DO NOT EDIT THIS SECTION MANUALLY!";
 
-	protected static final String LINE_SEPARATOR = "\r\n";
+	private static final String LINE_SEPARATOR = "\r\n";
 
-    protected static final String WORDPRESS_META_START = "{details:label=WordpressMetadata|hidden=true}";
+	private static final String WORDPRESS_META_START = "{details:label=WordpressMetadata|hidden=true}";
 
-    protected static final String WORDPRESS_META_END = "{details}";
+    private static final String WORDPRESS_META_END = "{details}";
 
     private static final String WORDPRESS_SYNC_INFO = "{wordpress-sync-info}";
 
     private static final Pattern DRAFT_PREFIX_PATTERN = Pattern.compile("(DRAFT\\s*-\\s*).+");
 
 	private static final String KEY_VALUE_SEPARATOR = ":";
+
+	private static final String RDP_CATEGORY_NAME = "Revue de presse";
+
+	private static final String RDP_PAGE_TITLE = "Revue de Presse Xebia";
+
+	private static final String RDP_POST_SLUG_FORMAT = "revue-de-presse-xebia-%1$tY-%2$02d";
+
+	private static final String XEBIA_FRANCE_LOGIN = "XebiaFrance";
 
     private MetadataSerializer serializer = new MetadataSerializer();
 
@@ -119,22 +127,22 @@ public class MetadataManager {
         } else {
             metadata.setPageTitle(pageTitle);
         }
-        if(StringUtils.containsIgnoreCase(metadata.getPageTitle(), "revue de presse")) {
+        if(StringUtils.containsIgnoreCase(metadata.getPageTitle(), RDP_CATEGORY_NAME)) {
             metadata.setOptimizeForRDP(true);
-            metadata.setPageTitle("Revue de Presse Xebia");
+            metadata.setPageTitle(RDP_PAGE_TITLE); // to normalize the title
             if(categories != null) {
 	            for (WordpressCategory category : categories) {
-	                if(StringUtils.containsIgnoreCase(category.getCategoryName(), "revue de presse")){
+	                if(StringUtils.containsIgnoreCase(category.getCategoryName(), RDP_CATEGORY_NAME)){
 	                    metadata.setCategoryNames(Collections.singletonList(category.getCategoryName()));
 	                    break;
 	                }
 	            }
             }
             Calendar now = Calendar.getInstance();
-            metadata.setPostSlug(String.format("revue-de-presse-xebia-%1$tY-%2$02d", now.getTime(), now.get(Calendar.WEEK_OF_YEAR)));
+            metadata.setPostSlug(String.format(RDP_POST_SLUG_FORMAT, now.getTime(), now.get(Calendar.WEEK_OF_YEAR)));
             if(users != null) {
             	for (WordpressUser user : users) {
-	                if("xebia-france".equals(user.getLogin())){
+	                if(XEBIA_FRANCE_LOGIN.equals(user.getLogin())){
 	                    metadata.setAuthorId(user.getId());
 	                    break;
 	                }
