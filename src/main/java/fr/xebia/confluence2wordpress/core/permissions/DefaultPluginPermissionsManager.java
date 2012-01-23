@@ -17,7 +17,9 @@ package fr.xebia.confluence2wordpress.core.permissions;
 
 import java.util.List;
 
+import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.core.SpaceContentEntityObject;
+import com.atlassian.confluence.pages.Draft;
 import com.atlassian.sal.api.user.UserManager;
 import com.atlassian.user.User;
 
@@ -36,7 +38,7 @@ public class DefaultPluginPermissionsManager implements PluginPermissionsManager
     }
 
     @Override
-    public boolean checkUsagePermission(User user, SpaceContentEntityObject page) {
+    public boolean checkUsagePermission(User user, ContentEntityObject page) {
         return checkUser(user) && checkPage(page);
     }
 
@@ -64,16 +66,22 @@ public class DefaultPluginPermissionsManager implements PluginPermissionsManager
         return false;
     }
 
-    private boolean checkPage(SpaceContentEntityObject page) {
+    private boolean checkPage(ContentEntityObject page) {
         if(page == null){
             return false;
+        }
+        String pageSpaceKey;
+        if(page instanceof Draft){
+            pageSpaceKey = ((Draft)page).getDraftSpaceKey();
+        } else {
+            pageSpaceKey = ((SpaceContentEntityObject) page).getSpaceKey();
         }
         List<String> spaceKeys = pluginSettingsManager.getAllowedConfluenceSpaceKeysAsList();
         if(spaceKeys == null || spaceKeys.isEmpty()){
             return true;
         }
         for (String spaceKey : spaceKeys) {
-            if(page.getSpaceKey().equals(spaceKey)){
+            if(pageSpaceKey.equals(spaceKey)){
                 return true;
             }
         }

@@ -20,7 +20,7 @@ package fr.xebia.confluence2wordpress.macro;
 
 import java.util.Map;
 
-import com.atlassian.confluence.core.SpaceContentEntityObject;
+import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.confluence.user.AuthenticatedUserThreadLocal;
 import com.atlassian.renderer.RenderContext;
@@ -61,7 +61,7 @@ public class SyncInfoMacro extends BaseMacro {
 		if (!(renderContext instanceof PageContext)) {
 			throw new MacroException("This macro can only be used in a page");
 		}
-        SpaceContentEntityObject page = (SpaceContentEntityObject) ((PageContext) renderContext).getEntity();
+        ContentEntityObject page = ((PageContext) renderContext).getEntity();
 		Metadata metadata;
 		try {
 			metadata = metadataManager.extractMetadata(page);
