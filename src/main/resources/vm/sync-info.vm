@@ -32,7 +32,7 @@
                     |
                     #end
                     #if($userHasPluginUsagePermission)
-                    <a href="${settingsManager.globalSettings.baseUrl}/confluence2wordpress/convert.action?pageId=$page.id">$action.getText("macro.metadata.link.sync")</a>
+                    <a href="${settingsManager.globalSettings.baseUrl}/confluence2wordpress/syncOptions.action?pageId=$page.id">$action.getText("macro.metadata.link.sync")</a>
                     #end
                     <br/>
                     <img src="${settingsManager.globalSettings.baseUrl}/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0">

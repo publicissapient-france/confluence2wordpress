@@ -75,7 +75,7 @@
     <web-item key="c2w-link" name="Confluence-to-Wordpress Converter Link" 
         section="system.content.action/primary"  weight="100">
         <label key="link.label" />
-        <link>/confluence2wordpress/convert.action?pageId=$page.id</link>
+        <link>/confluence2wordpress/syncOptions.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
             <link>/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png</link>
@@ -95,16 +95,16 @@
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
             
-            <action name="convert" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="input">
-                <result name="success" type="velocity">/vm/convert.vm</result>
+            <action name="syncOptions" class="fr.xebia.confluence2wordpress.action.SyncAction" method="input">
+                <result name="success" type="velocity">/vm/sync-options.vm</result>
             </action>
-            <action name="preview" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="preview">
+            <action name="preview" class="fr.xebia.confluence2wordpress.action.SyncAction" method="preview">
                  <result name="success" type="velocity">/vm/preview.vm</result>
             </action>
-            <action name="sync" class="fr.xebia.confluence2wordpress.action.ConversionAction" method="sync">
+            <action name="sync" class="fr.xebia.confluence2wordpress.action.SyncAction" method="sync">
                  <interceptor-ref name="validatingStack" />
-                 <result name="success" type="redirect">convert.action?pageId=${pageId}</result>
-                 <result name="input" type="velocity">/vm/convert.vm</result>
+                 <result name="success" type="redirect">syncOptions.action?pageId=${pageId}</result>
+                 <result name="input" type="velocity">/vm/sync-options.vm</result>
             </action>
             
             <action name="settings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="input">
@@ -145,5 +145,6 @@
         <description>Synchronizes Confluence labels with Wordpress tags.</description>
         <interface>fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer</interface>
     </component>
+    
     
 </atlassian-plugin>

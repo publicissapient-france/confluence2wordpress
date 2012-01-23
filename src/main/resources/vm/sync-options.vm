@@ -16,10 +16,10 @@
 #htmlSafe()
 <html>
 <head>
-    <title>$action.page.displayTitle - $action.getText("convert.title")</title>
+    <title>$action.page.displayTitle - $action.getText("sync.title")</title>
     <meta name="decorator" content="atl.general"/>
     #requireResource("fr.xebia.confluence2wordpress:c2w-conversion-resources")
-    #requireResource($action.getText("convert.js.datepicker.resource"))
+    #requireResource($action.getText("sync.js.datepicker.resource"))
 </head>
 <body>
 
@@ -39,8 +39,8 @@
             #end
             </strong>
         </p>
-        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("convert.link.viewPost")</a></p>
-        <p><a href="$action.editLink" target="wp-edit">$action.getText("convert.link.editPost")</a></p>
+        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a></p>
+        <p><a href="$action.editLink" target="wp-edit">$action.getText("sync.link.editPost")</a></p>
     </div>   
 #end
 
@@ -48,26 +48,27 @@
 
     <input name="pageId" type="hidden" value="$action.pageId" />
     <input name="metadata.digest" type="hidden" value="$!action.metadata.digest" />
+    <input name="metadata.permalink" type="hidden" value="$!action.metadata.permalink" />
 
-    <h2>$action.getText("convert.form.title.conversionOptions")</h2>
+    <h2>$action.getText("sync.form.title.conversionOptions")</h2>
     
     <div class="field-group">
-        <label>$action.getText("convert.form.pageToTranslate")</label>
+        <label>$action.getText("sync.form.pageToTranslate")</label>
         <span class="field-value"><a href="${settingsManager.globalSettings.baseUrl}${action.page.urlPath}"><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</a></span>
     </div>    
     
     <div class="field-group">
         <label for="pageTitle">
-            $action.getText("convert.form.pageTitle.label")
+            $action.getText("sync.form.pageTitle.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
         <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text long-field"/>
     </div>    
     
     <div class="field-group">
-        <label for="ignoredConfluenceMacros">$action.getText("convert.form.ignoredConfluenceMacros.label")</label>
+        <label for="ignoredConfluenceMacros">$action.getText("sync.form.ignoredConfluenceMacros.label")</label>
         <input id="ignoredConfluenceMacros" name="ignoredConfluenceMacrosAsString" type="text" value="$!action.ignoredConfluenceMacrosAsString" class="text long-field" />
-        <div class="description">$action.getText("convert.form.ignoredConfluenceMacros.description")</div>
+        <div class="description">$action.getText("sync.form.ignoredConfluenceMacros.description")</div>
     </div>    
     
     <script type="text/javascript">
@@ -80,10 +81,10 @@
     <fieldset class="group">
       <div class="checkbox">
         <input id="optimizeForRDP" name="metadata.optimizeForRDP" value="true" type="checkbox" class="checkbox" #if($action.metadata.optimizeForRDP)checked="checked"#end />
-        <label for="optimizeForRDP">$action.getText("convert.form.optimizeForRDP.label")</label>
+        <label for="optimizeForRDP">$action.getText("sync.form.optimizeForRDP.label")</label>
       </div>
       <div class="field-group">
-        <div class="description">$action.getText("convert.form.optimizeForRDP.description")</div>
+        <div class="description">$action.getText("sync.form.optimizeForRDP.description")</div>
       </div>
     </fieldset>
 
@@ -108,56 +109,56 @@
    <fieldset class="group">
       <div class="checkbox">
         <input id="includeTOC" name="metadata.includeTOC" value="true" type="checkbox" class="checkbox" #if($action.metadata.includeTOC)checked="checked"#end />
-        <label for="includeTOC">$action.getText("convert.form.includeTOC.label")</label>
+        <label for="includeTOC">$action.getText("sync.form.includeTOC.label")</label>
       </div>
       <div class="field-group">
-        <div class="description">$action.getText("convert.form.includeTOC.description")</div>
+        <div class="description">$action.getText("sync.form.includeTOC.description")</div>
       </div>
     </fieldset>
 
-    <h2>$action.getText("convert.form.title.syncOptions")</h2>
+    <h2>$action.getText("sync.form.title.syncOptions")</h2>
 
     <input name="metadata.draft" value="$action.metadata.draft" type="hidden" />
     <fieldset class="group">
-        <legend><span>$action.getText("convert.form.draft.label")</legend>
+        <legend><span>$action.getText("sync.form.draft.label")</legend>
         <div class="matrix">
           <div class="radio" style="width:8em">
-            <input id="draft.true" value="true" type="radio" class="radio" #if($action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
-            <label for="draft.true">$action.getText("convert.form.draft.true.label")</label>
+            <input id="draft.true" name="metadata.draft.display" value="true" type="radio" class="radio" #if($action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
+            <label for="draft.true">$action.getText("sync.form.draft.true.label")</label>
           </div>
           <div class="radio">
-            <input id="draft.false" value="false" type="radio" class="radio" disabled="true" #if( ! $action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
-            <label for="draft.false">$action.getText("convert.form.draft.false.label")</label>
+            <input id="draft.false" name="metadata.draft.display" value="false" type="radio" class="radio" #if( ! $action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
+            <label for="draft.false">$action.getText("sync.form.draft.false.label")</label>
           </div>
       </div>
       <div class="field-group">
-        <div class="description">$action.getText("convert.form.draft.description")</div>
+        <div class="description">$action.getText("sync.form.draft.description")</div>
       </div>
     </fieldset>
     
     <div class="field-group">
         <label for="postId">
-            $action.getText("convert.form.postId.label")
+            $action.getText("sync.form.postId.label")
         </label>
         <input type="text" id="postId" name="metadata.postId" class="text short-field" value="$!action.metadata.postId" />
-        <div class="description">$action.getText("convert.form.postId.description")</div>
+        <div class="description">$action.getText("sync.form.postId.description")</div>
     </div>
     
     <div class="field-group">
         <label for="dateCreated">
-            $action.getText("convert.form.dateCreated.label")
+            $action.getText("sync.form.dateCreated.label")
         </label>
         <input id="dateCreated" name="dateCreated" type="text medium-field" value="$!action.dateCreated" class="text"/>
-        <div class="description">$action.getText("convert.form.dateCreated.description")</div>
+        <div class="description">$action.getText("sync.form.dateCreated.description")</div>
     </div>
 
     <script type="text/javascript">
     jQuery(document).ready(function() {
         jQuery('#dateCreated').datetimepicker({
-            dateFormat: '$action.getText("convert.js.datepicker.format.js.date")',
-            timeFormat: '$action.getText("convert.js.datepicker.format.js.time")',
-            hour: #if( "$!action.metadata.dateCreated" == "") 10 #else ${action.getText("convert.js.datepicker.js.regex.hours")}.exec('$action.dateCreated')[1] #end,
-            minute: #if( "$!action.metadata.dateCreated" == "") 0 #else ${action.getText("convert.js.datepicker.js.regex.minutes")}.exec('$action.dateCreated')[1] #end,
+            dateFormat: '$action.getText("sync.js.datepicker.format.js.date")',
+            timeFormat: '$action.getText("sync.js.datepicker.format.js.time")',
+            hour: #if( "$!action.metadata.dateCreated" == "") 10 #else ${action.getText("sync.js.datepicker.js.regex.hours")}.exec('$action.dateCreated')[1] #end,
+            minute: #if( "$!action.metadata.dateCreated" == "") 0 #else ${action.getText("sync.js.datepicker.js.regex.minutes")}.exec('$action.dateCreated')[1] #end,
             stepMinute: 5,
             hourGrid: 5,
             minuteGrid: 10,
@@ -169,15 +170,15 @@
     
     <div class="field-group">
         <label for="postSlug">
-            $action.getText("convert.form.postSlug.label")
+            $action.getText("sync.form.postSlug.label")
         </label>
         <input type="text" id="postSlug" name="metadata.postSlug" class="text long-field" value="$!action.metadata.postSlug" />
-        <div class="description">$action.getText("convert.form.postSlug.description")</div>
+        <div class="description">$action.getText("sync.form.postSlug.description")</div>
     </div>
 
     <div class="field-group">
         <label for="authorId">
-            $action.getText("convert.form.authorId.label")
+            $action.getText("sync.form.authorId.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
         <select id="authorId" name="metadata.authorId" class="select long-field">
@@ -198,7 +199,7 @@
     
     <div class="field-group">
         <label for="categoryNames">
-            $action.getText("convert.form.categoryNames.label")
+            $action.getText("sync.form.categoryNames.label")
             <span class="form-icon aui-icon icon-required"/>
         </label>
         <select id="categoryNames" name="metadata.categoryNames" multiple="true" class="multi-select">
@@ -206,7 +207,7 @@
                 <option value="$wordpressCategory.categoryName" #if( $action.metadata.categoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
             #end
         </select>
-        <div class="description">$action.getText("convert.form.categoryNames.description")</div>
+        <div class="description">$action.getText("sync.form.categoryNames.description")</div>
     </div>
     
     <script type="text/javascript">
@@ -220,10 +221,10 @@
     
     <div class="field-group">
         <label for="tagNamesAsString">
-            $action.getText("convert.form.tagNames.label")
+            $action.getText("sync.form.tagNames.label")
         </label>
         <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text long-field" />
-        <div class="description">$action.getText("convert.form.tagNames.description")</div>
+        <div class="description">$action.getText("sync.form.tagNames.description")</div>
     </div>
     
     <script type="text/javascript">
@@ -236,23 +237,23 @@
    <fieldset class="group">
       <div class="checkbox">
         <input id="allowPostOverride" name="allowPostOverride" value="true" type="checkbox" class="checkbox" #if($action.allowPostOverride)checked="checked"#end />
-        <label for="allowPostOverride">$action.getText("convert.form.allowPostOverride.label")</label>
+        <label for="allowPostOverride">$action.getText("sync.form.allowPostOverride.label")</label>
       </div>
       <div class="field-group">
-        <div class="description">$action.getText("convert.form.allowPostOverride.description")</div>
+        <div class="description">$action.getText("sync.form.allowPostOverride.description")</div>
       </div>
     </fieldset>
             
     <div class="buttons-container">
       <div class="buttons">
-        <input type="submit" class="button submit" value="$action.getText("convert.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
-        <input type="submit" class="button submit" value="$action.getText("convert.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
+        <input type="submit" class="button submit" value="$action.getText("sync.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
+        <input type="submit" class="button submit" value="$action.getText("sync.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
         #if($action.remoteUserHasConfigurationPermission)
-        <a href="settings.action?pageUrl=/confluence2wordpress/convert.action?pageId=$action.pageId">$action.getText("convert.form.link.settings")</a>
+        <a href="settings.action?pageUrl=/confluence2wordpress/sync.action?pageId=$action.pageId">$action.getText("sync.form.link.settings")</a>
         &nbsp;
         #end
         |&nbsp;
-        <a class="cancel texticon" href="${settingsManager.globalSettings.baseUrl}${action.page.urlPath}">$action.getText("convert.form.link.cancel")</a>
+        <a class="cancel texticon" href="${settingsManager.globalSettings.baseUrl}${action.page.urlPath}">$action.getText("sync.form.link.cancel")</a>
       </div>
     </div>
     

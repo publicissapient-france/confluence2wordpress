@@ -65,30 +65,32 @@ import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
  * @author Alexandre Dutra
  *
  */
-public class ConversionAction extends AbstractPageAwareAction {
+public class SyncAction extends AbstractPageAwareAction {
 
-    private static final long serialVersionUID = 140791345328730095L;
+	private static final long serialVersionUID = 140791345328730095L;
 
-    private static final String MSG_UPDATE_SUCCESS_KEY = "convert.msg.update.success";
+    private static final String MSG_UPDATE_SUCCESS_KEY = "sync.msg.update.success";
 
-    private static final String MSG_CREATION_SUCCESS_KEY = "convert.msg.creation.success";
+    private static final String MSG_CREATION_SUCCESS_KEY = "sync.msg.creation.success";
 
-    private static final String ERRORS_POST_SLUG_SYNTAX_KEY = "convert.errors.postSlug.syntax";
+    private static final String ERRORS_POST_SLUG_SYNTAX_KEY = "sync.errors.postSlug.syntax";
 
-    private static final String ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY = "convert.errors.digest.concurrentModification";
+    private static final String ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY = "sync.errors.digest.concurrentModification";
 
-    private static final String ERRORS_POST_SLUG_AVAILABILITY_KEY = "convert.errors.postSlug.availability";
+    private static final String ERRORS_POST_SLUG_AVAILABILITY_KEY = "sync.errors.postSlug.availability";
 
-    private static final String ERRORS_CONNECTION_FAILED_KEY = "convert.errors.connection.failed";
+    private static final String ERRORS_CONNECTION_FAILED_KEY = "sync.errors.connection.failed";
 
-    private static final String ERRORS_PAGE_TITLE_EMPTY_KEY = "convert.errors.pageTitle.empty";
+    private static final String ERRORS_PAGE_TITLE_EMPTY_KEY = "sync.errors.pageTitle.empty";
 
-    private static final String ERRORS_DATE_CREATED_KEY = "convert.errors.dateCreated.invalid";
+    private static final String ERRORS_DATE_CREATED_KEY = "sync.errors.dateCreated.invalid";
 
-    private static final String ERRORS_AUTHOR_ID_EMPTY_KEY = "convert.errors.authorId.empty";
+    private static final String ERRORS_AUTHOR_ID_EMPTY_KEY = "sync.errors.authorId.empty";
 
-    private static final String ERRORS_CATEGORIES_EMPTY_KEY = "convert.errors.categoryNames.empty";
+    private static final String ERRORS_CATEGORIES_EMPTY_KEY = "sync.errors.categoryNames.empty";
     
+    private static final String JS_DATEPICKER_FORMAT_KEY = "sync.js.datepicker.format";
+
     private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
 
     private static final String WP_CATEGORIES_KEY = "C2W_WP_CATEGORIES";
@@ -303,7 +305,7 @@ public class ConversionAction extends AbstractPageAwareAction {
             
             if(StringUtils.isNotBlank(dateCreated)){
                 try {
-                    String pattern = getText("convert.js.datepicker.format");
+                    String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
                     Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
                     getMetadata().setDateCreated(dateCreated);
                 } catch (ParseException e) {
@@ -387,19 +389,40 @@ public class ConversionAction extends AbstractPageAwareAction {
      * @throws ParseException 
      */
     public String sync() throws IOException, WordpressXmlRpcException, MetadataException, ParseException {
-        //create the post
+        // consider it a creation if no post ID
+        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         boolean creation = this.metadata.getPostId() == null;
+        //if we do not know yet the final permalink, we need to do it before the actual conversion
+        //from Confluence to Wordpress, because the Converter needs it.
+		//in this case we need Wordpress to generate the permalink for us;
+        //the easiest way is to post it twice
+        if(StringUtils.isEmpty(this.metadata.getPermalink())) {
+        	WordpressPost post = metadata.createPost();
+        	post.setBody(""); // fake body to lighten xml-rpc request
+            post = client.post(post);
+            metadata.updateFromPost(post);
+        }
+        String permalink = metadata.getPermalink();
         WordpressPost post = metadata.createPost();
         post.setBody(createPostBody(false));
-        //post it
-        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         post = client.post(post);
-        //update metadata
         metadata.updateFromPost(post);
+        //Wordpress changed the permalink: we need to reconvert and resync
+        //happens only when the post status is changed from draft to published
+        if( ! permalink.equals(metadata.getPermalink())) {
+        	post = metadata.createPost();
+            post.setBody(createPostBody(false));
+            post = client.post(post);
+            metadata.updateFromPost(post);
+        }
         pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
-        if(creation) addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
-        else addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
+        //messages
+        if(creation) {
+        	addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
+        } else {
+        	addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
+        }
         actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
         return SUCCESS;
     }
@@ -410,8 +433,8 @@ public class ConversionAction extends AbstractPageAwareAction {
             Set<WordpressUser> users = new TreeSet<WordpressUser>(new Comparator<WordpressUser>(){
                 @Override public int compare(WordpressUser o1, WordpressUser o2) {
                     return new CompareToBuilder().
-                        append(StringUtils.lowerCase(o1.getLastName()), StringUtils.lowerCase(o2.getLastName())).
-                        append(StringUtils.lowerCase(o1.getFirstName()), StringUtils.lowerCase(o2.getFirstName())).
+                        append(StringUtils.lowerCase(o1.getNiceUsername()), StringUtils.lowerCase(o2.getNiceUsername())).
+                        append(o1.getId(), o2.getId()).
                         toComparison();
                 }
             });
@@ -478,7 +501,7 @@ public class ConversionAction extends AbstractPageAwareAction {
     }
 
     private void updateFormFields() {
-        String pattern = getText("convert.js.datepicker.format");
+        String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
         if(getMetadata().getDateCreated() != null){
             this.dateCreated = new SimpleDateFormat(pattern).format(getMetadata().getDateCreated());
         }
@@ -505,6 +528,8 @@ public class ConversionAction extends AbstractPageAwareAction {
 
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
+        options.setPageTitle(metadata.getPageTitle());
+        options.setPostUrl(metadata.getPermalink());
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
