@@ -127,7 +127,7 @@
             <label for="draft.true">$action.getText("sync.form.draft.true.label")</label>
           </div>
           <div class="radio">
-            <input id="draft.false" name="metadata.draft.display" value="false" type="radio" class="radio" #if( ! $action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
+            <input disabled="disabled" id="draft.false" name="metadata.draft.display" value="false" type="radio" class="radio" #if( ! $action.metadata.draft)checked="checked"#end onclick="this.form.elements['metadata.draft'].value=this.value" />
             <label for="draft.false">$action.getText("sync.form.draft.false.label")</label>
           </div>
       </div>
