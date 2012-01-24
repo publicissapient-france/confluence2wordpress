@@ -15,7 +15,7 @@
        limitations under the License.
 
 -->
-<atlassian-plugin key="${project.groupId}.${project.artifactId}" name="${project.name}" plugins-version="2">
+<atlassian-plugin key="fr.xebia.confluence2wordpress" name="Confluence to Wordpress Synchronizer" plugins-version="2">
 
     <plugin-info>
         <description>${project.description}</description>
@@ -78,18 +78,23 @@
         <link>/confluence2wordpress/syncOptions.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
-            <link>/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png</link>
+            <link>/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png</link>
         </icon>
         <condition class="fr.xebia.confluence2wordpress.condition.PluginPermissionsCondition" />
     </web-item>
     
     <macro name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" key="c2w-more-macro" 
-        icon="/download/resources/${project.groupId}.${project.artifactId}/confluence2wordpress.png">
+        icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
         <description>Generates a Wordpress "more" markup.</description>
         <category name="external-content"/>
+        <parameters />
     </macro>
     
-    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" key="c2w-sync-info-macro" hidden="true" />
+    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" key="c2w-sync-info-macro" hidden="true" >
+    	<description>Displays a message indicating that the current page is synchronized with a Wordpress post.</description>
+        <category name="external-content"/>
+        <parameters />
+    </macro>
     
     <xwork key="c2w-action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
