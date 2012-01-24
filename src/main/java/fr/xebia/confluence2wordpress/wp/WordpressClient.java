@@ -368,12 +368,25 @@ public class WordpressClient {
         map.put("overwrite", true);
         params.add(map);
 
-        Map<String, String> response = invoke(UPLOAD_FILE_METHOD_NAME, params);
+        Map<String, ?> response = invoke(UPLOAD_FILE_METHOD_NAME, params);
 
-        file.setFileName(response.get("file"));
-        file.setMimeType(response.get("type"));
-        file.setUrl(response.get("url"));
-
+        file.setFileName((String)response.get("file"));
+        file.setMimeType((String)response.get("type"));
+        file.setUrl((String)response.get("url"));
+        
+        @SuppressWarnings("unchecked")
+        Map<String,?> meta = (Map<String,?>) response.get("meta");
+        meta.get("height");
+        meta.get("width");
+        
+        @SuppressWarnings("unchecked")
+        Map<String,?> sizes = (Map<String,?>) meta.get("sizes");
+        
+        sizes.get("large-feature");
+        sizes.get("medium");
+        sizes.get("post-thumbnail");
+        sizes.get("small-feature");
+        sizes.get("thumbnail");
         return file;
 
     }

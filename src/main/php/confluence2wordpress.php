@@ -262,9 +262,10 @@ function c2w_upload_file($args) {
 
 		// Save the data
 		$id = wp_insert_attachment( $attachment, $upload[ 'file' ], $post_id );
-		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $upload['file'] ) );
+		$attachement_metadata = wp_generate_attachment_metadata( $id, $upload['file'] );
+		wp_update_attachment_metadata( $id, $attachement_metadata );
 
-		return apply_filters( 'wp_handle_upload', array( 'file' => $name, 'url' => $upload[ 'url' ], 'type' => $type ), 'upload' );
+		return apply_filters( 'wp_handle_upload', array( 'file' => $name, 'url' => $upload[ 'url' ], 'type' => $type, 'meta' =>  $attachement_metadata), 'upload' );
 	}
 
 ?>

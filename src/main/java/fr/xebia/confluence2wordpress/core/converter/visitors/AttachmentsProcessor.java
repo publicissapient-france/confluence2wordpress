@@ -18,6 +18,8 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -51,7 +53,6 @@ public class AttachmentsProcessor implements TagNodeVisitor {
             String tagName = tag.getName();
             if ("img".equals(tagName)) {
                 String url = tag.getAttributeByName("src");
-                //URL is absolute, i.e. starts with scheme "http://" but has no port number :(
                 if (url != null) {
                     String src = replaceAttachmentUrl(url);
                     if(src != null) {
@@ -60,7 +61,6 @@ public class AttachmentsProcessor implements TagNodeVisitor {
                 }
             } else if ("a".equals(tagName)) {
                 String url = tag.getAttributeByName("href");
-                // URL starts with context path, i.e. "/confluence"
                 if (url != null) {
                     String href = replaceAttachmentUrl(url);
                     if(href != null) {
@@ -77,8 +77,13 @@ public class AttachmentsProcessor implements TagNodeVisitor {
     private String replaceAttachmentUrl(String url) {
         //url may contain "&amp;" - due to htmlcleaner?
         String sanitized = StringEscapeUtils.unescapeXml(url);
+        String path = sanitized;
+        try {
+            path = new URL(sanitized).getPath();
+        } catch (MalformedURLException e) {
+        }
         for (Entry<String,String> entry : attachmentsMap.entrySet()) {
-            if(sanitized.endsWith(entry.getKey())){
+            if(path.equals(entry.getKey())){
                 return entry.getValue();
             }
         }

@@ -16,6 +16,7 @@
 package fr.xebia.confluence2wordpress.action;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -514,6 +515,7 @@ public class SyncAction extends AbstractPageAwareAction {
         Map<String, String> attachmentsMap = new HashMap<String, String>();
         WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         List<Attachment> attachments = attachmentManager.getAttachments(page);
+        String context = new URL(getConfluenceRootUrl()).getPath();
         for (Attachment attachment : attachments) {
             byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
             WordpressFile file = new WordpressFile(
@@ -521,7 +523,7 @@ public class SyncAction extends AbstractPageAwareAction {
                 attachment.getContentType(),
                 data);
             file = client.uploadFile(file);
-            attachmentsMap.put(attachment.getDownloadPath(), file.getUrl());
+            attachmentsMap.put(context + attachment.getDownloadPathWithoutVersion(), file.getUrl());
         }
         return attachmentsMap;
     }
