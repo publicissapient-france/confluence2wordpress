@@ -22,7 +22,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +45,7 @@ import com.opensymphony.util.TextUtils;
 
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
+import fr.xebia.confluence2wordpress.core.converter.UploadedFile;
 import fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer;
 import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
@@ -387,9 +388,8 @@ public class SyncAction extends AbstractPageAwareAction {
      * @throws IOException 
      * @throws WordpressXmlRpcException 
      * @throws MetadataException 
-     * @throws ParseException 
      */
-    public String sync() throws IOException, WordpressXmlRpcException, MetadataException, ParseException {
+    public String sync() throws IOException, WordpressXmlRpcException, MetadataException {
         // consider it a creation if no post ID
         WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         boolean creation = this.metadata.getPostId() == null;
@@ -510,12 +510,12 @@ public class SyncAction extends AbstractPageAwareAction {
         this.ignoredConfluenceMacrosAsString = CollectionUtils.join(getMetadata().getIgnoredConfluenceMacros(), ", ");
     }
 
-    private Map<String, String> uploadAttachments() throws WordpressXmlRpcException, IOException {
+    private Set<UploadedFile> uploadFiles() throws WordpressXmlRpcException, IOException {
         AbstractPage page = getPage();
-        Map<String, String> attachmentsMap = new HashMap<String, String>();
+        Set<UploadedFile> uploadedFiles = new HashSet<UploadedFile>();
         WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         List<Attachment> attachments = attachmentManager.getAttachments(page);
-        String context = new URL(getConfluenceRootUrl()).getPath();
+        //cannot be donne in parallel, something on Confluence and/or Wordpress side is not thread-safe :(
         for (Attachment attachment : attachments) {
             byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
             WordpressFile file = new WordpressFile(
@@ -523,9 +523,9 @@ public class SyncAction extends AbstractPageAwareAction {
                 attachment.getContentType(),
                 data);
             file = client.uploadFile(file);
-            attachmentsMap.put(context + attachment.getDownloadPathWithoutVersion(), file.getUrl());
+            uploadedFiles.add(new UploadedFile(attachment, file));
         }
-        return attachmentsMap;
+        return uploadedFiles;
     }
 
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
@@ -535,9 +535,10 @@ public class SyncAction extends AbstractPageAwareAction {
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
+        options.setConfluenceRootUrl(new URL(getConfluenceRootUrl()));
         if( ! preview){
-            Map<String, String> attachmentsMap = uploadAttachments();
-            options.setAttachmentsMap(attachmentsMap);
+            Set<UploadedFile> uploadedFiles = uploadFiles();
+            options.setUploadedFiles(uploadedFiles);
         }
         return getConverter().convert(getPage(), options);
     }

@@ -16,9 +16,11 @@
 package fr.xebia.confluence2wordpress.core.converter;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -29,6 +31,8 @@ public class ConverterOptions {
 	private String pageTitle;
 
     private String postUrl;
+    
+    private URL confluenceRootUrl;
     
     private boolean omitXmlDeclaration = true;
 
@@ -48,7 +52,7 @@ public class ConverterOptions {
 
     private boolean includeTOC = false;
 
-    private Map<String, String> attachmentsMap;
+    private Set<UploadedFile> uploadedFiles;
 
     private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
     
@@ -153,20 +157,28 @@ public class ConverterOptions {
         this.includeTOC = includeTOC;
     }
 
-    public Map<String, String> getAttachmentsMap() {
-        return attachmentsMap;
-    }
+    public Set<UploadedFile> getUploadedFiles() {
+		return uploadedFiles;
+	}
 
-    public void setAttachmentsMap(Map<String, String> attachmentsMap) {
-        this.attachmentsMap = attachmentsMap;
-    }
-    
-    public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {
+	public void setUploadedFiles(Set<UploadedFile> uploadedFiles) {
+		this.uploadedFiles = uploadedFiles;
+	}
+
+	public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {
         return syntaxHighlighterPlugin;
     }
     
     public void setSyntaxHighlighterPlugin(SyntaxHighlighterPlugin syntaxHighlighterPlugin) {
         this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
     }
+
+	public URL getConfluenceRootUrl() {
+		return confluenceRootUrl;
+	}
+
+	public void setConfluenceRootUrl(URL confluenceRootUrl) {
+		this.confluenceRootUrl = confluenceRootUrl;
+	}
 
 }

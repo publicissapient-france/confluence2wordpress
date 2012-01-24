@@ -1,0 +1,61 @@
+/**
+ * Copyright 2011 Alexandre Dutra
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+package fr.xebia.confluence2wordpress.core.converter;
+
+import com.atlassian.confluence.pages.Attachment;
+
+import fr.xebia.confluence2wordpress.wp.WordpressFile;
+
+public class UploadedFile {
+
+    private final WordpressFile wordpressFile;
+
+	private final String thumbnailPath;
+
+	private String attachmentPath;
+
+	public UploadedFile(Attachment confluenceAttachment, WordpressFile wordpressFile) {
+		super();
+		this.wordpressFile = wordpressFile;
+		this.attachmentPath = confluenceAttachment.getDownloadPathWithoutVersion();
+		this.thumbnailPath = attachmentPath.replace("/attachments/", "/thumbnails/");
+	}
+	
+	public String getWordpressUrl(String confluencePath){
+		if(confluencePath.equals(attachmentPath)){
+			return wordpressFile.getUrl();
+		}
+		if(thumbnailPath.equals(confluencePath)){
+	        /*
+	        medium -> image is resized
+	        post-thumbnail
+	        small-feature
+	        thumbnail -> image is deformed to 150*150
+	         */
+			WordpressFile medium = wordpressFile.getAlternative("medium");
+			if(medium != null) {
+				return medium.getUrl();
+			}
+			WordpressFile thumbnail = wordpressFile.getAlternative("thumbnail");
+			if(thumbnail != null) {
+				return thumbnail.getUrl();
+			}
+			return wordpressFile.getUrl();
+		}
+		return null;
+	}
+
+}

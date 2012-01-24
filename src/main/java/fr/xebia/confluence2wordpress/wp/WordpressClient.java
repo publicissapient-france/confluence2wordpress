@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -374,24 +375,50 @@ public class WordpressClient {
         file.setMimeType((String)response.get("type"));
         file.setUrl((String)response.get("url"));
         
-        @SuppressWarnings("unchecked")
-        Map<String,?> meta = (Map<String,?>) response.get("meta");
-        meta.get("height");
-        meta.get("width");
+        String baseUrl = StringUtils.substringBeforeLast(file.getUrl(), "/");
         
-        @SuppressWarnings("unchecked")
-        Map<String,?> sizes = (Map<String,?>) meta.get("sizes");
-        
-        sizes.get("large-feature");
-        sizes.get("medium");
-        sizes.get("post-thumbnail");
-        sizes.get("small-feature");
-        sizes.get("thumbnail");
+        if(response.get("meta") != null && response.get("meta") instanceof Map){
+			@SuppressWarnings("unchecked")
+	        Map<String,?> meta = (Map<String,?>) response.get("meta");
+	        if(meta != null) {
+	        	if(meta.containsKey("height")){
+	        		file.setHeight((Integer) meta.get("height"));
+	        	}
+	        	if(meta.containsKey("width")){
+	        		file.setWidth((Integer) meta.get("width"));
+	        	}
+	    		@SuppressWarnings("unchecked")
+	            Map<String,?> sizes = (Map<String,?>) meta.get("sizes");
+	        	if(sizes != null){
+	        		for (Entry<String,?> entry : sizes.entrySet()) {
+	        			@SuppressWarnings("unchecked")
+						Map<String,?> value = (Map<String,?>) entry.getValue();
+						WordpressFile alternative = createAlternative(value, file.getMimeType(), baseUrl);
+						file.putAlternative(entry.getKey(), alternative);
+					}
+	        	}
+	        }
+        }
         return file;
 
     }
 
-    @SuppressWarnings("unchecked")
+    private WordpressFile createAlternative(Map<String, ?> value, String mimeType, String baseUrl) {
+		WordpressFile alternative = new WordpressFile((String) value.get("file"));
+		alternative.setMimeType(mimeType);
+		String fileName = (String) value.get("file");
+		alternative.setFileName(fileName);
+		alternative.setUrl(baseUrl + "/" + fileName);
+    	if(value.containsKey("height")){
+    		alternative.setHeight((Integer) value.get("height"));
+    	}
+    	if(value.containsKey("width")){
+    		alternative.setWidth((Integer) value.get("width"));
+    	}
+    	return alternative;
+	}
+
+	@SuppressWarnings("unchecked")
     private <T> T invoke(String methodName, Vector<Object> params) throws WordpressXmlRpcException {
         try {
             return (T) getClientInstance().execute(methodName, params);

@@ -16,7 +16,6 @@
 package fr.xebia.confluence2wordpress.core.metadata;
 
 import java.io.Serializable;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -188,7 +187,7 @@ public class Metadata implements Serializable {
         this.dateCreated = dateCreated;
     }
 
-    public WordpressPost createPost() throws ParseException{
+    public WordpressPost createPost() {
         WordpressPost post = new WordpressPost();
         post.setDraft(this.isDraft());
         post.setPostId(this.getPostId());
@@ -214,7 +213,17 @@ public class Metadata implements Serializable {
         this.setDateCreated(post.getDateCreated());
         this.setCategoryNames(post.getCategoryNames());
         this.setTagNames(post.getTagNames());
-        this.setPermalink(post.getLink());
+        String permalink = post.getLink();
+		if(post.isDraft()) {
+			//it seems that WP does not always send back the query string
+			//containing "preview=true"...
+        	if( permalink.contains("?p=") && ! permalink.contains("preview=true")) {
+        		permalink += "&preview=true";
+        	}
+            this.setPermalink(permalink);
+        } else {
+            this.setPermalink(permalink);
+        }
         this.setDigest(post.getDigest());
     }
 

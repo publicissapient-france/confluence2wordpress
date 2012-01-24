@@ -169,8 +169,8 @@ public class Converter {
         visitors.add(new SyncInfoMacroProcessor());
         visitors.add(new LegacyCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
         visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
-        if(options.getAttachmentsMap() != null) {
-            visitors.add(new AttachmentsProcessor(options.getAttachmentsMap()));
+        if(options.getUploadedFiles() != null) {
+            visitors.add(new AttachmentsProcessor(options.getConfluenceRootUrl(), options.getUploadedFiles()));
         }
         visitors.add(new CdataProcessor());
         visitors.add(new CssClassNameCleaner());

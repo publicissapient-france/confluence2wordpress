@@ -15,6 +15,9 @@
  */
 package fr.xebia.confluence2wordpress.wp;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 
 public class WordpressFile {
@@ -27,6 +30,11 @@ public class WordpressFile {
 
     private byte[] data;
 
+    private Integer height = null;
+    
+    private Integer width = null;
+    
+    private Map<String, WordpressFile> alternatives = new HashMap<String, WordpressFile>();
 
     public WordpressFile(String fileName, String mimeType, byte[] data) {
         super();
@@ -35,8 +43,13 @@ public class WordpressFile {
         this.data = data;
     }
 
+    public WordpressFile(String fileName) {
+		super();
+		this.fileName = fileName;
+	}
 
-    public String getFileName() {
+
+	public String getFileName() {
         return fileName;
     }
 
@@ -74,5 +87,35 @@ public class WordpressFile {
     public void setMimeType(String type) {
         this.mimeType = type;
     }
+
+
+	public Integer getHeight() {
+		return height;
+	}
+
+
+	public void setHeight(Integer height) {
+		this.height = height;
+	}
+
+
+	public Integer getWidth() {
+		return width;
+	}
+
+
+	public void setWidth(Integer width) {
+		this.width = width;
+	}
+
+
+	public WordpressFile getAlternative(String key) {
+		return alternatives.get(key);
+	}
+
+
+	public void putAlternative(String key, WordpressFile value) {
+		alternatives.put(key, value);
+	}
 
 }
