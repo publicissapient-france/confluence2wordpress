@@ -43,9 +43,9 @@ import fr.xebia.confluence2wordpress.util.CollectionUtils;
  */
 public class WordpressClient {
 
-    private static final String CREATE_POST_METHOD_NAME = "metaWeblog.newPost";
+    private static final String CREATE_POST_METHOD_NAME = "c2w.newPost";
 
-    private static final String UPDATE_POST_METHOD_NAME = "metaWeblog.editPost";
+    private static final String UPDATE_POST_METHOD_NAME = "c2w.editPost";
 
     private static final String FIND_POST_BY_ID_METHOD_NAME = "metaWeblog.getPost"; //"blogger.getPost";
 
@@ -60,6 +60,7 @@ public class WordpressClient {
     private static final String FIND_PAGE_ID_BY_SLUG_METHOD_NAME = "c2w.findPageIdBySlug";
     
     private static final String PING_METHOD_NAME = "c2w.ping";
+
     
     /**
      * Very, VERY old version of the lib bundled with Confluence.
@@ -196,72 +197,9 @@ public class WordpressClient {
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
         Map<String, Object> map = invoke(FIND_POST_BY_ID_METHOD_NAME, params);
-
-        /*Sample of the response structure:
-         * 
-         * userid=3,
-         * mt_allow_pings=1,
-         * postid=40,
-         * wp_author_id=3,
-         * date_created_gmt=Wed May 04 14:32:57 CEST 2011,
-         * wp_password=,
-         * link=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
-         * mt_keywords=tag1, tag2,
-         * dateCreated=Wed May 04 16:32:57 CEST 2011,
-         * categories=[test],
-         * post_status=publish,
-         * mt_allow_comments=1,
-         * wp_slug=revue-de-presse-xebia-9,
-         * permaLink=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
-         * description=coucou c'est un draft,
-         * custom_fields=[],
-         * mt_text_more=,
-         * mt_excerpt=,
-         * sticky=false,
-         * title=Revue de Presse Xebia,
-         * wp_author_display_name=xebia-france
-         */
-
-        WordpressPost post = new WordpressPost();
-        post.setPostId(postId);
-        post.setDraft(false);
-
-        Object authorId = map.get("wp_author_id");
-        post.setAuthorId(authorId == null ? null : Integer.valueOf(authorId.toString()));
-
-        Date dateCreated = (Date) map.get("dateCreated");
-        post.setDateCreated(dateCreated);
-
-        StringBuilder body = new StringBuilder();
-        if(map.get("description") != null){
-        	body.append((String) map.get("description"));
-        }
-        if(map.get("mt_text_more") != null){
-        	body.append("<!--more-->");
-        	body.append((String) map.get("mt_text_more"));
-        }
-        post.setBody(body.toString());
-
-        String title = (String) map.get("title");
-        post.setTitle(title);
-
-        post.setDraft( ! "publish".equals(map.get("post_status")));
-
-        @SuppressWarnings("unchecked")
-        List<String> categoryNames = (List<String>) map.get("categories");
-        post.setCategoryNames(categoryNames);
-
-        List<String> tagNames = CollectionUtils.split((String) map.get("mt_keywords"), ",");
-        post.setTagNames(tagNames);
-
-        String slug = (String) map.get("wp_slug");
-        post.setPostSlug(slug);
-
-        String permaLink = (String) map.get("permaLink");
-        post.setLink(permaLink);
-
-        return post;
+        return convertToPost(map);
     }
+
 
     /**
      * 
@@ -281,7 +219,7 @@ public class WordpressClient {
         }
         return result;
     }
-
+    
     /**
      * 
      * http://www.xmlrpc.com/metaWeblogApi
@@ -298,13 +236,12 @@ public class WordpressClient {
 
         Vector<Object> params = new Vector<Object>();
 
-        if(post.getPostId() == null) {
-            params.add(wordpressConnection.getBlogId());
-        } else {
-            params.add(post.getPostId());
-        }
+        params.add(wordpressConnection.getBlogId());
         params.add(wordpressConnection.getUsername());
         params.add(wordpressConnection.getPassword());
+        if(post.getPostId() != null) {
+            params.add(post.getPostId());
+        }
 
         Hashtable<String,Object> map = new Hashtable<String,Object>();
         map.put("title", post.getTitle());
@@ -335,18 +272,14 @@ public class WordpressClient {
         //to publish ?
         params.add( ! post.isDraft());
 
+        String methodName;
         if(post.getPostId() == null) {
-            Object ret = invoke(CREATE_POST_METHOD_NAME, params);
-            int postId = Integer.parseInt(ret.toString());
-            post.setPostId(postId);
+            methodName = CREATE_POST_METHOD_NAME;
         } else {
-            Boolean ret = invoke(UPDATE_POST_METHOD_NAME, params);
-            if( ! ret) {
-                throw new WordpressXmlRpcException("Post edit failed");
-            }
+            methodName = UPDATE_POST_METHOD_NAME;
         }
-
-        return findPostById(post.getPostId());
+        Map<String, Object> ret = invoke(methodName, params);
+        return convertToPost(ret);
     }
 
     /**
@@ -417,6 +350,75 @@ public class WordpressClient {
     	}
     	return alternative;
 	}
+    
+    private WordpressPost convertToPost(Map<String, Object> map) {
+        /*Sample of the response structure:
+         * 
+         * userid=3,
+         * mt_allow_pings=1,
+         * postid=40,
+         * wp_author_id=3,
+         * date_created_gmt=Wed May 04 14:32:57 CEST 2011,
+         * wp_password=,
+         * link=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
+         * mt_keywords=tag1, tag2,
+         * dateCreated=Wed May 04 16:32:57 CEST 2011,
+         * categories=[test],
+         * post_status=publish,
+         * mt_allow_comments=1,
+         * wp_slug=revue-de-presse-xebia-9,
+         * permaLink=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/,
+         * description=coucou c'est un draft,
+         * custom_fields=[],
+         * mt_text_more=,
+         * mt_excerpt=,
+         * sticky=false,
+         * title=Revue de Presse Xebia,
+         * wp_author_display_name=xebia-france
+         */
+
+        WordpressPost post = new WordpressPost();
+        
+        Object postId = map.get("postid");
+        post.setPostId(Integer.valueOf(postId.toString()));
+        post.setDraft(false);
+
+        Object authorId = map.get("wp_author_id");
+        post.setAuthorId(authorId == null ? null : Integer.valueOf(authorId.toString()));
+
+        Date dateCreated = (Date) map.get("dateCreated");
+        post.setDateCreated(dateCreated);
+
+        StringBuilder body = new StringBuilder();
+        if(map.get("description") != null){
+            body.append((String) map.get("description"));
+        }
+        if(map.get("mt_text_more") != null){
+            body.append("<!--more-->");
+            body.append((String) map.get("mt_text_more"));
+        }
+        post.setBody(body.toString());
+
+        String title = (String) map.get("title");
+        post.setTitle(title);
+
+        post.setDraft( ! "publish".equals(map.get("post_status")));
+
+        @SuppressWarnings("unchecked")
+        List<String> categoryNames = (List<String>) map.get("categories");
+        post.setCategoryNames(categoryNames);
+
+        List<String> tagNames = CollectionUtils.split((String) map.get("mt_keywords"), ",");
+        post.setTagNames(tagNames);
+
+        String slug = (String) map.get("wp_slug");
+        post.setPostSlug(slug);
+
+        String permaLink = (String) map.get("permaLink");
+        post.setLink(permaLink);
+
+        return post;
+    }
 
 	@SuppressWarnings("unchecked")
     private <T> T invoke(String methodName, Vector<Object> params) throws WordpressXmlRpcException {

@@ -24,22 +24,6 @@ Author URI: https://github.com/adutra
 License: Apache License v. 2
 */
 
-/*
-Copyright 2011 Alexandre Dutra
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 require_once(ABSPATH . 'wp-includes/post.php');
 require_once(ABSPATH . 'wp-includes/link-template.php');
@@ -56,6 +40,8 @@ add_shortcode( 'permalink', 'c2w_generate_permalink' );
  */
 function c2w_add_xmlrpc_methods( $methods ) {
     $methods['c2w.ping'] = 'c2w_ping';
+    $methods['c2w.newPost'] = 'c2w_new_post';
+    $methods['c2w.editPost'] = 'c2w_edit_post';
     $methods['c2w.getAuthors'] = 'c2w_get_authors';
     $methods['c2w.findPageIdBySlug'] = 'c2w_get_page_id_by_slug';
     $methods['c2w.uploadFile'] = 'c2w_upload_file';
@@ -112,6 +98,43 @@ function c2w_ping($args){
 	
 	return $text;
 }
+
+
+function c2w_new_post ($args) {
+	
+	global $wp_xmlrpc_server;
+	
+	$username = $args[1];
+	$password = $args[2];
+	$post_ID  = $wp_xmlrpc_server->mw_newPost($args);
+	
+	if ( is_wp_error( $post_ID ) )
+			return new IXR_Error(500, $post_ID->get_error_message());
+	if ( !$post_ID )
+		return new IXR_Error(500, __('Could not create post.'));
+	
+	$post = $wp_xmlrpc_server->mw_getPost(array($post_ID, $username, $password));	
+	return $post;
+}
+
+function c2w_edit_post ($args) {
+	
+	global $wp_xmlrpc_server;
+	
+	$username  = $args[1];
+	$password  = $args[2];
+	$post_ID   = (int) $args[3];
+	
+	$result = $wp_xmlrpc_server->mw_editPost($args);
+	if ( is_wp_error( $result ) )
+			return new IXR_Error(500, $result->get_error_message());
+	if ( !$result )
+		return new IXR_Error(500, __('Could not update post.'));
+	
+	$post = $wp_xmlrpc_server->mw_getPost(array($post_ID, $username, $password));	
+	return $post;
+}
+
 
 /**
  * Find a page ID by its post slug.
