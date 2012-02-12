@@ -17,7 +17,7 @@
 <p><strong>$heading.label</strong></p>
 <ul>
 #foreach($subHeading in $heading.children)
-<li><a href="$!postUrl#$subHeading.anchor">$subHeading.label</a></li>
+<li><a href="[permalink]#$subHeading.anchor">$subHeading.label</a></li>
 #end
 </ul>
 #end

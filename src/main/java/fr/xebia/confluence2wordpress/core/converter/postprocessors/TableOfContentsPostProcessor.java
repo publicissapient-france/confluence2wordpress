@@ -26,12 +26,6 @@ public class TableOfContentsPostProcessor implements PostProcessor {
 
     private VelocityHelper velocityHelper = new VelocityHelper();
 
-    private String postUrl;
-    
-    public TableOfContentsPostProcessor(String postUrl) {
-		super();
-		this.postUrl = postUrl;
-	}
 
 	/* (non-Javadoc)
      * @see fr.xebia.confluence2wordpress.core.converter.postprocess.ConversionPostProcessor#postProcess(java.lang.String, org.htmlcleaner.TagNode, fr.xebia.confluence2wordpress.core.converter.ConverterOptions)
@@ -41,7 +35,7 @@ public class TableOfContentsPostProcessor implements PostProcessor {
         if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
             HeadingsCollector collector = new HeadingsCollector();
             body.traverse(collector);
-            String toc = velocityHelper.generateTOC(collector.getHeadings(), postUrl);
+            String toc = velocityHelper.generateTOC(collector.getHeadings());
             return toc + html;
         } else {
             return html;

@@ -37,21 +37,14 @@ public class VelocityHelper {
 	private static final String RDP_HEADER_VM = "/vm/rdp-header.vm";
 
     public String generateHeader() {
-        // Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
-        // Render the Template
-        String result = VelocityUtils.getRenderedTemplate(RDP_HEADER_VM, context);
-        return result;
+        return VelocityUtils.getRenderedTemplate(RDP_HEADER_VM, context);
     }
 
-    public String generateTOC(List<Heading> headings, String postUrl) {
-        // Create the Velocity Context
+    public String generateTOC(List<Heading> headings) {
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         context.put("headings", headings);
-        context.put("postUrl", postUrl);
-        // Render the Template
-        String result = VelocityUtils.getRenderedTemplate(TOC_VM, context);
-        return result;
+        return VelocityUtils.getRenderedTemplate(TOC_VM, context);
     }
     
     public String generateMetadataHtml(ContentEntityObject page, boolean userHasPluginUsagePermission, Metadata metadata) {
@@ -59,17 +52,12 @@ public class VelocityHelper {
         context.put("page", page);
         context.put("metadata", metadata);
         context.put("userHasPluginUsagePermission", userHasPluginUsagePermission);
-        // Render the Template
-        String result = VelocityUtils.getRenderedTemplate(SYNC_INFO_VM, context);
-        return result;
+        return VelocityUtils.getRenderedTemplate(SYNC_INFO_VM, context);
     }
 
     public String generateReadMoreHtml() {
-		// Create the Velocity Context
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
-        // Render the Template
-        String result = VelocityUtils.getRenderedTemplate(MORE_VM, context);
-        return result;
+        return VelocityUtils.getRenderedTemplate(MORE_VM, context);
 	}
 
 }

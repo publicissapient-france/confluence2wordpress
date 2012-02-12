@@ -393,29 +393,10 @@ public class SyncAction extends AbstractPageAwareAction {
         // consider it a creation if no post ID
         WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
         boolean creation = this.metadata.getPostId() == null;
-        //if we do not know yet the final permalink, we need to do it before the actual conversion
-        //from Confluence to Wordpress, because the Converter needs it.
-		//in this case we need Wordpress to generate the permalink for us;
-        //the easiest way is to post it twice
-        if(StringUtils.isEmpty(this.metadata.getPermalink())) {
-        	WordpressPost post = metadata.createPost();
-        	post.setBody(""); // fake body to lighten xml-rpc request
-            post = client.post(post);
-            metadata.updateFromPost(post);
-        }
-        String permalink = metadata.getPermalink();
         WordpressPost post = metadata.createPost();
         post.setBody(createPostBody(false));
         post = client.post(post);
         metadata.updateFromPost(post);
-        //Wordpress changed the permalink: we need to reconvert and resync
-        //happens only when the post status is changed from draft to published
-        if( ! permalink.equals(metadata.getPermalink())) {
-        	post = metadata.createPost();
-            post.setBody(createPostBody(false));
-            post = client.post(post);
-            metadata.updateFromPost(post);
-        }
         pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
         //messages
@@ -531,7 +512,6 @@ public class SyncAction extends AbstractPageAwareAction {
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
         ConverterOptions options = new ConverterOptions();
         options.setPageTitle(metadata.getPageTitle());
-        options.setPostUrl(metadata.getPermalink());
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());

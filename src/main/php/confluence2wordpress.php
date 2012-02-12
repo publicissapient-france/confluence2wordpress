@@ -42,9 +42,12 @@ Copyright 2011 Alexandre Dutra
 
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 require_once(ABSPATH . 'wp-includes/post.php');
+require_once(ABSPATH . 'wp-includes/link-template.php');
 
 add_filter('xmlrpc_methods', 'c2w_add_xmlrpc_methods');
 add_filter('upload_mimes', 'c2w_add_mime_types');
+
+add_shortcode( 'permalink', 'c2w_generate_permalink' );
 
 /**
  * Register new XML-RPC methods.
@@ -67,6 +70,16 @@ function c2w_add_xmlrpc_methods( $methods ) {
 function c2w_add_mime_types( $mimes ) {
     $mimes['xml'] = 'text/xml';
     return $mimes;
+}
+
+/**
+ * Register shortcode for [permalink] macros.
+ * @param array $atts macro attributes (ignored)
+ * @return the current post permalink.
+ */
+function c2w_generate_permalink( $atts ){
+	global $post;
+	return get_permalink($post->ID);
 }
 
 /**

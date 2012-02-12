@@ -30,9 +30,7 @@ public class ConverterOptions {
 
 	private String pageTitle;
 
-    private String postUrl;
-    
-    private URL confluenceRootUrl;
+	private URL confluenceRootUrl;
     
     private boolean omitXmlDeclaration = true;
 
@@ -74,14 +72,6 @@ public class ConverterOptions {
 
 	public void setPageTitle(String pageTitle) {
 		this.pageTitle = pageTitle;
-	}
-
-	public String getPostUrl() {
-		return postUrl;
-	}
-
-	public void setPostUrl(String postUrl) {
-		this.postUrl = postUrl;
 	}
 
 	public boolean isOmitXmlDeclaration() {
