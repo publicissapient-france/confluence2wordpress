@@ -19,8 +19,8 @@ import fr.xebia.confluence2wordpress.util.HtmlUtils;
 
 public class WhitespaceTolerantTagInfo extends TagInfo {
 	
-	public WhitespaceTolerantTagInfo(String name, int contentType, int belongsTo, boolean depricated, boolean unique, boolean ignorePermitted) {
-		super(name, contentType, belongsTo, depricated, unique, ignorePermitted);
+	public WhitespaceTolerantTagInfo(String name, int contentType, int belongsTo, boolean deprecated, boolean unique, boolean ignorePermitted) {
+		super(name, contentType, belongsTo, deprecated, unique, ignorePermitted);
 	}
 
 	@Override
