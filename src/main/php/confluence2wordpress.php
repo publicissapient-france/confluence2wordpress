@@ -104,9 +104,13 @@ function c2w_new_post ($args) {
 	
 	global $wp_xmlrpc_server;
 	
+	$blog_ID  = $args[0];
 	$username = $args[1];
 	$password = $args[2];
-	$post_ID  = $wp_xmlrpc_server->mw_newPost($args);
+	$content_struct = $args[3];
+	$publish  = $args[4];
+	
+	$post_ID  = $wp_xmlrpc_server->mw_newPost(array($blog_ID, $username, $password, $content_struct, $publish));
 	
 	if ( is_wp_error( $post_ID ) )
 			return new IXR_Error(500, $post_ID->get_error_message());
@@ -121,11 +125,14 @@ function c2w_edit_post ($args) {
 	
 	global $wp_xmlrpc_server;
 	
-	$username  = $args[1];
-	$password  = $args[2];
-	$post_ID   = (int) $args[3];
+	$blog_ID  = $args[0];
+	$username = $args[1];
+	$password = $args[2];
+	$post_ID  = (int) $args[3];
+	$content_struct = $args[4];
+	$publish  = $args[5];
 	
-	$result = $wp_xmlrpc_server->mw_editPost($args);
+	$result = $wp_xmlrpc_server->mw_editPost(array($post_ID, $username, $password, $content_struct, $publish));
 	if ( is_wp_error( $result ) )
 			return new IXR_Error(500, $result->get_error_message());
 	if ( !$result )
