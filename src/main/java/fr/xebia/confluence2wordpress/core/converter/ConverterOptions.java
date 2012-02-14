@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -50,7 +49,7 @@ public class ConverterOptions {
 
     private boolean includeTOC = false;
 
-    private Set<UploadedFile> uploadedFiles;
+    private List<UploadedFile> uploadedFiles;
 
     private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
     
@@ -147,11 +146,11 @@ public class ConverterOptions {
         this.includeTOC = includeTOC;
     }
 
-    public Set<UploadedFile> getUploadedFiles() {
+    public List<UploadedFile> getUploadedFiles() {
 		return uploadedFiles;
 	}
 
-	public void setUploadedFiles(Set<UploadedFile> uploadedFiles) {
+	public void setUploadedFiles(List<UploadedFile> uploadedFiles) {
 		this.uploadedFiles = uploadedFiles;
 	}
 

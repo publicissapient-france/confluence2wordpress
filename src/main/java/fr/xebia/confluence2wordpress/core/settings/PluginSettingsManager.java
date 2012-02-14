@@ -18,10 +18,18 @@ package fr.xebia.confluence2wordpress.core.settings;
 import java.util.List;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
-import fr.xebia.confluence2wordpress.wp.WordpressConnectionProperties;
+import fr.xebia.confluence2wordpress.wp.WordpressClient;
 
-public interface PluginSettingsManager extends WordpressConnectionProperties {
+public interface PluginSettingsManager {
 
+    String getWordpressXmlRpcUrl();
+
+    WordpressClient getWordpressClient();
+    
+    String getWordpressMaxConnections();
+    
+    void setWordpressMaxConnections(String maxConnections);
+    
     void setWordpressRootUrl(String wordpressRootUrl);
 
     String getWordpressRootUrl();

@@ -19,7 +19,7 @@
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
 import java.net.URL;
-import java.util.Set;
+import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -36,13 +36,13 @@ import fr.xebia.confluence2wordpress.core.converter.UploadedFile;
  */
 public class AttachmentsProcessor implements TagNodeVisitor {
 
-    private Set<UploadedFile> uploadedFiles;
+    private List<UploadedFile> uploadedFiles;
     
     private String serverRoot;
     
     private String contextPath;
 
-    public AttachmentsProcessor(URL confluenceRootUrl, Set<UploadedFile> uploadedFiles) {
+    public AttachmentsProcessor(URL confluenceRootUrl, List<UploadedFile> uploadedFiles) {
         super();
         this.uploadedFiles = uploadedFiles;
         StringBuffer result = new StringBuffer();

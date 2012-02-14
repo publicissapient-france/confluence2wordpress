@@ -15,13 +15,15 @@
  */
 package fr.xebia.confluence2wordpress.wp;
 
+import java.net.URL;
+
 
 public class WordpressConnection {
 
     /**
      * Wordpress XML RPC URL, typically http://your.domain.here/wordpress/xmlrpc.php
      */
-    private final String url;
+    private final URL url;
 
     /**
      * Wordpress user to connect with. The user must have one of
@@ -37,21 +39,24 @@ public class WordpressConnection {
      * The blog ID (for multi-blog installations).
      */
     private final String blogId;
-    
+
+    private final int maxConnections;
+
     private String proxyHost;
     
     private Integer proxyPort;
-
-    public WordpressConnection(String url, String username, String password) {
+    
+    public WordpressConnection(URL url, String username, String password, int maxConnections) {
         //default (bogus) blog ID
-        this(url, username, password, "1");
+        this(url, username, password, "1", maxConnections);
     }
 
-    public WordpressConnection(String url, String username, String password, String blogId) {
+    public WordpressConnection(URL url, String username, String password, String blogId, int maxConnections) {
         this.url = url;
         this.username = username;
         this.password = password;
         this.blogId = blogId;
+        this.maxConnections = maxConnections;
     }
 
     public String getBlogId() {
@@ -66,11 +71,15 @@ public class WordpressConnection {
         return username;
     }
 
-    public String getUrl() {
+    public URL getUrl() {
         return url;
     }
     
-    public String getProxyHost() {
+    public int getMaxConnections() {
+		return maxConnections;
+	}
+
+	public String getProxyHost() {
         return proxyHost;
     }
     

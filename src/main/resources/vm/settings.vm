@@ -174,8 +174,16 @@
         <label for="proxyPort">
             $action.getText("settings.form.proxyPort.label")
         </label>
-        <input class="text long-field" type="text" id="proxyPort" name="proxyPort" value="$!action.proxyPort" title="$action.getText("settings.form.proxyPort.label")">
+        <input class="text short-field" type="text" id="proxyPort" name="proxyPort" value="$!action.proxyPort" title="$action.getText("settings.form.proxyPort.label")">
         <div class="description">$action.getText("settings.form.proxyPort.description")</div>
+      </div>
+      
+      <div class="field-group">
+        <label for="wordpressMaxConnections">
+            $action.getText("settings.form.wordpressMaxConnections.label")&nbsp;<span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input class="text short-field" type="text" id="wordpressMaxConnections" name="wordpressMaxConnections" value="$action.wordpressMaxConnections" title="$action.getText("settings.form.wordpressMaxConnections.label")">
+        <div class="description">$action.getText("settings.form.wordpressMaxConnections.description")</div>
       </div>
       
       <div class="buttons-container">

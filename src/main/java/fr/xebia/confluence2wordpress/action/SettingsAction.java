@@ -15,6 +15,8 @@
  */
 package fr.xebia.confluence2wordpress.action;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,20 +39,20 @@ import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
 import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
-import fr.xebia.confluence2wordpress.wp.WordpressClientFactory;
-import fr.xebia.confluence2wordpress.wp.WordpressConnectionProperties;
 import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
 
 /**
  * @author Alexandre Dutra
  */
-public class SettingsAction extends ConfluenceActionSupport implements WordpressConnectionProperties {
+public class SettingsAction extends ConfluenceActionSupport {
 
     private static final long serialVersionUID = 5175072542211533080L;
 
     private static final String ERRORS_REQUIRED_KEY = "settings.errors.required.field";
 
     private static final String ERRORS_INTEGER_KEY = "settings.errors.integer.field";
+
+    private static final String ERRORS_URL_KEY = "settings.errors.url";
 
     private static final String ERRORS_PING = "settings.errors.ping";
 
@@ -80,6 +82,8 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
 
     private String proxyPort;
 
+    private String maxConnections;
+
     private String allowedConfluenceGroups;
     
     private String allowedConfluenceSpaceKeys;
@@ -93,8 +97,6 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
     private GroupManager groupManager;
     
     private SpaceManager spaceManager;
-    
-    private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
     
     private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
     
@@ -152,37 +154,52 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
     @Override
     public void validate() {
         if (StringUtils.isBlank(getWordpressRootUrl())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY), getText("settings.form.wordpressRootUrl.label"));
+            addActionError(getText(ERRORS_REQUIRED_KEY), new Object[]{getText("settings.form.wordpressRootUrl.label")});
         }
         if (StringUtils.isBlank(getWordpressXmlRpcRelativePath())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressXmlRpcRelativePath.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.wordpressXmlRpcRelativePath.label")}));
         }
         if (StringUtils.isBlank(getEditPostRelativePath())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.editPostRelativePath.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.editPostRelativePath.label")}));
         }
         if (StringUtils.isBlank(getWordpressUserName())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressUserName.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.wordpressUserName.label")}));
         }
         if (StringUtils.isBlank(getWordpressPassword())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressPassword.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.wordpressPassword.label")}));
         }
         if (StringUtils.isBlank(getWordpressBlogId())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.wordpressBlogId.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.wordpressBlogId.label")}));
         }
         if (StringUtils.isBlank(getSyntaxHighlighterPlugin())) {
-            addActionError(getText(ERRORS_REQUIRED_KEY, getText("settings.form.syntaxHighlighterPlugin.label")));
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.syntaxHighlighterPlugin.label")}));
+        }
+        if (StringUtils.isBlank(getWordpressMaxConnections())) {
+            addActionError(getText(ERRORS_REQUIRED_KEY, new Object[]{getText("settings.form.wordpressMaxConnections.label")}));
         }
         if (StringUtils.isNotBlank(getProxyPort())) {
         	try {
 				Integer.decode(getProxyPort());
 			} catch (NumberFormatException e) {
-				addActionError(getText(ERRORS_INTEGER_KEY, getText("settings.form.proxyPort.label")));
+				addActionError(getText(ERRORS_INTEGER_KEY, new Object[]{getText("settings.form.proxyPort.label")}));
 			}
         }
+        if (StringUtils.isNotBlank(getWordpressMaxConnections())) {
+        	try {
+				Integer.decode(getWordpressMaxConnections());
+			} catch (NumberFormatException e) {
+				addActionError(getText(ERRORS_INTEGER_KEY, new Object[]{getText("settings.form.wordpressMaxConnections.label")}));
+			}
+        }
+        try {
+			new URL(getWordpressRootUrl() + getWordpressXmlRpcRelativePath());
+		} catch (MalformedURLException e) {
+			addActionError(getText(ERRORS_URL_KEY, new Object[]{pluginSettingsManager.getWordpressXmlRpcUrl()}));
+		}
     }
     
     public String input() throws Exception {
-        actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);        
+        actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);
         wordpressRootUrl = pluginSettingsManager.getWordpressRootUrl();
         ignoredConfluenceMacros = pluginSettingsManager.getDefaultIgnoredConfluenceMacros();
         wordpressXmlRpcRelativePath = pluginSettingsManager.getWordpressXmlRpcRelativePath();
@@ -192,6 +209,7 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
         editPostRelativePath = pluginSettingsManager.getWordpressEditPostRelativePath();
         proxyHost = pluginSettingsManager.getProxyHost();
         proxyPort = pluginSettingsManager.getProxyPort();
+        maxConnections = pluginSettingsManager.getWordpressMaxConnections();
         syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
         allowedConfluenceGroups = pluginSettingsManager.getAllowedConfluenceGroups();
         allowedConfluenceSpaceKeys = pluginSettingsManager.getAllowedConfluenceSpaceKeys();
@@ -213,6 +231,7 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
         pluginSettingsManager.setWordpressSyntaxHighlighterPlugin(syntaxHighlighterPlugin);
         pluginSettingsManager.setAllowedConfluenceGroups(allowedConfluenceGroups);
         pluginSettingsManager.setAllowedConfluenceSpaceKeys(allowedConfluenceSpaceKeys);
+        pluginSettingsManager.setWordpressMaxConnections(maxConnections);
         this.addActionMessage(getText(MSG_UPDATE));
         actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
         return SUCCESS;
@@ -220,7 +239,7 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
 
     public String testConnection(){
         normalizeUrls();
-        WordpressClient client = wordpressClientFactory.newWordpressClient(this);
+        WordpressClient client = pluginSettingsManager.getWordpressClient();
         try {
             String expected = Long.toString(System.currentTimeMillis());
             String actual = client.ping(expected);
@@ -245,11 +264,6 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
         if(editPostRelativePath.startsWith("/")){
             editPostRelativePath = editPostRelativePath.substring(1);
         }
-    }
-
-    @Override
-    public String getWordpressXmlRpcUrl() {
-        return getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
     }
 
     public String getPageUrl() {
@@ -339,7 +353,15 @@ public class SettingsAction extends ConfluenceActionSupport implements Wordpress
 	public void setProxyPort(String proxyPort) {
 		this.proxyPort = proxyPort;
 	}
+	
+	public String getWordpressMaxConnections() {
+        return maxConnections;
+    }
 
+    public void setWordpressMaxConnections(String maxConnections) {
+        this.maxConnections = maxConnections;
+    }
+    
 	public SyntaxHighlighterPlugin[] getSyntaxHighlighterPlugins() {
 		return SyntaxHighlighterPlugin.values();
 	}

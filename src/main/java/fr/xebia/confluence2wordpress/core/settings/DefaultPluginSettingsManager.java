@@ -15,19 +15,26 @@
  */
 package fr.xebia.confluence2wordpress.core.settings;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.DisposableBean;
 
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.util.CollectionUtils;
+import fr.xebia.confluence2wordpress.wp.WordpressClient;
+import fr.xebia.confluence2wordpress.wp.WordpressConnection;
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class DefaultPluginSettingsManager implements PluginSettingsManager {
+public class DefaultPluginSettingsManager implements PluginSettingsManager, DisposableBean {
 
     private static final String KEY_PREFIX = "fr.xebia.confluence2wordpress:";
 
@@ -45,13 +52,193 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private static final String DEFAULT_WP_EDIT_POST_RELATIVE_PATH = "wp-admin/post.php?action=edit&post={0}";
 
+    private static final String DEFAULT_WP_XML_RPC_MAX_CONNECTIONS = "10";
+
     private static final String DEFAULT_WP_SH_PLUGIN = SyntaxHighlighterPlugin.SH_EVOLVED.name();
 
     private PluginSettingsFactory pluginSettingsFactory;
 
+    private WordpressClient client;
+    
     public DefaultPluginSettingsManager(PluginSettingsFactory pluginSettingsFactory) {
         this.pluginSettingsFactory = pluginSettingsFactory;
     }
+
+	@Override
+	public void destroy() throws Exception {
+		this.destroyClient();
+	}
+
+    @Override
+	public synchronized WordpressClient getWordpressClient() {
+		if(client == null) {
+			createClient();
+		}
+		return client;
+	}
+
+	@Override
+    public String getWordpressXmlRpcUrl() {
+        return getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
+    }
+
+    @Override
+    public void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath){
+    	this.destroyClient();
+        storeSettings("wordpressXmlRpcRelativePath", wordpressXmlRpcRelativePath);
+    }
+
+    @Override
+    public String getWordpressXmlRpcRelativePath(){
+        return retrieveSettings("wordpressXmlRpcRelativePath", DEFAULT_WP_XML_RPC_RELATIVE_PATH);
+    }
+
+    @Override
+    public void setProxyHost(String proxyHost){
+    	this.destroyClient();
+        storeSettings("proxyHost", proxyHost);
+    }
+
+    @Override
+    public String getProxyHost(){
+        return retrieveSettings("proxyHost", null);
+    }
+    
+    @Override
+    public void setProxyPort(String proxyPort){
+    	this.destroyClient();
+        storeSettings("proxyPort", proxyPort);
+    }
+
+    @Override
+    public String getProxyPort(){
+        return retrieveSettings("proxyPort", null);
+    }
+
+	@Override
+	public void setWordpressMaxConnections(String maxConnections) {
+		this.destroyClient();
+        storeSettings("maxConnections", maxConnections);
+	}
+
+	@Override
+	public String getWordpressMaxConnections() {
+		return retrieveSettings("maxConnections", DEFAULT_WP_XML_RPC_MAX_CONNECTIONS);
+	}
+
+    @Override
+    public void setWordpressUserName(String wordpressUserName){
+    	this.destroyClient();
+        storeSettings("wordpressUserName", wordpressUserName);
+    }
+
+    @Override
+    public String getWordpressUserName(){
+        return retrieveSettings("wordpressUserName", DEFAULT_WP_XML_RPC_USERNAME);
+    }
+
+    @Override
+    public void setWordpressPassword(String wordpressPassword){
+    	this.destroyClient();
+        storeSettings("wordpressPassword", wordpressPassword);
+    }
+
+    @Override
+    public String getWordpressPassword(){
+        return retrieveSettings("wordpressPassword", DEFAULT_WP_XML_RPC_PASSWORD);
+    }
+
+    @Override
+    public void setWordpressBlogId(String wordpressBlogId){
+    	this.destroyClient();
+        storeSettings("wordpressBlogId", wordpressBlogId);
+    }
+
+    @Override
+    public String getWordpressBlogId(){
+        return retrieveSettings("wordpressBlogId", DEFAULT_WP_XML_RPC_BLOG_ID);
+    }
+
+    @Override
+    public void setWordpressEditPostRelativePath(String wordpressXmlRpcRelativePath){
+        storeSettings("wordpressEditPostRelativePath", wordpressXmlRpcRelativePath);
+    }
+
+    @Override
+    public String getWordpressEditPostRelativePath(){
+        return retrieveSettings("wordpressEditPostRelativePath", DEFAULT_WP_EDIT_POST_RELATIVE_PATH);
+    }
+
+    @Override
+    public void setDefaultIgnoredConfluenceMacros(String ignoredConfluenceMacros){
+        storeSettings("ignoredConfluenceMacros", ignoredConfluenceMacros);
+    }
+
+    @Override
+    public String getDefaultIgnoredConfluenceMacros(){
+        return retrieveSettings("ignoredConfluenceMacros", DEFAULT_IGNORED_CONFLUENCE_MACROS);
+    }
+
+    @Override
+    public List<String> getDefaultIgnoredConfluenceMacrosAsList(){
+        return CollectionUtils.split(getDefaultIgnoredConfluenceMacros(), ",");
+    }
+
+    @Override
+    public void setAllowedConfluenceGroups(String allowedConfluenceGroups){
+        storeSettings("allowedConfluenceGroups", allowedConfluenceGroups);
+    }
+
+    @Override
+    public String getAllowedConfluenceGroups(){
+        return retrieveSettings("allowedConfluenceGroups", null);
+    }
+
+    @Override
+    public List<String> getAllowedConfluenceGroupsAsList(){
+        return CollectionUtils.split(getAllowedConfluenceGroups(), ",");
+    }
+
+    @Override
+    public void setAllowedConfluenceSpaceKeys(String allowedConfluenceSpaceKeys) {
+        storeSettings("allowedConfluenceSpaceKeys", allowedConfluenceSpaceKeys);
+    }
+
+    @Override
+    public String getAllowedConfluenceSpaceKeys() {
+        return retrieveSettings("allowedConfluenceSpaceKeys", null);
+    }
+
+    @Override
+    public List<String> getAllowedConfluenceSpaceKeysAsList() {
+        return CollectionUtils.split(getAllowedConfluenceSpaceKeys(), ",");
+    }
+
+    @Override
+    public void setWordpressRootUrl(String wordpressRootUrl){
+    	this.destroyClient();
+        storeSettings("wordpressRootUrl", wordpressRootUrl);
+    }
+
+    @Override
+    public String getWordpressRootUrl(){
+        return retrieveSettings("wordpressRootUrl", DEFAULT_WORDPRESS_ROOT_URL);
+    }
+    
+    @Override
+    public void setWordpressSyntaxHighlighterPlugin(String wordpressSyntaxHighlighterPlugin){
+        storeSettings("wordpressSyntaxHighlighterPlugin", wordpressSyntaxHighlighterPlugin);
+    }
+
+    @Override
+    public String getWordpressSyntaxHighlighterPlugin(){
+        return retrieveSettings("wordpressSyntaxHighlighterPlugin", DEFAULT_WP_SH_PLUGIN);
+    }
+
+	@Override
+    public SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum() {
+		return SyntaxHighlighterPlugin.valueOf(getWordpressSyntaxHighlighterPlugin());
+	}
 
     private String retrieveSettings(String settingsKey, String defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
@@ -68,234 +255,27 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
         pluginSettings.put(KEY_PREFIX + settingsKey, value);
     }
 
-
-    @Override
-    public String getWordpressXmlRpcUrl() {
-        return getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressXmlRpcRelativePath(java.lang.String)
-     */
-    @Override
-    public void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath){
-        storeSettings("wordpressXmlRpcRelativePath", wordpressXmlRpcRelativePath);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressXmlRpcRelativePath()
-     */
-    @Override
-    public String getWordpressXmlRpcRelativePath(){
-        return retrieveSettings("wordpressXmlRpcRelativePath", DEFAULT_WP_XML_RPC_RELATIVE_PATH);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setProxyHost(java.lang.String)
-     */
-    @Override
-    public void setProxyHost(String proxyHost){
-        storeSettings("proxyHost", proxyHost);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getProxyHost()
-     */
-    @Override
-    public String getProxyHost(){
-        return retrieveSettings("proxyHost", null);
-    }
-    
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setProxyPort(java.lang.String)
-     */
-    @Override
-    public void setProxyPort(String proxyPort){
-        storeSettings("proxyPort", proxyPort);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getProxyPort()
-     */
-    @Override
-    public String getProxyPort(){
-        return retrieveSettings("proxyPort", null);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressEditPostRelativePath(java.lang.String)
-     */
-    @Override
-    public void setWordpressEditPostRelativePath(String wordpressXmlRpcRelativePath){
-        storeSettings("wordpressEditPostRelativePath", wordpressXmlRpcRelativePath);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressEditPostRelativePath()
-     */
-    @Override
-    public String getWordpressEditPostRelativePath(){
-        return retrieveSettings("wordpressEditPostRelativePath", DEFAULT_WP_EDIT_POST_RELATIVE_PATH);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressUserName(java.lang.String)
-     */
-    @Override
-    public void setWordpressUserName(String wordpressUserName){
-        storeSettings("wordpressUserName", wordpressUserName);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressUserName()
-     */
-    @Override
-    public String getWordpressUserName(){
-        return retrieveSettings("wordpressUserName", DEFAULT_WP_XML_RPC_USERNAME);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressPassword(java.lang.String)
-     */
-    @Override
-    public void setWordpressPassword(String wordpressPassword){
-        storeSettings("wordpressPassword", wordpressPassword);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressPassword()
-     */
-    @Override
-    public String getWordpressPassword(){
-        return retrieveSettings("wordpressPassword", DEFAULT_WP_XML_RPC_PASSWORD);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressBlogId(java.lang.String)
-     */
-    @Override
-    public void setWordpressBlogId(String wordpressBlogId){
-        storeSettings("wordpressBlogId", wordpressBlogId);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressBlogId()
-     */
-    @Override
-    public String getWordpressBlogId(){
-        return retrieveSettings("wordpressBlogId", DEFAULT_WP_XML_RPC_BLOG_ID);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setDefaultIgnoredConfluenceMacros(java.lang.String)
-     */
-    @Override
-    public void setDefaultIgnoredConfluenceMacros(String ignoredConfluenceMacros){
-        storeSettings("ignoredConfluenceMacros", ignoredConfluenceMacros);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getDefaultIgnoredConfluenceMacros()
-     */
-    @Override
-    public String getDefaultIgnoredConfluenceMacros(){
-        return retrieveSettings("ignoredConfluenceMacros", DEFAULT_IGNORED_CONFLUENCE_MACROS);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getDefaultIgnoredConfluenceMacrosAsList()
-     */
-    @Override
-    public List<String> getDefaultIgnoredConfluenceMacrosAsList(){
-        return CollectionUtils.split(getDefaultIgnoredConfluenceMacros(), ",");
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setAllowedConfluenceGroups(java.lang.String)
-     */
-    @Override
-    public void setAllowedConfluenceGroups(String allowedConfluenceGroups){
-        storeSettings("allowedConfluenceGroups", allowedConfluenceGroups);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getAllowedConfluenceGroups()
-     */
-    @Override
-    public String getAllowedConfluenceGroups(){
-        return retrieveSettings("allowedConfluenceGroups", null);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getAllowedConfluenceGroupsAsList()
-     */
-    @Override
-    public List<String> getAllowedConfluenceGroupsAsList(){
-        return CollectionUtils.split(getAllowedConfluenceGroups(), ",");
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setAllowedConfluenceSpaceKeys(java.lang.String)
-     */
-    @Override
-    public void setAllowedConfluenceSpaceKeys(String allowedConfluenceSpaceKeys) {
-        storeSettings("allowedConfluenceSpaceKeys", allowedConfluenceSpaceKeys);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getAllowedConfluenceSpaceKeys()
-     */
-    @Override
-    public String getAllowedConfluenceSpaceKeys() {
-        return retrieveSettings("allowedConfluenceSpaceKeys", null);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getAllowedConfluenceSpaceKeysAsList()
-     */
-    @Override
-    public List<String> getAllowedConfluenceSpaceKeysAsList() {
-        return CollectionUtils.split(getAllowedConfluenceSpaceKeys(), ",");
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressRootUrl(java.lang.String)
-     */
-    @Override
-    public void setWordpressRootUrl(String wordpressRootUrl){
-        storeSettings("wordpressRootUrl", wordpressRootUrl);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressRootUrl()
-     */
-    @Override
-    public String getWordpressRootUrl(){
-        return retrieveSettings("wordpressRootUrl", DEFAULT_WORDPRESS_ROOT_URL);
-    }
-    
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#setWordpressSyntaxHighlighterPlugin(java.lang.String)
-     */
-    @Override
-    public void setWordpressSyntaxHighlighterPlugin(String wordpressSyntaxHighlighterPlugin){
-        storeSettings("wordpressSyntaxHighlighterPlugin", wordpressSyntaxHighlighterPlugin);
-    }
-
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressSyntaxHighlighterPlugin()
-     */
-    @Override
-    public String getWordpressSyntaxHighlighterPlugin(){
-        return retrieveSettings("wordpressSyntaxHighlighterPlugin", DEFAULT_WP_SH_PLUGIN);
-    }
-
-	/* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager#getWordpressSyntaxHighlighterPluginAsEnum()
-     */
-	@Override
-    public SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum() {
-		return SyntaxHighlighterPlugin.valueOf(getWordpressSyntaxHighlighterPlugin());
+	private synchronized void createClient() {
+		try {
+			URL url = new URL(getWordpressXmlRpcUrl());
+			WordpressConnection wordpressConnection = new WordpressConnection(
+	            url,
+	            getWordpressUserName(),
+	            getWordpressPassword(),
+	            getWordpressBlogId(),
+	            Integer.parseInt(getWordpressMaxConnections())
+				);
+	        wordpressConnection.setProxyHost(getProxyHost());
+			wordpressConnection.setProxyPort(StringUtils.isEmpty(getProxyPort()) ? null : Integer.decode(getProxyHost()));
+	        this.client = new WordpressClient(wordpressConnection);
+		} catch (MalformedURLException e) {
+			//this has been validated previously
+		}
 	}
 
+	private synchronized void destroyClient() {
+        this.client.destroy();
+        this.client = null;
+	}
+	
 }

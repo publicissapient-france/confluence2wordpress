@@ -20,13 +20,15 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -56,7 +58,6 @@ import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
 import fr.xebia.confluence2wordpress.util.CollectionUtils;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
-import fr.xebia.confluence2wordpress.wp.WordpressClientFactory;
 import fr.xebia.confluence2wordpress.wp.WordpressFile;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 import fr.xebia.confluence2wordpress.wp.WordpressTag;
@@ -124,8 +125,6 @@ public class SyncAction extends AbstractPageAwareAction {
     private PageLabelsSynchronizer pageLabelsSynchronizer;
     
     private boolean allowPostOverride = false;
-
-    private WordpressClientFactory wordpressClientFactory = new WordpressClientFactory();
 
     private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
     
@@ -334,16 +333,16 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     private void checkPostSlugAvailability() throws WordpressXmlRpcException {
-        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
+        WordpressClient client = pluginSettingsManager.getWordpressClient();
         Integer retrievedPostId = client.findPageIdBySlug(getMetadata().getPostSlug());
         if (retrievedPostId != null && ! retrievedPostId.equals(getMetadata().getPostId())){
-            addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY), retrievedPostId);
+            addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY), new Object[]{retrievedPostId});
         }
     }
 
     private void checkConcurrentPostModification() throws WordpressXmlRpcException {
         if(getMetadata().getPostId() != null){
-            WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
+            WordpressClient client = pluginSettingsManager.getWordpressClient();
             WordpressPost post = client.findPostById(getMetadata().getPostId());
             if(post == null || ! StringUtils.equals(post.getDigest(), getMetadata().getDigest())){
                 addActionError(getText(ERRORS_DIGEST_CONCURRENT_MODIFICATION_KEY));
@@ -362,8 +361,10 @@ public class SyncAction extends AbstractPageAwareAction {
      * @return The action result.
      * @throws MetadataException 
      * @throws WordpressXmlRpcException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
      */
-    public String input() throws MetadataException, WordpressXmlRpcException {
+    public String input() throws MetadataException, WordpressXmlRpcException, InterruptedException, ExecutionException {
         actionMessagesManager.restoreActionErrorsAndMessagesFromSession(this);
         initSessionElements();
         initMetadata();
@@ -388,10 +389,12 @@ public class SyncAction extends AbstractPageAwareAction {
      * @throws IOException 
      * @throws WordpressXmlRpcException 
      * @throws MetadataException 
+     * @throws ExecutionException 
+     * @throws InterruptedException 
      */
-    public String sync() throws IOException, WordpressXmlRpcException, MetadataException {
+    public String sync() throws IOException, WordpressXmlRpcException, MetadataException, InterruptedException, ExecutionException {
         // consider it a creation if no post ID
-        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
+        WordpressClient client = pluginSettingsManager.getWordpressClient();
         boolean creation = this.metadata.getPostId() == null;
         WordpressPost post = metadata.createPost();
         post.setBody(createPostBody(false));
@@ -409,9 +412,12 @@ public class SyncAction extends AbstractPageAwareAction {
         return SUCCESS;
     }
 
-    private void initSessionElements() throws WordpressXmlRpcException {
+    private void initSessionElements() throws WordpressXmlRpcException, InterruptedException, ExecutionException {
         if(getWordpressUsers() == null) {
-            WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
+            WordpressClient client = pluginSettingsManager.getWordpressClient();
+            Future<List<WordpressUser>> futureUsers = client.getUsers();
+            Future<List<WordpressCategory>> futureCategories = client.getCategories();
+            Future<List<WordpressTag>> futureTags = client.getTags();
             Set<WordpressUser> users = new TreeSet<WordpressUser>(new Comparator<WordpressUser>(){
                 @Override public int compare(WordpressUser o1, WordpressUser o2) {
                     return new CompareToBuilder().
@@ -420,7 +426,7 @@ public class SyncAction extends AbstractPageAwareAction {
                         toComparison();
                 }
             });
-            users.addAll(client.getUsers());
+			users.addAll(futureUsers.get());
             setWordpressUsers(users);
             Set<WordpressCategory> categories = new TreeSet<WordpressCategory>(new Comparator<WordpressCategory>() {
                 @Override public int compare(WordpressCategory o1, WordpressCategory o2) {
@@ -429,7 +435,7 @@ public class SyncAction extends AbstractPageAwareAction {
                     toComparison();
                 }
             });
-            categories.addAll(client.getCategories());
+			categories.addAll(futureCategories.get());
             setWordpressCategories(categories);
             Set<WordpressTag> tags = new TreeSet<WordpressTag>(new Comparator<WordpressTag>() {
                 @Override public int compare(WordpressTag o1, WordpressTag o2) {
@@ -438,7 +444,7 @@ public class SyncAction extends AbstractPageAwareAction {
                     toComparison();
                 }
             });
-            tags.addAll(client.getTags()); 
+			tags.addAll(futureTags.get()); 
             setWordpressTags(tags);
         }
         if(getAvailableMacros() == null){
@@ -491,25 +497,7 @@ public class SyncAction extends AbstractPageAwareAction {
         this.ignoredConfluenceMacrosAsString = CollectionUtils.join(getMetadata().getIgnoredConfluenceMacros(), ", ");
     }
 
-    private Set<UploadedFile> uploadFiles() throws WordpressXmlRpcException, IOException {
-        AbstractPage page = getPage();
-        Set<UploadedFile> uploadedFiles = new HashSet<UploadedFile>();
-        WordpressClient client = wordpressClientFactory.newWordpressClient(pluginSettingsManager);
-        List<Attachment> attachments = attachmentManager.getAttachments(page);
-        //cannot be donne in parallel, something on Confluence and/or Wordpress side is not thread-safe :(
-        for (Attachment attachment : attachments) {
-            byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
-            WordpressFile file = new WordpressFile(
-                attachment.getFileName(),
-                attachment.getContentType(),
-                data);
-            file = client.uploadFile(file);
-            uploadedFiles.add(new UploadedFile(attachment, file));
-        }
-        return uploadedFiles;
-    }
-
-    private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException {
+    private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException {
         ConverterOptions options = new ConverterOptions();
         options.setPageTitle(metadata.getPageTitle());
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
@@ -517,10 +505,34 @@ public class SyncAction extends AbstractPageAwareAction {
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
         options.setConfluenceRootUrl(new URL(getConfluenceRootUrl()));
         if( ! preview){
-            Set<UploadedFile> uploadedFiles = uploadFiles();
+        	List<UploadedFile> uploadedFiles = uploadFiles();
             options.setUploadedFiles(uploadedFiles);
         }
         return getConverter().convert(getPage(), options);
+    }
+
+    private List<UploadedFile> uploadFiles() throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException {
+        AbstractPage page = getPage();
+        List<Attachment> attachments = attachmentManager.getAttachments(page);
+        if(attachments == null || attachments.isEmpty()) {
+        	return null;
+        }
+        int size = attachments.size();
+        final WordpressClient client = pluginSettingsManager.getWordpressClient();
+        List<Future<WordpressFile>> files = new ArrayList<Future<WordpressFile>>(size);
+    	for (final Attachment attachment : attachments) {
+			byte[] data = IOUtils.toByteArray(attachment.getContentsAsStream());
+            WordpressFile file = new WordpressFile(
+                attachment.getFileName(),
+                attachment.getContentType(),
+                data);
+            files.add(client.uploadFile(file));
+        }
+    	List<UploadedFile> uploadedFiles = new ArrayList<UploadedFile>(size);
+    	for (int i = 0; i < size; i++) {
+    		uploadedFiles.add(new UploadedFile(attachments.get(i), files.get(i).get()));
+		}
+        return uploadedFiles;
     }
 
 }
