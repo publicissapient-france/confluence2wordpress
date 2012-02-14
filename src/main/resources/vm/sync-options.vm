@@ -249,7 +249,7 @@
         <input type="submit" class="button submit" value="$action.getText("sync.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />
         <input type="submit" class="button submit" value="$action.getText("sync.form.button.preview")" onclick="this.form.target='_blank';this.form.action='preview.action'" />
         #if($action.remoteUserHasConfigurationPermission)
-        <a href="settings.action?pageUrl=/confluence2wordpress/sync.action?pageId=$action.pageId">$action.getText("sync.form.link.settings")</a>
+        <a href="settings.action?pageUrl=/confluence2wordpress/syncOptions.action?pageId=$action.pageId">$action.getText("sync.form.link.settings")</a>
         &nbsp;
         #end
         |&nbsp;
