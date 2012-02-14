@@ -149,7 +149,8 @@
             $action.getText("sync.form.dateCreated.label")
         </label>
         <input id="dateCreated" name="dateCreated" type="text medium-field" value="$!action.dateCreated" class="text"/>
-        <div class="description">$action.getText("sync.form.dateCreated.description")</div>
+        #set ($args = [ $action.getText($dateFormatter.timeZone.messageKey) ])
+        <div class="description">$action.getText("sync.form.dateCreated.description", $args)</div>
     </div>
 
     <script type="text/javascript">
