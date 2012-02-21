@@ -50,7 +50,7 @@
                     <artifactId>google-collections</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>dom44j</groupId>
+                    <groupId>dom4j</groupId>
                     <artifactId>dom4j</artifactId>
                 </exclusion>
             </exclusions>
