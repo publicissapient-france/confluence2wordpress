@@ -16,6 +16,7 @@
 package fr.xebia.confluence2wordpress.core.settings;
 
 import java.util.List;
+import java.util.Map;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
@@ -85,5 +86,9 @@ public interface PluginSettingsManager {
     String getWordpressSyntaxHighlighterPlugin();
 
     SyntaxHighlighterPlugin getWordpressSyntaxHighlighterPluginAsEnum();
+    
+    Map<String,String> getDefaultTagAttributes();
+
+    void setTagAttributes(Map<String,String> attributes);
 
 }

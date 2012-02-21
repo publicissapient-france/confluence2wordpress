@@ -42,6 +42,10 @@ public class HtmlUtils{
         return text.replace("<", "&lt;").replace("&", "&amp;");
     }
     
+	public static String escapeQuotes(String text) {
+        return text.replace("\"", "&quot;");
+    }
+	
     public static boolean isHtmlWhitespace(String text){
 		return StringUtils.containsOnly(text,WHITESPACE);
     }

@@ -18,6 +18,7 @@ package fr.xebia.confluence2wordpress.core.metadata;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 
@@ -52,6 +53,9 @@ public class Metadata implements Serializable {
 
     @MetadataItem("Ignored Confluence Macros")
     private List<String> ignoredConfluenceMacros;
+
+    @MetadataItem("Tag Attributes")
+    private Map<String,String> tagAttributes;
 
     @MetadataItem("Optimize for Press Review")
     private boolean optimizeForRDP;
@@ -187,7 +191,15 @@ public class Metadata implements Serializable {
         this.dateCreated = dateCreated;
     }
 
-    public WordpressPost createPost() {
+    public Map<String, String> getTagAttributes() {
+		return tagAttributes;
+	}
+
+	public void setTagAttributes(Map<String, String> tagAttributes) {
+		this.tagAttributes = tagAttributes;
+	}
+
+	public WordpressPost createPost() {
         WordpressPost post = new WordpressPost();
         post.setDraft(this.isDraft());
         post.setPostId(this.getPostId());
@@ -214,16 +226,16 @@ public class Metadata implements Serializable {
         this.setCategoryNames(post.getCategoryNames());
         this.setTagNames(post.getTagNames());
         String permalink = post.getLink();
-		if(post.isDraft()) {
-			//it seems that WP does not always send back the query string
-			//containing "preview=true"...
-        	if( permalink.contains("?p=") && ! permalink.contains("preview=true")) {
-        		permalink += "&preview=true";
-        	}
-            this.setPermalink(permalink);
-        } else {
-            this.setPermalink(permalink);
+		//it seems that WP does not always send back the query string
+		//containing "preview=true"...
+		if(post.isDraft() && ! permalink.contains("preview=true")) {
+			if(permalink.contains("?")){
+	    		permalink += "&preview=true";
+			} else {
+	    		permalink += "?preview=true";
+			}
         }
+        this.setPermalink(permalink);
         this.setDigest(post.getDigest());
     }
 

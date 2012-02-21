@@ -18,7 +18,7 @@
 <head>
     <title>$action.page.displayTitle - $action.getText("sync.title")</title>
     <meta name="decorator" content="atl.general"/>
-    #requireResource("fr.xebia.confluence2wordpress:c2w-conversion-resources")
+    #requireResource("fr.xebia.confluence2wordpress:conversion-resources")
     #requireResource($action.getText("sync.js.datepicker.resource"))
 </head>
 <body>
@@ -77,6 +77,38 @@
             autoCompleteMultiple('ignoredConfluenceMacros', availableMacros, 2);
          });
     </script>
+    
+    <div class="field-group">
+        <label>
+            $action.getText("sync.form.tagAttributes.label")
+        </label>
+        <table id="tagAttributes" style="clear:none">
+	        <thead>
+	        	<tr>
+	        		<td>$action.getText("sync.form.tagName.label")&nbsp;<span class="form-icon aui-icon icon-required"/></td>
+	        		<td>$action.getText("sync.form.tagAttribute.label")&nbsp;<span class="form-icon aui-icon icon-required"/></td>
+	        	</tr>
+	        </thead>
+	        <tbody></tbody>
+	    </table>
+	    <input id="tagAttributes-add" class="button" type="button" value="$action.getText("sync.form.tagAttributes.add.label")" style="margin:0" />
+        <div class="description">$action.getText("sync.form.tagAttributes.description")</div>
+	</div>
+      
+	<script type="text/javascript">
+
+        jQuery(document).ready(function() {
+        	var tagAttributesManager = new TagAttributesManager('tagAttributes', '$action.getText("sync.form.tagAttributes.delete.label")');
+		    tagAttributesManager.init();
+		    #if( ! $action.tagNames.empty )
+		    #set( $size = $action.tagNames.size() - 1 )
+		    #foreach ($i in [0 .. $size])
+		    tagAttributesManager.addTagAttributesRow("$!action.tagNames.get($i)", "$!action.tagAttributes.get($i)");
+		    #end
+		    #end
+        });
+         
+	</script>
     
     <fieldset class="group">
       <div class="checkbox">

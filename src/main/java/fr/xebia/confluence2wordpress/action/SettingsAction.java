@@ -17,10 +17,13 @@ package fr.xebia.confluence2wordpress.action;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -33,6 +36,7 @@ import com.atlassian.user.EntityException;
 import com.atlassian.user.Group;
 import com.atlassian.user.GroupManager;
 import com.atlassian.user.search.page.Pager;
+import com.opensymphony.xwork.util.XWorkList;
 
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
 import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
@@ -46,7 +50,7 @@ import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
  */
 public class SettingsAction extends ConfluenceActionSupport {
 
-    private static final long serialVersionUID = 5175072542211533080L;
+	private static final long serialVersionUID = 5175072542211533080L;
 
     private static final String ERRORS_REQUIRED_KEY = "settings.errors.required.field";
 
@@ -56,9 +60,17 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private static final String ERRORS_PING = "settings.errors.ping";
 
+	private static final String ERRORS_TAG_NAME_EMPTY_KEY = "settings.errors.tagName.empty";
+
+	private static final String ERRORS_TAG_NAME_INVALID_KEY = "settings.errors.tagName.invalid";
+
+	private static final String ERRORS_TAG_ATTRIBUTE_EMPTY_KEY = "settings.errors.tagAttribute.empty";
+
     private static final String MSG_PING = "settings.msg.ping";
 
     private static final String MSG_UPDATE = "settings.msg.update";
+
+    private static final Pattern TAG_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
     private String pageUrl;
 
@@ -72,6 +84,12 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     private String ignoredConfluenceMacros;
 
+    @SuppressWarnings("unchecked")
+	private List<String> tagNames = new XWorkList(String.class);
+    
+    @SuppressWarnings("unchecked")
+    private List<String> tagAttributes = new XWorkList(String.class);
+    
     private String wordpressRootUrl;
 
     private String editPostRelativePath;
@@ -191,10 +209,25 @@ public class SettingsAction extends ConfluenceActionSupport {
 				addActionError(getText(ERRORS_INTEGER_KEY, new Object[]{getText("settings.form.wordpressMaxConnections.label")}));
 			}
         }
+		String url = getWordpressRootUrl() + getWordpressXmlRpcRelativePath();
         try {
-			new URL(getWordpressRootUrl() + getWordpressXmlRpcRelativePath());
+			new URL(url);
 		} catch (MalformedURLException e) {
-			addActionError(getText(ERRORS_URL_KEY, new Object[]{pluginSettingsManager.getWordpressXmlRpcUrl()}));
+			addActionError(getText(ERRORS_URL_KEY, new Object[]{url}));
+		}
+        for (int i = 0; i < tagNames.size(); i++) {
+        	String tagName = tagNames.get(i);
+			if(StringUtils.isBlank(tagName)){
+				addActionError(getText(ERRORS_TAG_NAME_EMPTY_KEY, new Object[]{i+1}));
+			} else if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_TAG_NAME_INVALID_KEY, new Object[]{tagName, i+1}));
+			}
+		}
+        for (int i = 0; i < tagAttributes.size(); i++) {
+        	String tagAttribute = tagAttributes.get(i);
+			if(StringUtils.isBlank(tagAttribute)){
+				addActionError(getText(ERRORS_TAG_ATTRIBUTE_EMPTY_KEY, new Object[]{i+1}));
+			}
 		}
     }
     
@@ -213,6 +246,11 @@ public class SettingsAction extends ConfluenceActionSupport {
         syntaxHighlighterPlugin = pluginSettingsManager.getWordpressSyntaxHighlighterPlugin();
         allowedConfluenceGroups = pluginSettingsManager.getAllowedConfluenceGroups();
         allowedConfluenceSpaceKeys = pluginSettingsManager.getAllowedConfluenceSpaceKeys();
+        Map<String, String> tagAttributesMap = pluginSettingsManager.getDefaultTagAttributes();
+        for (Entry<String, String> entry : tagAttributesMap.entrySet()) {
+        	tagNames.add(entry.getKey());
+        	tagAttributes.add(entry.getValue());
+		}
         return SUCCESS;
     }
 
@@ -232,6 +270,11 @@ public class SettingsAction extends ConfluenceActionSupport {
         pluginSettingsManager.setAllowedConfluenceGroups(allowedConfluenceGroups);
         pluginSettingsManager.setAllowedConfluenceSpaceKeys(allowedConfluenceSpaceKeys);
         pluginSettingsManager.setWordpressMaxConnections(maxConnections);
+        Map<String, String> tagAttributesMap = new LinkedHashMap<String, String>();
+        for (int i = 0; i < tagNames.size(); i++) {
+        	tagAttributesMap.put(tagNames.get(i), tagAttributes.get(i));
+		}
+        pluginSettingsManager.setTagAttributes(tagAttributesMap);
         this.addActionMessage(getText(MSG_UPDATE));
         actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
         return SUCCESS;
@@ -329,6 +372,22 @@ public class SettingsAction extends ConfluenceActionSupport {
     public void setIgnoredConfluenceMacros(String ignoredConfluenceMacros) {
         this.ignoredConfluenceMacros = ignoredConfluenceMacros;
     }
+
+	public List<String> getTagNames() {
+		return tagNames;
+	}
+
+	public void setTagNames(List<String> tagNames) {
+		this.tagNames = tagNames;
+	}
+
+	public List<String> getTagAttributes() {
+		return tagAttributes;
+	}
+
+	public void setTagAttributes(List<String> tagAttributes) {
+		this.tagAttributes = tagAttributes;
+	}
 
 	public String getSyntaxHighlighterPlugin() {
 		return syntaxHighlighterPlugin;

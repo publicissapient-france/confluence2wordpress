@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
@@ -116,8 +117,7 @@ public class MetadataManager {
     public Metadata createMetadata(
         ContentEntityObject page, 
         Set<WordpressUser> users, 
-        Set<WordpressCategory> categories, 
-        List<String> ignoredConfluenceMacros) {
+        Set<WordpressCategory> categories) {
         Metadata metadata = new Metadata();
         String pageTitle = page.getTitle();
         Matcher matcher = DRAFT_PREFIX_PATTERN.matcher(pageTitle);
@@ -159,7 +159,6 @@ public class MetadataManager {
                 }
             }
         }
-        metadata.setIgnoredConfluenceMacros(ignoredConfluenceMacros);
         return metadata;
     }
 
@@ -175,12 +174,19 @@ public class MetadataManager {
                 if(macroParameters.containsKey(key)){
                     String serialized = macroParameters.get(key);
                     Class<?> fieldType = field.getType();
-                    Class<?> elementType = null;
                     Object value;
-                    if(List.class.isAssignableFrom(fieldType) && field.getGenericType() instanceof ParameterizedType){
-                        elementType = (Class<?>) ((ParameterizedType)field.getGenericType()).getActualTypeArguments()[0];
+					if(List.class.isAssignableFrom(fieldType) && field.getGenericType() instanceof ParameterizedType){
+	                    Type[] typeArgs = ((ParameterizedType)field.getGenericType()).getActualTypeArguments();
+                    	Class<?> elementType = (Class<?>) typeArgs[0];
+                        value = serializer.deserializeList(serialized, elementType);
+                    } else if(Map.class.isAssignableFrom(fieldType) && field.getGenericType() instanceof ParameterizedType){
+                        Type[] typeArgs = ((ParameterizedType)field.getGenericType()).getActualTypeArguments();
+                    	Class<?> keyType = (Class<?>) typeArgs[0];
+                    	Class<?> valueType = (Class<?>) typeArgs[1];
+                        value = serializer.deserializeMap(serialized, keyType, valueType);
+                    } else {
+                        value = serializer.deserialize(serialized, fieldType);
                     }
-                    value = serializer.deserialize(serialized, fieldType, elementType);
                     try {
                         field.set(metadata, value);
                     } catch (IllegalArgumentException e) {
@@ -210,7 +216,15 @@ public class MetadataManager {
                 } catch (IllegalAccessException e) {
                     throw new MetadataException("Cannot access field value: " + field.getName(), e);
                 }
-                String value = serializer.serialize(rawValue);
+                Class<?> fieldType = field.getType();
+                String value;
+                if(List.class.isAssignableFrom(fieldType)){
+                	value = serializer.serializeList((List<?>) rawValue);
+                } else if(Map.class.isAssignableFrom(fieldType)){
+                	value = serializer.serializeMap((Map<?, ?>) rawValue);
+                } else {
+                	value = serializer.serialize(rawValue);
+                }
                 macroParameters.put(key, value);
             }
         }

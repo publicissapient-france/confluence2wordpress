@@ -47,6 +47,7 @@ import fr.xebia.confluence2wordpress.core.converter.visitors.LegacyCodeMacroProc
 import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.NewCodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
 
 public class Converter {
 
@@ -171,6 +172,9 @@ public class Converter {
         visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
         if(options.getUploadedFiles() != null) {
             visitors.add(new AttachmentsProcessor(options.getConfluenceRootUrl(), options.getUploadedFiles()));
+        }
+        if(options.getTagAttributes() != null && ! options.getTagAttributes().isEmpty()) {
+        	visitors.add(new TagAttributesProcessor(options.getTagAttributes()));
         }
         visitors.add(new CdataProcessor());
         visitors.add(new CssClassNameCleaner());

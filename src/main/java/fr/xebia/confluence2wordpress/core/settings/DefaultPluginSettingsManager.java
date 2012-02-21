@@ -17,7 +17,9 @@ package fr.xebia.confluence2wordpress.core.settings;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.DisposableBean;
@@ -55,6 +57,8 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager, Disp
     private static final String DEFAULT_WP_XML_RPC_MAX_CONNECTIONS = "10";
 
     private static final String DEFAULT_WP_SH_PLUGIN = SyntaxHighlighterPlugin.SH_EVOLVED.name();
+
+    private static final Map<String,String> DEFAULT_TAG_ATTRIBUTES = new LinkedHashMap<String, String>();
 
     private PluginSettingsFactory pluginSettingsFactory;
 
@@ -240,9 +244,20 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager, Disp
 		return SyntaxHighlighterPlugin.valueOf(getWordpressSyntaxHighlighterPlugin());
 	}
 
-    private String retrieveSettings(String settingsKey, String defaultValue) {
+	@Override
+	public Map<String, String> getDefaultTagAttributes() {
+		return retrieveSettings("tagAttributes", DEFAULT_TAG_ATTRIBUTES);
+	}
+
+	@Override
+	public void setTagAttributes(Map<String, String> attributes) {
+		storeSettings("tagAttributes", attributes);
+	}
+	
+	private <T> T retrieveSettings(String settingsKey, T defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
-        String value = (String) pluginSettings.get(KEY_PREFIX + settingsKey);
+        @SuppressWarnings("unchecked")
+        T value = (T) pluginSettings.get(KEY_PREFIX + settingsKey);
         if(value == null) {
             storeSettings(settingsKey, defaultValue);
             value = defaultValue;
@@ -250,7 +265,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager, Disp
         return value;
     }
 
-    private void storeSettings(String settingsKey, String value) {
+    private void storeSettings(String settingsKey, Object value) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
         pluginSettings.put(KEY_PREFIX + settingsKey, value);
     }
@@ -274,8 +289,10 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager, Disp
 	}
 
 	private synchronized void destroyClient() {
-        this.client.destroy();
+		if(this.client != null) {
+			this.client.destroy();
+		}
         this.client = null;
 	}
-	
+
 }

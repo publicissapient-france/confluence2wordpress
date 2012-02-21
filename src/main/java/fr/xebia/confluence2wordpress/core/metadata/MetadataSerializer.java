@@ -15,15 +15,21 @@
  */
 package fr.xebia.confluence2wordpress.core.metadata;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.convert.StringConvert;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Joiner.MapJoiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import fr.xebia.confluence2wordpress.util.ClassUtils;
+import fr.xebia.confluence2wordpress.util.EscapeUtils;
 
 
 /**
@@ -41,88 +47,92 @@ public class MetadataSerializer {
      */
     private static final String CSV_PATTERN = ",(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
 
+    private static final String KEY_VALUE_PATTERN = "=(?=([^\"]*\"[^\"]*\")*[^\"]*$)";
+
+    private static final Joiner LIST_JOINER = Joiner.on(',');
+    
+    private static final MapJoiner MAP_JOINER = Joiner.on(',').withKeyValueSeparator("=");
+    
+	private static final Function<Object,String> CONVERT_ESCAPE_AND_TRIM = new Function<Object,String>(){
+		@Override public String apply(Object input) {
+			return convertToString(input);
+		}
+
+	};
+	    
     public String serialize(Object value){
         if(value == null){
             return null;
         }
-        if(value instanceof String){
-            return (String) value;
-        }
-        if(value instanceof List){
-            return serializeList((List<?>) value);
-        }
-        return StringConvert.INSTANCE.convertToString(value);
+        return convertToString(value);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> T deserialize(String value, Class<T> destinationType, Class<?> componentType){
+    public <T> T deserialize(String value, Class<T> destinationType){
         if(value == null){
             return null;
         }
-        if(destinationType.equals(String.class)){
-            return (T) value;
+        return convertFromString(value, destinationType);
+    }
+    
+    public String serializeList(List<?> list) {
+    	if(list == null || list.isEmpty()){
+            return null;
         }
-        if(List.class.isAssignableFrom(destinationType)){
-            return (T) deserializeList(value, componentType);
+    	List<String> items = Lists.transform(list, CONVERT_ESCAPE_AND_TRIM);
+        return LIST_JOINER.join(items);
+    }
+    
+    public <T> List<T> deserializeList(String value, Class<T> componentType) {
+    	if(value == null){
+            return null;
         }
+        String[] items = value.split(CSV_PATTERN, -1);
+        List<T> coll = Lists.newArrayListWithExpectedSize(items.length);
+        for (int i = 0; i < items.length; i++) {
+            coll.add(convertFromString(items[i], componentType));
+        }
+        return coll;
+    }
+
+    public String serializeMap(Map<?,?> map) {
+    	if(map == null || map.isEmpty()){
+            return null;
+        }
+    	Map<String,String> transformedMap = Maps.newLinkedHashMap();
+    	for (Entry<?,?> entry : map.entrySet()) {
+            transformedMap.put(CONVERT_ESCAPE_AND_TRIM.apply(entry.getKey()), CONVERT_ESCAPE_AND_TRIM.apply(entry.getValue()));
+        }
+    	return MAP_JOINER.join(transformedMap);
+    }
+    
+    public <K,V> Map<K,V> deserializeMap(String value, Class<K> keyType, Class<V> valueType){
+        if(value == null){
+            return null;
+        }
+        String[] items = value.split(CSV_PATTERN, -1);
+        Map<K,V> map = Maps.newLinkedHashMap();
+        for (int i = 0; i < items.length; i++) {
+        	String input = items[i];
+        	String[] tokens = input.split(KEY_VALUE_PATTERN);
+        	K convertedKey = convertFromString(tokens[0], keyType);
+        	V convertedValue = convertFromString(tokens[1], valueType);
+        	map.put(convertedKey, convertedValue);
+        }
+        return map;
+    }
+
+	private static String convertToString(Object input) {
+		//we should avoid null values
+		return StringUtils.trimToEmpty(EscapeUtils.escape(StringConvert.INSTANCE.convertToString(input)));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> T convertFromString(String input, Class<T> destinationType) {
         if(destinationType.isPrimitive()){
             //joda convert framework cannot handle primitive types
             destinationType = (Class<T>) ClassUtils.getPrimitiveWrapperType(destinationType);
         }
-        T convertFromString = StringConvert.INSTANCE.convertFromString(destinationType, value);
-        return convertFromString;
-    }
-
-    private String serializeList(List<?> coll) {
-        List<String> items = new ArrayList<String>();
-        for (Object item : coll) {
-            items.add(escape(ConvertUtils.convert(item)));
-        }
-        return StringUtils.trimToNull(StringUtils.join(items, ','));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> List<T> deserializeList(String value, Class<T> componentType) {
-        String[] items = value.split(CSV_PATTERN, -1);
-        for (int i = 0; i < items.length; i++) {
-            items[i] = unescape(items[i]);
-        }
-        if(String.class.equals(componentType)){
-            //return modifiable list
-            return new ArrayList<T>((List<T>) Arrays.asList(items));
-        }
-        List<T> coll = new ArrayList<T>(items.length);
-        for (int i = 0; i < items.length; i++) {
-            coll.add((T) ConvertUtils.convert(items[i], componentType));
-        }
-        return coll;
-    }
-    
-    private String escape(String s) {
-        if(s == null){
-            return "";
-        }
-        if(s.contains(",") || s.contains("|") || s.contains("\"")){
-            StringBuilder sb = new StringBuilder();
-            sb.append("\"");
-            sb.append(s.replace("\"","\"\""));
-            sb.append("\"");
-            return sb.toString();
-        }
-        return s;
-    }
-
-    private String unescape(String s) {
-        if("".equals(s)){
-            return null;
-        }
-        if(s.startsWith("\"") && s.endsWith("\"")){
-            String unescaped = s.substring(1, s.length() - 1);
-            if(unescaped.contains(",") || unescaped.contains("\"\"")){
-                return unescaped.replace("\"\"", "\"");
-            }
-        }
-        return s;
-    }
-
+        //we should avoid empty strings
+		return StringConvert.INSTANCE.convertFromString(destinationType, EscapeUtils.unescape(StringUtils.trimToNull(input)));
+	}
 }

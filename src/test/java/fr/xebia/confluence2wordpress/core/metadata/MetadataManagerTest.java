@@ -18,15 +18,20 @@ package fr.xebia.confluence2wordpress.core.metadata;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 public class MetadataManagerTest {
 
 	private String includeTOC = "    Include TOC : true\r\n";
 	
 	private String tags = " Tags : maven,mindmapping\r\n";
+	
+	private String tagAttributes = " Tag Attributes : img=\"style=\"\"foo\"\" class='bar'\",a=,p=\"alt=\"\"foo\"\"\"\r\n";
 	
 	private String postId = "    Post ID : 43\r\n";
 	
@@ -58,6 +63,11 @@ public class MetadataManagerTest {
 		metadata.setIncludeTOC(true);
 		metadata.setPostId(43);
 		metadata.setTagNames(Arrays.asList(new String[]{"maven", "mindmapping"}));
+		HashMap<String,String> map = Maps.newLinkedHashMap();
+		map.put("img", "style=\"foo\" class='bar'");
+		map.put("a", "");
+		map.put("p", "alt=\"foo\"");
+		metadata.setTagAttributes(map);
 		metadata.setPermalink("http://wordpress.dutra.fr/2011/08/28/le-mind-mapping-applique-aux-dependances-des-projets-mavenises");
 		Map<String, String> macroParameters = m.getMacroParameters(metadata);
 		String body = m.writeMetadataMacroBody(macroParameters).toString();
@@ -65,6 +75,7 @@ public class MetadataManagerTest {
 		assertTrue(body.contains(tags));
 		assertTrue(body.contains(postId));
 		assertTrue(body.contains(includeTOC));
+		assertTrue(body.contains(tagAttributes));
 	}
 
 }

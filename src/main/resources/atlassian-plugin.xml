@@ -24,7 +24,7 @@
         <param name="configure.url">/confluence2wordpress/settings.action</param>
     </plugin-info>
 
-    <web-resource key="c2w-conversion-resources">
+    <web-resource key="conversion-resources">
         <!-- jQuery UI + theme -->
         <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="jquery/jquery-ui-1.8.16.custom.min.js"/>
         <resource type="download" name="jquery-ui-1.8.16.custom.css" location="jquery/jquery-ui-1.8.16.custom.css"/>
@@ -32,47 +32,49 @@
         <!-- jQuery TimePicker add-on -->
         <resource type="download" name="jquery-ui-timepicker-addon.js" location="jquery/jquery-ui-timepicker-addon.js"/>
         <resource type="download" name="jquery-ui-timepicker-addon.css" location="jquery/jquery-ui-timepicker-addon.css"/>
-        <!-- autocomplete extensions -->
+        <!-- jQuery personal extensions -->
         <resource type="download" name="autocomplete-combobox.js" location="js/autocomplete-combobox.js"/>
         <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
-        <!-- customizations -->
+        <resource type="download" name="tag-attributes.js" location="js/tag-attributes.js"/>
+        <!-- jQuery customizations -->
         <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
         <dependency>confluence.web.resources:ajs</dependency>
     </web-resource>
 
-    <web-resource key="c2w-settings-resources">
+    <web-resource key="settings-resources">
         <!-- jQuery UI + theme -->
         <resource type="download" name="jquery-ui-1.8.16.custom.min.js" location="jquery/jquery-ui-1.8.16.custom.min.js"/>
         <resource type="download" name="jquery-ui-1.8.16.custom.css" location="jquery/jquery-ui-1.8.16.custom.css"/>
         <resource type="download" name="images/" location="jquery/images"/>
-        <!-- autocomplete extensions -->
+        <!-- jQuery personal extensions -->
         <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
-        <!-- customizations -->
+        <resource type="download" name="tag-attributes.js" location="js/tag-attributes.js"/>
+        <!-- jQuery customizations -->
         <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
         <dependency>confluence.web.resources:ajs</dependency>
     </web-resource>
     
-    <web-resource key="c2w-datepicker-en-GB">
+    <web-resource key="datepicker-en-GB">
         <resource type="download" name="jquery.ui.datepicker-en-GB.js" location="jquery/jquery.ui.datepicker-en-GB.js"/>
     </web-resource>
-    <web-resource key="c2w-datepicker-fr">
+    <web-resource key="datepicker-fr">
         <resource type="download" name="jquery.ui.datepicker-fr.js" location="jquery/jquery.ui.datepicker-fr.js"/>
     </web-resource>
-    <web-resource key="c2w-datepicker-nl">
+    <web-resource key="datepicker-nl">
         <resource type="download" name="jquery.ui.datepicker-nl.js" location="jquery/jquery.ui.datepicker-nl.js"/>
     </web-resource>
 
-    <web-resource key="c2w-preview-resources">
+    <web-resource key="preview-resources">
         <resource type="download" name="preview.css" location="css/preview.css"/>
     </web-resource>
  
-    <resource key="c2w-i18n" type="i18n" name="i18n" location="i18n.confluence2wordpress" />
+    <resource key="i18n" name="i18n" type="i18n" location="i18n.confluence2wordpress" />
     
-    <resource key="c2w-icon" type="download" name="confluence2wordpress.png" location="img/confluence2wordpress.png">
+    <resource key="icon" name="confluence2wordpress.png" type="download" location="img/confluence2wordpress.png">
         <property key="content-type" value="image/png"/>
     </resource>
     
-    <web-item key="c2w-link" name="Confluence-to-Wordpress Converter Link" 
+    <web-item key="link" name="Confluence-to-Wordpress Converter Link" 
         section="system.content.action/primary"  weight="100">
         <label key="link.label" />
         <link>/confluence2wordpress/syncOptions.action?pageId=$page.id</link>
@@ -83,20 +85,20 @@
         <condition class="fr.xebia.confluence2wordpress.condition.PluginPermissionsCondition" />
     </web-item>
     
-    <macro name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" key="c2w-more-macro" 
+    <macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" 
         icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
-        <description>Generates a Wordpress "more" markup.</description>
+        <!-- <description>Generates a Wordpress "more" markup.</description> -->
         <category name="external-content"/>
         <parameters />
     </macro>
     
-    <macro name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" key="c2w-sync-info-macro" hidden="true" >
+    <macro key="sync-info" name="sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
     	<description>Displays a message indicating that the current page is synchronized with a Wordpress post.</description>
         <category name="external-content"/>
         <parameters />
     </macro>
     
-    <xwork key="c2w-action" name="Confluence-to-Wordpress Converter Action">
+    <xwork key="action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
             

@@ -15,13 +15,15 @@
  */
 package fr.xebia.confluence2wordpress.util;
 
-import java.util.HashMap;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
+
 
 
 public final class ClassUtils {
 
-    private static final Map<Class<?>, Class<?>> WRAPPERS = new HashMap<Class<?>, Class<?>>();
+	private static final Map<Class<?>, Class<?>> WRAPPERS = Maps.newConcurrentMap();
 
     static {
         WRAPPERS.put(byte.class,    Byte.class);

@@ -53,6 +53,8 @@ public class ConverterOptions {
 
     private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
     
+    private Map<String,String> tagAttributes;
+    
     public ConverterOptions() {
         this.tagTransformations = MapUtils.split("tt=code", ",", "=");
     }
@@ -168,6 +170,14 @@ public class ConverterOptions {
 
 	public void setConfluenceRootUrl(URL confluenceRootUrl) {
 		this.confluenceRootUrl = confluenceRootUrl;
+	}
+
+	public Map<String, String> getTagAttributes() {
+		return tagAttributes;
+	}
+
+	public void setTagAttributes(Map<String, String> tagAttributes) {
+		this.tagAttributes = tagAttributes;
 	}
 
 }

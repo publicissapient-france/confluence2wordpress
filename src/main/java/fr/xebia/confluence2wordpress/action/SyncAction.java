@@ -23,12 +23,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,6 +47,7 @@ import com.atlassian.renderer.WikiStyleRenderer;
 import com.atlassian.renderer.v2.macro.Macro;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
+import com.opensymphony.xwork.util.XWorkList;
 
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
@@ -91,7 +95,13 @@ public class SyncAction extends AbstractPageAwareAction {
     private static final String ERRORS_AUTHOR_ID_EMPTY_KEY = "sync.errors.authorId.empty";
 
     private static final String ERRORS_CATEGORIES_EMPTY_KEY = "sync.errors.categoryNames.empty";
-    
+
+	private static final String ERRORS_TAG_NAME_EMPTY_KEY = "sync.errors.tagName.empty";
+
+	private static final String ERRORS_TAG_NAME_INVALID_KEY = "sync.errors.tagName.invalid";
+
+	private static final String ERRORS_TAG_ATTRIBUTE_EMPTY_KEY = "sync.errors.tagAttribute.empty";
+
     private static final String JS_DATEPICKER_FORMAT_KEY = "sync.js.datepicker.format";
 
     private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
@@ -101,6 +111,8 @@ public class SyncAction extends AbstractPageAwareAction {
     private static final String WP_USERS_KEY = "C2W_WP_USERS";
     
     private static final String MACROS_KEY = "C2W_MACROS";
+
+    private static final Pattern TAG_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
     private Converter converter;
 
@@ -133,6 +145,12 @@ public class SyncAction extends AbstractPageAwareAction {
     private String tagNamesAsString;
 
     private String ignoredConfluenceMacrosAsString;
+
+    @SuppressWarnings("unchecked")
+	private List<String> tagNames = new XWorkList(String.class);
+    
+    @SuppressWarnings("unchecked")
+    private List<String> tagAttributes = new XWorkList(String.class);
     
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -249,7 +267,23 @@ public class SyncAction extends AbstractPageAwareAction {
         this.ignoredConfluenceMacrosAsString = ignoredConfluenceMacrosAsString;
     }
 
-    @ParameterSafe
+    public List<String> getTagNames() {
+		return tagNames;
+	}
+
+	public void setTagNames(List<String> tagNames) {
+		this.tagNames = tagNames;
+	}
+
+	public List<String> getTagAttributes() {
+		return tagAttributes;
+	}
+
+	public void setTagAttributes(List<String> tagAttributes) {
+		this.tagAttributes = tagAttributes;
+	}
+
+	@ParameterSafe
     public Metadata getMetadata() {
         if(metadata == null){
             metadata = new Metadata();
@@ -289,47 +323,64 @@ public class SyncAction extends AbstractPageAwareAction {
 
     @Override
     public void validate() {
+        if (StringUtils.isBlank(getMetadata().getPageTitle())) {
+            addActionError(getText(ERRORS_PAGE_TITLE_EMPTY_KEY));
+        }
+        if (getMetadata().getAuthorId() == null) {
+            addActionError(getText(ERRORS_AUTHOR_ID_EMPTY_KEY));
+        }
         try {
-            if (StringUtils.isBlank(getMetadata().getPageTitle())) {
-                addActionError(getText(ERRORS_PAGE_TITLE_EMPTY_KEY));
-            }
             if (StringUtils.isNotBlank(getMetadata().getPostSlug())) {
                 checkPostSlugSyntax();
                 checkPostSlugAvailability();
             }
-            if (getMetadata().getAuthorId() == null) {
-                addActionError(getText(ERRORS_AUTHOR_ID_EMPTY_KEY));
-            }
             if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
                 checkConcurrentPostModification();
             }
-            
-            if(StringUtils.isNotBlank(dateCreated)){
-                try {
-                    String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
-                    Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
-                    getMetadata().setDateCreated(dateCreated);
-                } catch (ParseException e) {
-                    addActionError(getText(ERRORS_DATE_CREATED_KEY));
-                }
-            }
-            
-            if(getMetadata().getCategoryNames() == null || getMetadata().getCategoryNames().isEmpty()){
-                addActionError(getText(ERRORS_CATEGORIES_EMPTY_KEY));
-            }
-            
-            if(StringUtils.isNotBlank(tagNamesAsString)){
-                List<String> tagNames = CollectionUtils.split(tagNamesAsString, ",");
-                getMetadata().setTagNames(tagNames);
-            }
-            if(StringUtils.isNotBlank(ignoredConfluenceMacrosAsString)){
-                List<String> ignoredConfluenceMacros = CollectionUtils.split(ignoredConfluenceMacrosAsString, ",");
-                getMetadata().setIgnoredConfluenceMacros(ignoredConfluenceMacros);
-            }
-  
         } catch (WordpressXmlRpcException e) {
             addActionError(getText(ERRORS_CONNECTION_FAILED_KEY), e.getMessage());
         }
+        if(StringUtils.isNotBlank(dateCreated)){
+            try {
+                String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
+                Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
+                getMetadata().setDateCreated(dateCreated);
+            } catch (ParseException e) {
+                addActionError(getText(ERRORS_DATE_CREATED_KEY));
+            }
+        }
+        
+        if(getMetadata().getCategoryNames() == null || getMetadata().getCategoryNames().isEmpty()){
+            addActionError(getText(ERRORS_CATEGORIES_EMPTY_KEY));
+        }
+        
+        if(StringUtils.isNotBlank(tagNamesAsString)){
+            List<String> tagNames = CollectionUtils.split(tagNamesAsString, ",");
+            getMetadata().setTagNames(tagNames);
+        }
+        if(StringUtils.isNotBlank(ignoredConfluenceMacrosAsString)){
+            List<String> ignoredConfluenceMacros = CollectionUtils.split(ignoredConfluenceMacrosAsString, ",");
+            getMetadata().setIgnoredConfluenceMacros(ignoredConfluenceMacros);
+        }
+        for (int i = 0; i < tagNames.size(); i++) {
+        	String tagName = tagNames.get(i);
+			if(StringUtils.isBlank(tagName)){
+				addActionError(getText(ERRORS_TAG_NAME_EMPTY_KEY, new Object[]{i+1}));
+			} else if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_TAG_NAME_INVALID_KEY, new Object[]{tagName, i+1}));
+			}
+		}
+        for (int i = 0; i < tagAttributes.size(); i++) {
+        	String tagAttribute = tagAttributes.get(i);
+			if(StringUtils.isBlank(tagAttribute)){
+				addActionError(getText(ERRORS_TAG_ATTRIBUTE_EMPTY_KEY, new Object[]{i+1}));
+			}
+		}
+        Map<String, String> tagAttributesMap = new LinkedHashMap<String, String>();
+        for (int i = 0; i < tagNames.size(); i++) {
+        	tagAttributesMap.put(tagNames.get(i), tagAttributes.get(i));
+		}
+        getMetadata().setTagAttributes(tagAttributesMap);
     }
 
     private void checkPostSlugAvailability() throws WordpressXmlRpcException {
@@ -479,9 +530,10 @@ public class SyncAction extends AbstractPageAwareAction {
                 metadata = metadataManager.createMetadata(
                     getPage(), 
                     getWordpressUsers(), 
-                    getWordpressCategories(),
-                    pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList()
+                    getWordpressCategories()
                 );
+                metadata.setIgnoredConfluenceMacros(pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList());
+                metadata.setTagAttributes(pluginSettingsManager.getDefaultTagAttributes());
             }
         }
         pageLabelsSynchronizer.pageLabelsToTagNames(getPage(), metadata);
@@ -495,6 +547,13 @@ public class SyncAction extends AbstractPageAwareAction {
         }
         this.tagNamesAsString = CollectionUtils.join(getMetadata().getTagNames(), ", ");
         this.ignoredConfluenceMacrosAsString = CollectionUtils.join(getMetadata().getIgnoredConfluenceMacros(), ", ");
+        Map<String, String> tagAttributesMap = getMetadata().getTagAttributes();
+        if(tagAttributesMap != null) {
+	        for (Entry<String, String> entry : tagAttributesMap.entrySet()) {
+	        	tagNames.add(entry.getKey());
+	        	tagAttributes.add(entry.getValue());
+			}
+        }
     }
 
     private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException {
@@ -504,6 +563,7 @@ public class SyncAction extends AbstractPageAwareAction {
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
         options.setConfluenceRootUrl(new URL(getConfluenceRootUrl()));
+        options.setTagAttributes(metadata.getTagAttributes());
         if( ! preview){
         	List<UploadedFile> uploadedFiles = uploadFiles();
             options.setUploadedFiles(uploadedFiles);

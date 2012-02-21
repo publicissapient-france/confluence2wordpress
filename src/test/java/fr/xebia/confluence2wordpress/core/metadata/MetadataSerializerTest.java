@@ -19,10 +19,12 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 
 import org.joda.time.format.ISODateTimeFormat;
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 
 public class MetadataSerializerTest {
@@ -39,10 +41,10 @@ public class MetadataSerializerTest {
 
     @Test
     public void testDeserializeBoolean() {
-        assertEquals(Boolean.TRUE, s.deserialize("true", boolean.class, null));
-        assertEquals(Boolean.FALSE, s.deserialize("false", boolean.class, null));
-        assertEquals(Boolean.TRUE, s.deserialize("true", Boolean.class, null));
-        assertEquals(Boolean.FALSE, s.deserialize("false", Boolean.class, null));
+        assertEquals(Boolean.TRUE, s.deserialize("true", boolean.class));
+        assertEquals(Boolean.FALSE, s.deserialize("false", boolean.class));
+        assertEquals(Boolean.TRUE, s.deserialize("true", Boolean.class));
+        assertEquals(Boolean.FALSE, s.deserialize("false", Boolean.class));
     }
 
     @Test
@@ -70,7 +72,7 @@ public class MetadataSerializerTest {
     public void testDeserializeDate() {
         String date = "2011-10-18T17:40:18.886+02:00";
         Date expected = ISODateTimeFormat.dateTime().parseDateTime(date).toDate();
-        assertEquals(expected, s.deserialize(date, Date.class, null));
+        assertEquals(expected, s.deserialize(date, Date.class));
     }
     
     @Test
@@ -80,25 +82,70 @@ public class MetadataSerializerTest {
 
     @Test
     public void testSerializeStringArray() {
-        assertEquals("\"foo, \"\"bar\",\"bar, \"\"foo\"", s.serialize(Arrays.asList("foo, \"bar","bar, \"foo")));
+        assertEquals("\"foo, \"\"bar\",\"bar, \"\"foo\"", s.serializeList(Arrays.asList("foo, \"bar","bar, \"foo")));
     }
     
     @Test
     public void testSerializeDecimalArray() {
-        assertEquals("-1.0,3.1", s.serialize(Arrays.asList(-1.0,3.1)));
+        assertEquals("-1.0,3.1", s.serializeList(Arrays.asList(-1.0,3.1)));
     }
     
     @Test
     public void testDeserializeStringArray() {
         assertEquals(
             Arrays.asList(null, null, "foo, \"bar", null, "bar, \"foo", "foobar", "foo bar", null, null), 
-            s.deserialize(",,\"foo, \"\"bar\",,\"bar, \"\"foo\",foobar,foo bar,,", List.class, String.class));
+            s.deserializeList(",,\"foo, \"\"bar\",,\"bar, \"\"foo\",foobar,foo bar,,", String.class));
     }
 
     @Test
     public void testDeserializeDecimalArray() {
         assertEquals(
             Arrays.asList(-1.0,3.1), 
-            s.deserialize("-1.0,3.1", List.class, Double.class));
+            s.deserializeList("-1.0,3.1", Double.class));
+    }
+    
+    @Test
+    public void testSerializeMap() {
+    	HashMap<String,String> map = Maps.newLinkedHashMap();
+    	map.put("foo, =\"bar", "bar, =\"foo");
+    	map.put("foo2, =\"bar", "bar, =\"foo2");
+                   // K---------------K V---------------V K----------------K V----------------V 	
+        assertEquals("\"foo, =\"\"bar\"=\"bar, =\"\"foo\",\"foo2, =\"\"bar\"=\"bar, =\"\"foo2\"", s.serializeMap(map));
+    }
+    
+    @Test
+    public void testSerializeMapWithEmptyValues() {
+    	HashMap<String,String> map = Maps.newLinkedHashMap();
+    	map.put("k1", "");
+    	map.put("k2", null);
+        assertEquals("k1=,k2=", s.serializeMap(map));
+    }
+    
+    @Test
+    public void testDeserializeMap() {
+    	HashMap<String,String> map = Maps.newLinkedHashMap();
+    	map.put("foo, =\"bar", "bar, =\"foo");
+    	map.put("foo2, =\"bar", "bar, =\"foo2");
+                          // K---------------K V---------------V K----------------K V----------------V 	
+        String serialized = "\"foo, =\"\"bar\"=\"bar, =\"\"foo\",\"foo2, =\"\"bar\"=\"bar, =\"\"foo2\"";
+		assertEquals(map, s.deserializeMap(serialized, String.class, String.class));
+    }
+    
+    @Test
+    public void testDeserializeMapWithEmptyValues() {
+    	HashMap<String,String> map = Maps.newLinkedHashMap();
+    	map.put("k1", null);
+        String serialized = " k1 = ";
+		assertEquals(map, s.deserializeMap(serialized, String.class, String.class));
+    }
+    
+    @Test
+    public void testDeserializeDecimalMap() {
+    	HashMap<String,Double> map = Maps.newLinkedHashMap();
+    	map.put("foo, =\"bar", 0.12);
+    	map.put("foo2, =\"bar", -3.5);
+                          // K---------------K V--V K----------------K V--V 	
+        String serialized = "\"foo, =\"\"bar\"=0.12,\"foo2, =\"\"bar\"=-3.5";
+		assertEquals(map, s.deserializeMap(serialized, String.class, Double.class));
     }
 }
