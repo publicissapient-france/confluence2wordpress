@@ -65,7 +65,7 @@ public class Converter {
 
     public String convert(ContentEntityObject page, ConverterOptions options) {
     	
-        String wiki = page.getContent();
+        String wiki = page.getBodyAsString();
         
         //Wiki pre-processing
         List<PreProcessor> preProcessors = getPreProcessors(options);

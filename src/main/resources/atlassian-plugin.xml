@@ -153,5 +153,9 @@
         <interface>fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer</interface>
     </component>
     
+    <component key="metadataManager" class="fr.xebia.confluence2wordpress.core.metadata.DefaultMetadataManager">
+        <description>Manages Wordpress metadata.</description>
+        <interface>fr.xebia.confluence2wordpress.core.metadata.MetadataManager</interface>
+    </component>
     
 </atlassian-plugin>

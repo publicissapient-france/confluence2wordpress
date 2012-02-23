@@ -31,15 +31,13 @@ import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
 
     private static final String WORDPRESSMETADATA = "wordpressmetadata";
+    
     private LabelManager labelManager;
 
     public DefaultPageLabelsSynchronizer(LabelManager labelManager) {
         this.labelManager = labelManager;
     }
 
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer#tagNamesToPageLabels(com.atlassian.confluence.core.ContentEntityObject, fr.xebia.confluence2wordpress.core.metadata.Metadata)
-     */
     @Override
     public void tagNamesToPageLabels(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
@@ -81,9 +79,6 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
         }
     }
 
-    /* (non-Javadoc)
-     * @see fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer#pageLabelsToTagNames(com.atlassian.confluence.core.ContentEntityObject, fr.xebia.confluence2wordpress.core.metadata.Metadata)
-     */
     @Override
     public void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
@@ -102,6 +97,11 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
         metadata.setTagNames(tagNames);
     }
 
+	@Override
+	public void tagPage(ContentEntityObject page) {
+		LabelUtil.addLabel(WORDPRESSMETADATA, labelManager, page);
+	}
+    
     private String sanitize(String tagName) {
         return tagName.replaceAll("[^A-Za-z0-9-_]", "").toLowerCase();
     }
@@ -114,5 +114,5 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
         }
         return false;
     }
-    
+
 }

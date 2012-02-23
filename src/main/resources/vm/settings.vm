@@ -123,6 +123,7 @@
 
         jQuery(document).ready(function() {
 		    var tagAttributesManager = new TagAttributesManager('tagAttributes', '$action.getText("settings.form.tagAttributes.delete.label")');
+		    tagAttributesManager.init();
 		    #if( ! $action.tagNames.empty )
 		    #set( $size = $action.tagNames.size() - 1 )
 		    #foreach ($i in [0 .. $size])

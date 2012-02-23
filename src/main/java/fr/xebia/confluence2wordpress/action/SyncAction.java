@@ -128,7 +128,7 @@ public class SyncAction extends AbstractPageAwareAction {
     
     private MacroManager macroManager;
     
-    private final MetadataManager metadataManager = new MetadataManager();
+    private MetadataManager metadataManager;
 
     private Metadata metadata;
 
@@ -180,7 +180,11 @@ public class SyncAction extends AbstractPageAwareAction {
         this.pageLabelsSynchronizer = pageLabelsSynchronizer;
     }
 
-    public boolean isRemoteUserHasConfigurationPermission(){
+    public void setMetadataManager(MetadataManager metadataManager) {
+		this.metadataManager = metadataManager;
+	}
+
+	public boolean isRemoteUserHasConfigurationPermission(){
         return pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
     }
     
@@ -296,7 +300,7 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     public String getWiki() {
-        return getPage().getContent();
+        return getPage().getBodyAsString();
     }
 
     public String getWikiEscaped() {

@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.xebia</groupId>
     <artifactId>confluence2wordpress</artifactId>
-    <version>0.9.7</version>
+    <version>0.9.8-confluence4</version>
     <packaging>atlassian-plugin</packaging>
 
     <name>Confluence to Wordpress Synchronizer</name>
@@ -28,15 +28,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <confluence.version>3.5.2</confluence.version>
+        
+        <!-- <confluence.version>3.5.2</confluence.version> -->
+        <confluence.version>4.0</confluence.version>
         <confluence.data.version>3.5</confluence.data.version>
+        <amps.version>3.7.3</amps.version>
+        
         <!-- <jericho.version>3.2</jericho.version> -->
         <!-- <jtidy.version>r938</jtidy.version> -->
         <htmlcleaner.version>2.2</htmlcleaner.version>
     </properties>
     
     <dependencies>
-
+        
         <!-- required confluence dependencies -->
         
         <dependency>
@@ -73,14 +77,8 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- <dependency>
-            <groupId>com.atlassian.renderer</groupId>
-            <artifactId>atlassian-renderer</artifactId>
-            <version>7.0</version>
-            <scope>compile</scope>
-        </dependency> -->
-        
         <!-- this is provided by Confluence but we need it in compile scope -->
+        
 		<dependency>
 			<groupId>opensymphony</groupId>
 			<artifactId>xwork</artifactId>
@@ -187,18 +185,18 @@
 	    </testResources>
 	    
         <plugins>
-        
-             <plugin>
+
+            <plugin>
                 <groupId>com.atlassian.maven.plugins</groupId>
                 <artifactId>maven-confluence-plugin</artifactId>
-                <version>3.3.4</version>
+                <version>3.7.3</version>
                 <extensions>true</extensions>
                 <configuration>
                     <productVersion>${confluence.version}</productVersion>
                     <productDataVersion>${confluence.data.version}</productDataVersion>
                 </configuration>
             </plugin>
-            
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

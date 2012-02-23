@@ -23,6 +23,7 @@ import java.util.Map;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.confluence.user.AuthenticatedUserThreadLocal;
+import com.atlassian.confluence.user.UserAccessor;
 import com.atlassian.renderer.RenderContext;
 import com.atlassian.renderer.TokenType;
 import com.atlassian.renderer.v2.RenderMode;
@@ -46,13 +47,17 @@ public class SyncInfoMacro extends BaseMacro {
 
 	private VelocityHelper velocityHelper = new VelocityHelper();
 	
-	private MetadataManager metadataManager = new MetadataManager();
+	private MetadataManager metadataManager;
     
 	private PluginPermissionsManager pluginPermissionsManager;
 	
-    public SyncInfoMacro(PluginPermissionsManager pluginPermissionsManager) {
+	private UserAccessor userAccessor;
+	
+    public SyncInfoMacro(MetadataManager metadataManager, PluginPermissionsManager pluginPermissionsManager, UserAccessor userAccessor) {
         super();
+        this.metadataManager = metadataManager;
         this.pluginPermissionsManager = pluginPermissionsManager;
+        this.userAccessor = userAccessor;
     }
 
     @Override
@@ -76,7 +81,7 @@ public class SyncInfoMacro extends BaseMacro {
         if(ServletActionContext.getRequest().getRemoteUser() == null){
             user = AuthenticatedUserThreadLocal.getUser();
         } else {
-            user = page.getUserAccessor().getUser(ServletActionContext.getRequest().getRemoteUser());
+			user = userAccessor.getUser(ServletActionContext.getRequest().getRemoteUser());
         }
         boolean checkUsagePermission = pluginPermissionsManager.checkUsagePermission(user, page);
         return velocityHelper.generateMetadataHtml(page, checkUsagePermission, metadata);
