@@ -70,9 +70,9 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
         if (htmlNode instanceof TagNode) {
             TagNode divCodePanel = (TagNode) htmlNode;
             String tagName = divCodePanel.getName();
-            if ("div".equals(tagName) && divCodePanel.getAttributeByName("class").contains("code panel")) {
+            if ("div".equals(tagName) && divCodePanel.getAttributeByName("class") != null && divCodePanel.getAttributeByName("class").contains("code panel")) {
                 TagNode divCodeContent = divCodePanel.findElementByName("div", false);
-                if (divCodeContent.getAttributeByName("class").contains("codeContent")) {
+                if (divCodeContent.getAttributeByName("class") != null && divCodeContent.getAttributeByName("class").contains("codeContent")) {
                     String code = findCode(divCodeContent);
                     if(code != null) {
                         Map<String, String> shOptions = findSHOptions(divCodeContent);
