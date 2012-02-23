@@ -92,7 +92,7 @@
         <parameters />
     </macro>
     
-    <macro key="sync-info" name="sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
+    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
     	<description>Displays a message indicating that the current page is synchronized with a Wordpress post.</description>
         <category name="external-content"/>
         <parameters />
