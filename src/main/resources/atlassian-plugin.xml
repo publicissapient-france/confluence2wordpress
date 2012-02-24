@@ -85,18 +85,46 @@
         <condition class="fr.xebia.confluence2wordpress.condition.PluginPermissionsCondition" />
     </web-item>
     
-    <macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" 
-        icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
-        <!-- <description>Generates a Wordpress "more" markup.</description> -->
+    <!-- new macros -->
+    
+	<xhtml-macro key="wordpress-more" name="wordpress-more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" >
+        <category name="external-content"/>
+        <parameters />
+	</xhtml-macro>
+    
+    <xhtml-macro key="wordpress-metadata" name="wordpress-metadata" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" hidden="true">
+        <category name="external-content"/>
+        <parameters>
+            <parameter name="postId" type="int" required="false" />
+            <parameter name="draft" type="boolean" required="false" default="false"/>
+			<parameter name="postSlug" type="string" required="false" />
+			<parameter name="authorId" type="int" required="false" />
+			<parameter name="categoryNames" type="string" required="false" />
+			<parameter name="tagNames" type="string" required="false" />
+			<parameter name="pageTitle" type="string" required="false" />
+			<parameter name="ignoredConfluenceMacros" type="string" required="false" />
+			<parameter name="tagAttributes" type="string" required="false" />
+			<parameter name="optimizeForRDP" type="boolean" required="false" />
+			<parameter name="includeTOC" type="boolean" required="false" />
+			<parameter name="permalink" type="string" required="false" />
+			<parameter name="digest" type="string" required="false" />
+			<parameter name="dateCreated" type="string" required="false" />
+        </parameters>
+    </xhtml-macro>
+    
+    <!-- legacy macros -->
+    
+    <macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.legacy.MoreLegacyMacro" hidden="true">
         <category name="external-content"/>
         <parameters />
     </macro>
     
-    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
-    	<description>Displays a message indicating that the current page is synchronized with a Wordpress post.</description>
+    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.legacy.SyncInfoLegacyMacro" hidden="true" >
         <category name="external-content"/>
         <parameters />
     </macro>
+    
+    <!-- xwork actions -->
     
     <xwork key="action" name="Confluence-to-Wordpress Converter Action">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
@@ -156,6 +184,11 @@
     <component key="metadataManager" class="fr.xebia.confluence2wordpress.core.metadata.DefaultMetadataManager">
         <description>Manages Wordpress metadata.</description>
         <interface>fr.xebia.confluence2wordpress.core.metadata.MetadataManager</interface>
+    </component>
+    
+    <component key="converter" class="fr.xebia.confluence2wordpress.core.converter.DefaultConverter">
+        <description>Synchronizes Confluence html into Wordpress html.</description>
+        <interface>fr.xebia.confluence2wordpress.core.converter.Converter</interface>
     </component>
     
 </atlassian-plugin>

@@ -29,9 +29,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MetadataItem {
 
-    /**
-     * @return The metadata entry's label (key)
-     */
-    String value();
-        
 }

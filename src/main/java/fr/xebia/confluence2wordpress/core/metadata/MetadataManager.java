@@ -10,6 +10,8 @@ import fr.xebia.confluence2wordpress.wp.WordpressUser;
 
 public interface MetadataManager {
 
+	String WORDPRESS_METADATA_MACRO_NAME = "wordpress-metadata";
+
 	Metadata extractMetadata(ContentEntityObject page) throws MetadataException;
 
 	void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException;
@@ -17,11 +19,5 @@ public interface MetadataManager {
 	Metadata createMetadata(ContentEntityObject page, Set<WordpressUser> users, Set<WordpressCategory> categories);
 
 	Metadata createMetadata(Map<String, String> macroParameters) throws MetadataException;
-
-	Map<String, String> getMacroParameters(Metadata metadata) throws MetadataException;
-
-	Map<String, String> readMetadataMacroBody(String macroBody);
-
-	StringBuilder writeMetadataMacroBody(Map<String, String> macroParameters);
 
 }

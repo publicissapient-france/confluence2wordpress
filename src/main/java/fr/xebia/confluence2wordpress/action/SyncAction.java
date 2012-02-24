@@ -26,9 +26,9 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
@@ -37,18 +37,18 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 
+import com.atlassian.confluence.macro.browser.MacroMetadataManager;
+import com.atlassian.confluence.macro.browser.beans.MacroMetadata;
 import com.atlassian.confluence.pages.AbstractPage;
 import com.atlassian.confluence.pages.Attachment;
 import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
-import com.atlassian.confluence.renderer.MacroManager;
-import com.atlassian.renderer.WikiStyleRenderer;
-import com.atlassian.renderer.v2.macro.Macro;
 import com.atlassian.xwork.ParameterSafe;
 import com.opensymphony.util.TextUtils;
 import com.opensymphony.xwork.util.XWorkList;
 
+import fr.xebia.confluence2wordpress.core.converter.ConversionException;
 import fr.xebia.confluence2wordpress.core.converter.Converter;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.converter.UploadedFile;
@@ -124,9 +124,7 @@ public class SyncAction extends AbstractPageAwareAction {
 
     private PluginSettingsManager pluginSettingsManager;
     
-    private WikiStyleRenderer wikiStyleRenderer;
-    
-    private MacroManager macroManager;
+    private MacroMetadataManager macroMetadataManager;
     
     private MetadataManager metadataManager;
 
@@ -160,12 +158,8 @@ public class SyncAction extends AbstractPageAwareAction {
         this.attachmentManager = attachmentManager;
     }
 
-    public void setMacroManager(MacroManager macroManager) {
-        this.macroManager = macroManager;
-    }
-
-    public void setWikiStyleRenderer(WikiStyleRenderer wikiStyleRenderer) {
-        this.wikiStyleRenderer = wikiStyleRenderer;
+    public void setMacroMetadataManager(MacroMetadataManager macroMetadataManager) {
+        this.macroMetadataManager = macroMetadataManager;
     }
 
     public void setPluginSettingsManager(PluginSettingsManager pluginSettingsManager) {
@@ -184,18 +178,15 @@ public class SyncAction extends AbstractPageAwareAction {
 		this.metadataManager = metadataManager;
 	}
 
+    public void setConverter(Converter converter) {
+		this.converter = converter;
+	}
+
 	public boolean isRemoteUserHasConfigurationPermission(){
         return pluginPermissionsManager.checkConfigurationPermission(getRemoteUser());
     }
     
-    private Converter getConverter(){
-        if(converter == null){
-            converter = new Converter(wikiStyleRenderer, macroManager);
-        }
-        return converter;
-    }
-    
-    @SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked")
     public Set<WordpressUser> getWordpressUsers() {
         return (Set<WordpressUser>) getSession().get(WP_USERS_KEY);
     }
@@ -446,8 +437,9 @@ public class SyncAction extends AbstractPageAwareAction {
      * @throws MetadataException 
      * @throws ExecutionException 
      * @throws InterruptedException 
+     * @throws ConversionException 
      */
-    public String sync() throws IOException, WordpressXmlRpcException, MetadataException, InterruptedException, ExecutionException {
+    public String sync() throws IOException, WordpressXmlRpcException, MetadataException, InterruptedException, ExecutionException, ConversionException {
         // consider it a creation if no post ID
         WordpressClient client = pluginSettingsManager.getWordpressClient();
         boolean creation = this.metadata.getPostId() == null;
@@ -503,8 +495,12 @@ public class SyncAction extends AbstractPageAwareAction {
             setWordpressTags(tags);
         }
         if(getAvailableMacros() == null){
-            Map<String, Macro> macros = macroManager.getMacros();
-            setAvailableMacros(new TreeSet<String>(macros.keySet()));
+            Set<MacroMetadata> allMacroMetadata = macroMetadataManager.getAllMacroMetadata();
+            TreeSet<String> macros = new TreeSet<String>();
+            for (MacroMetadata macroMetadata : allMacroMetadata) {
+            	macros.add(macroMetadata.getMacroName());
+			}
+			setAvailableMacros(macros);
         }
     }
 
@@ -560,7 +556,7 @@ public class SyncAction extends AbstractPageAwareAction {
         }
     }
 
-    private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException {
+    private String createPostBody(boolean preview) throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException, ConversionException {
         ConverterOptions options = new ConverterOptions();
         options.setPageTitle(metadata.getPageTitle());
         options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
@@ -572,7 +568,7 @@ public class SyncAction extends AbstractPageAwareAction {
         	List<UploadedFile> uploadedFiles = uploadFiles();
             options.setUploadedFiles(uploadedFiles);
         }
-        return getConverter().convert(getPage(), options);
+        return converter.convert(getPage(), options);
     }
 
     private List<UploadedFile> uploadFiles() throws WordpressXmlRpcException, IOException, InterruptedException, ExecutionException {

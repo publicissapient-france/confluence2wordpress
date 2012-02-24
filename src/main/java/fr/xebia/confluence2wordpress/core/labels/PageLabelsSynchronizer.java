@@ -25,6 +25,4 @@ public interface PageLabelsSynchronizer {
 
     void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata);
 
-	void tagPage(ContentEntityObject page);
-
 }

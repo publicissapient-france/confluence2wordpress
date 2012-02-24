@@ -18,10 +18,10 @@ package fr.xebia.confluence2wordpress.core.metadata;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,10 +31,12 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.atlassian.confluence.content.render.xhtml.XhtmlException;
 import com.atlassian.confluence.core.ContentEntityObject;
-import com.google.common.base.Splitter;
+import com.atlassian.confluence.xhtml.api.MacroDefinition;
+import com.atlassian.confluence.xhtml.api.MacroDefinitionHandler;
+import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
-import fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressUser;
 
@@ -43,26 +45,15 @@ import fr.xebia.confluence2wordpress.wp.WordpressUser;
  *
  */
 public class DefaultMetadataManager implements MetadataManager {
+	
+	//see com.atlassian.confluence.content.render.xhtml.XhtmlConstants
+	// see com.atlassian.confluence.content.render.xhtml.storage.macro.StorageMacroConstants
+    
+	private static final String WORDPRESS_META_TAG_START = "<ac:macro ac:name=\"wordpress-metadata\">";
 
-	private static final String WORDPRESS_META_WRAP_START = "<div style=\"display: none;\"><p>&nbsp;</p>";
-
-	private static final String WORDPRESS_META_TAG_START = "<ac:macro ac:name=\"details\">";
-
-	private static final String WORDPRESS_META_BODY_START = "<ac:rich-text-body><p><strong>Please do not edit this section manually!</strong></p><table><tbody>";
-
-    private static final String WORDPRESS_META_BODY_END = "</tbody></table></ac:rich-text-body>";
+	private static final String WORDPRESS_META_PARAMETER = "<ac:parameter ac:name=\"%s\">%s</ac:parameter>";
 
     private static final String WORDPRESS_META_TAG_END = "</ac:macro>";
-
-    private static final String WORDPRESS_META_WRAP_END = "</div>";
-
-    private static final String WORDPRESS_SYNC_INFO = "<ac:macro ac:name=\"wordpress-sync-info\" />";
-
-	private static final String TABLE_LINE_START = "<tr><td>";
-
-	private static final String TABLE_LINE_MIDDLE = "</td><td>";
-
-	private static final String TABLE_LINE_END = "</td></tr>";
 
     private static final Pattern DRAFT_PREFIX_PATTERN = Pattern.compile("(DRAFT\\s*-\\s*).+");
 
@@ -74,50 +65,41 @@ public class DefaultMetadataManager implements MetadataManager {
 
 	private static final String XEBIA_FRANCE_LOGIN = "XebiaFrance";
 	
-	private static final Splitter ROW_SPLITTER = Splitter.onPattern("(</?tr>){1,2}");
-	
-	private static final Pattern ROW_PATTERN = Pattern.compile("<td>(.+)</td><td>(.+)</td>");
+    private final MetadataSerializer serializer = new MetadataSerializer();
 
-    private MetadataSerializer serializer = new MetadataSerializer();
+	private final XhtmlContent xhtmlUtils;
 
-    private PageLabelsSynchronizer pageLabelsSynchronizer;
-    
-    public DefaultMetadataManager(PageLabelsSynchronizer pageLabelsSynchronizer) {
+    public DefaultMetadataManager(XhtmlContent xhtmlUtils) {
 		super();
-		this.pageLabelsSynchronizer = pageLabelsSynchronizer;
+		this.xhtmlUtils = xhtmlUtils;
 	}
 
-	/**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#extractMetadata(com.atlassian.confluence.core.ContentEntityObject)
-	 * {@inheritDoc}
-	 */
     public Metadata extractMetadata(ContentEntityObject page) throws MetadataException {
-        String content = page.getBodyAsString();
-        int start = content.indexOf(WORDPRESS_META_TAG_START);
-        if(start != -1){
-            start += WORDPRESS_META_TAG_START.length();
-            int end = content.indexOf(WORDPRESS_META_TAG_END, start);
-            if(end != -1){
-                String macroBody = content.substring(start, end);
-                Map<String, String> macroParameters = readMetadataMacroBody(macroBody);
-				Metadata metadata = createMetadata(macroParameters);
-                return metadata;
-            }
-        }
-        return null;
+    	//https://developer.atlassian.com/display/CONFDEV/Creating+a+new+Confluence+4.0+Macro
+    	final List<MacroDefinition> metadataMacros = new ArrayList<MacroDefinition>();
+		try {
+			xhtmlUtils.handleMacroDefinitions(page.getBodyAsString(), null, new MacroDefinitionHandler() {
+				@Override
+				public void handle(MacroDefinition macroDefinition) {
+					if(macroDefinition.getName().equals(WORDPRESS_METADATA_MACRO_NAME)){
+						metadataMacros.add(macroDefinition);
+					}
+				}
+			});
+		} catch (XhtmlException e) {
+			throw new MetadataException("Could not parse page: " + page.getTitle(), e);
+		}
+		if(metadataMacros.isEmpty()) {
+			return null;
+		}
+		MacroDefinition metadataMacro = metadataMacros.get(0);
+		return createMetadata(metadataMacro.getParameters());
     }
-
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#storeMetadata(com.atlassian.confluence.core.ContentEntityObject, fr.xebia.confluence2wordpress.core.metadata.Metadata)
-	 * {@inheritDoc}
-	 */
+    
     public void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException{
         String content = page.getBodyAsString();
     	Map<String, String> macroParameters = getMacroParameters(metadata);
         StringBuilder newContent = new StringBuilder();
-        if(metadata.getPostId() != null && content.indexOf(WORDPRESS_SYNC_INFO) == -1) {
-			newContent.append(WORDPRESS_SYNC_INFO);
-        }
         StringBuilder metadataMacroBody = writeMetadataMacroBody(macroParameters);
         int start = content.indexOf(WORDPRESS_META_TAG_START);
         int end = start == -1 ? -1 : content.indexOf(WORDPRESS_META_TAG_END, start);
@@ -126,21 +108,12 @@ public class DefaultMetadataManager implements MetadataManager {
         	newContent.append(metadataMacroBody);
         	newContent.append(content.substring(end + WORDPRESS_META_TAG_END.length()));
         } else {
-        	newContent.append(content);
-        	newContent.append(WORDPRESS_META_WRAP_START);
-        	newContent.append(WORDPRESS_META_TAG_START);
         	newContent.append(metadataMacroBody);
-        	newContent.append(WORDPRESS_META_WRAP_END);
-        	newContent.append(WORDPRESS_META_TAG_END);
+        	newContent.append(content);
         }
         page.setBodyAsString(newContent.toString());
-        pageLabelsSynchronizer.tagPage(page);
     }
 
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#createMetadata(com.atlassian.confluence.core.ContentEntityObject, java.util.Set, java.util.Set)
-	 * {@inheritDoc}
-	 */
     public Metadata createMetadata(
         ContentEntityObject page, 
         Set<WordpressUser> users, 
@@ -189,18 +162,13 @@ public class DefaultMetadataManager implements MetadataManager {
         return metadata;
     }
 
-
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#createMetadata(java.util.Map)
-	 * {@inheritDoc}
-	 */
     public Metadata createMetadata(Map<String,String> macroParameters) throws MetadataException{
     	Metadata metadata = new Metadata();
     	Field[] declaredFields = metadata.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
             MetadataItem annotation = field.getAnnotation(MetadataItem.class);
             if(annotation != null){
-                String key = annotation.value();
+                String key = field.getName();
                 field.setAccessible(true);
                 if(macroParameters.containsKey(key)){
                     String serialized = macroParameters.get(key);
@@ -231,17 +199,13 @@ public class DefaultMetadataManager implements MetadataManager {
         return metadata;
     }
 
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#getMacroParameters(fr.xebia.confluence2wordpress.core.metadata.Metadata)
-	 * {@inheritDoc}
-	 */
-    public Map<String,String> getMacroParameters(Metadata metadata) throws MetadataException {
+    private Map<String,String> getMacroParameters(Metadata metadata) throws MetadataException {
         Map<String,String> macroParameters = new HashMap<String,String>();
         Field[] declaredFields = metadata.getClass().getDeclaredFields();
         for (Field field : declaredFields) {
             MetadataItem annotation = field.getAnnotation(MetadataItem.class);
             if(annotation != null){
-                String key = annotation.value();
+                String key = field.getName();
                 field.setAccessible(true);
                 Object rawValue;
                 try {
@@ -266,44 +230,18 @@ public class DefaultMetadataManager implements MetadataManager {
         return macroParameters;
     }
     
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#readMetadataMacroBody(java.lang.String)
-	 * {@inheritDoc}
-	 */
-    public Map<String, String> readMetadataMacroBody(String macroBody) {
-        Map<String, String> macroParameters = new HashMap<String, String>();
-        Iterator<String> iterator = ROW_SPLITTER.split(macroBody).iterator();
-		while(iterator.hasNext()){
-			String line = iterator.next();
-			Matcher matcher = ROW_PATTERN.matcher(line);
-			if(matcher.matches()){
-                String key = StringUtils.trimToNull(matcher.group(1));
-                String value = StringUtils.trimToNull(matcher.group(2));
-                macroParameters.put(key, value);
-			}
-    	}
-        return macroParameters;
-    }
-
-    /**
-	 * @see fr.xebia.confluence2wordpress.core.metadata.MetadataManager#writeMetadataMacroBody(java.util.Map)
-	 * {@inheritDoc}
-	 */
-    public StringBuilder writeMetadataMacroBody(Map<String,String> macroParameters) {
+    private StringBuilder writeMetadataMacroBody(Map<String,String> macroParameters) {
         StringBuilder sb = new StringBuilder();
-        sb.append(WORDPRESS_META_BODY_START);
+        sb.append(WORDPRESS_META_TAG_START);
         for (Entry<String,String> entry : macroParameters.entrySet()) {
             if(entry.getValue() != null){
-                sb.append(TABLE_LINE_START);
-                sb.append(entry.getKey());
-                sb.append(TABLE_LINE_MIDDLE);
-                sb.append(entry.getValue());
-                sb.append(TABLE_LINE_END);
+                sb.append(String.format(WORDPRESS_META_PARAMETER, entry.getKey(), entry.getValue()));
             }
         } 
-        sb.append(WORDPRESS_META_BODY_END);
+        sb.append(WORDPRESS_META_TAG_END);
         return sb;
     }
+    
 
 
 }

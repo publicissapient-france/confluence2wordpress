@@ -115,7 +115,10 @@ public class MetadataSerializer {
         	String input = items[i];
         	String[] tokens = input.split(KEY_VALUE_PATTERN);
         	K convertedKey = convertFromString(tokens[0], keyType);
-        	V convertedValue = convertFromString(tokens[1], valueType);
+        	V convertedValue = null;
+        	if(tokens.length == 2) {
+        		convertedValue = convertFromString(tokens[1], valueType);
+        	}
         	map.put(convertedKey, convertedValue);
         }
         return map;

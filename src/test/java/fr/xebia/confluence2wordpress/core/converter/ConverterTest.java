@@ -19,8 +19,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
-
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,20 +26,20 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.atlassian.confluence.content.render.xhtml.ConversionContext;
+import com.atlassian.confluence.content.render.xhtml.Renderer;
 import com.atlassian.confluence.core.ContentEntityObject;
-import com.atlassian.confluence.renderer.MacroManager;
-import com.atlassian.renderer.RenderContext;
-import com.atlassian.renderer.WikiStyleRenderer;
+import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConverterTest {
 	
 	@Mock
-	private WikiStyleRenderer wikiStyleRenderer;
+	private Renderer renderer;
 	
     @Mock
-    private MacroManager macroManager;
+    private XhtmlContent xhtmlUtils;
     
 	@Mock
 	private ContentEntityObject page;
@@ -50,12 +48,12 @@ public class ConverterTest {
 
 	@Before
 	public void createConverter() throws Exception {
-		converter = new Converter(wikiStyleRenderer, macroManager);
+		converter = new DefaultConverter(renderer, xhtmlUtils);
 	}
 
 	@Test
-	public void test_more_macro() throws IOException {
-		when(wikiStyleRenderer.convertWikiToXHtml(any(RenderContext.class), any(String.class))).thenReturn("<!--more-->");
+	public void test_more_macro() throws ConversionException {
+		when(renderer.render(any(String.class), any(ConversionContext.class))).thenReturn("<!--more-->");
 		String html = converter.convert(page, new ConverterOptions());
 		assertEquals("<!--more-->", StringUtils.trim(html));
 	}

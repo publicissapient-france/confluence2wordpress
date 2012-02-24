@@ -30,46 +30,46 @@ public class Metadata implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @MetadataItem("Post ID")
+    @MetadataItem
     private Integer postId;
     
-    @MetadataItem("Is Draft")
+    @MetadataItem
     private boolean draft = true;
 
-    @MetadataItem("Post Slug")
+    @MetadataItem
     private String postSlug;
 
-    @MetadataItem("Author ID")
+    @MetadataItem
     private Integer authorId;
 
-    @MetadataItem("Categories")
+    @MetadataItem
     private List<String> categoryNames;
 
-    @MetadataItem("Tags")
+    @MetadataItem
     private List<String> tagNames;
 
-    @MetadataItem("Title")
+    @MetadataItem
     private String pageTitle;
 
-    @MetadataItem("Ignored Confluence Macros")
+    @MetadataItem
     private List<String> ignoredConfluenceMacros;
 
-    @MetadataItem("Tag Attributes")
+    @MetadataItem
     private Map<String,String> tagAttributes;
 
-    @MetadataItem("Optimize for Press Review")
+    @MetadataItem
     private boolean optimizeForRDP;
 
-    @MetadataItem("Include TOC")
+    @MetadataItem
     private boolean includeTOC;
     
-    @MetadataItem("Permalink")    
+    @MetadataItem    
     private String permalink;
 
-    @MetadataItem("Digest")    
+    @MetadataItem    
     private String digest;
     
-    @MetadataItem("Date Created")    
+    @MetadataItem    
     private Date dateCreated;
 
     public String getPageTitle() {

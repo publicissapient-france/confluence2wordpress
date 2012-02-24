@@ -64,6 +64,15 @@ public class NewCodeMacroProcessor implements TagNodeVisitor {
         code
         [/xml]
 
+
+<ac:macro ac:name="code">
+<ac:parameter ac:name="title">mon code</ac:parameter>
+<ac:parameter ac:name="linenumbers">true</ac:parameter>
+<ac:parameter ac:name="language">java</ac:parameter>
+<ac:parameter ac:name="firstline">20</ac:parameter>
+<ac:parameter ac:name="collapse">true</ac:parameter>
+<ac:plain-text-body><![CDATA[...]]></ac:plain-text-body>
+</ac:macro>
      */
 
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {

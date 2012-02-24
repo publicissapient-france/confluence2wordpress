@@ -16,7 +16,7 @@
 /**
  * 
  */
-package fr.xebia.confluence2wordpress.macro;
+package fr.xebia.confluence2wordpress.macro.legacy;
 
 import java.util.Map;
 
@@ -43,7 +43,7 @@ import fr.xebia.confluence2wordpress.core.velocity.VelocityHelper;
 /**
  *
  */
-public class SyncInfoMacro extends BaseMacro {
+public class SyncInfoLegacyMacro extends BaseMacro {
 
 	private VelocityHelper velocityHelper = new VelocityHelper();
 	
@@ -53,7 +53,7 @@ public class SyncInfoMacro extends BaseMacro {
 	
 	private UserAccessor userAccessor;
 	
-    public SyncInfoMacro(MetadataManager metadataManager, PluginPermissionsManager pluginPermissionsManager, UserAccessor userAccessor) {
+    public SyncInfoLegacyMacro(MetadataManager metadataManager, PluginPermissionsManager pluginPermissionsManager, UserAccessor userAccessor) {
         super();
         this.metadataManager = metadataManager;
         this.pluginPermissionsManager = pluginPermissionsManager;

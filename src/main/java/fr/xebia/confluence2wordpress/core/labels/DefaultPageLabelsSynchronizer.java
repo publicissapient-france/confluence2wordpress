@@ -97,11 +97,6 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
         metadata.setTagNames(tagNames);
     }
 
-	@Override
-	public void tagPage(ContentEntityObject page) {
-		LabelUtil.addLabel(WORDPRESSMETADATA, labelManager, page);
-	}
-    
     private String sanitize(String tagName) {
         return tagName.replaceAll("[^A-Za-z0-9-_]", "").toLowerCase();
     }

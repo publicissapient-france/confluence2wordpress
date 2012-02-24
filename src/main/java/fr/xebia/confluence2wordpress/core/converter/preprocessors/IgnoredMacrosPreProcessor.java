@@ -15,54 +15,52 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.preprocessors;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
-import com.atlassian.confluence.renderer.MacroManager;
-import com.atlassian.renderer.v2.macro.Macro;
+import com.atlassian.confluence.content.render.xhtml.ConversionContext;
+import com.atlassian.confluence.content.render.xhtml.XhtmlException;
+import com.atlassian.confluence.xhtml.api.MacroDefinition;
+import com.atlassian.confluence.xhtml.api.MacroDefinitionReplacer;
+import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
+import fr.xebia.confluence2wordpress.core.converter.ConversionException;
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
+import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
 
 
 public class IgnoredMacrosPreProcessor implements PreProcessor {
 
-    private MacroManager macroManager;
+    private final XhtmlContent xhtmlUtils;
     
-    public IgnoredMacrosPreProcessor(MacroManager macroManager) {
+    private final ConversionContext conversionContext;
+    
+    public IgnoredMacrosPreProcessor(XhtmlContent xhtmlUtils, ConversionContext conversionContext) {
         super();
-        this.macroManager = macroManager;
+        this.xhtmlUtils = xhtmlUtils;
+        this.conversionContext = conversionContext;
     }
 
     @Override
-    public String preProcess(String wiki, ConverterOptions options) {
-    	if(options.getIgnoredConfluenceMacros() != null) {
-            for (String macro : options.getIgnoredConfluenceMacros()) {
-                boolean hasBody = true;
-                Macro enabledMacro = macroManager.getEnabledMacro(macro);
-                if(enabledMacro != null){
-                    hasBody = enabledMacro.hasBody();
-                }
-            	Pattern p = Pattern.compile("\\{" + macro + "(:[^\\}]+)?\\}");
-            	Matcher matcher = p.matcher(wiki);
-                StringBuffer sb = new StringBuffer();
-                boolean start = true;
-                while (matcher.find()) {
-                    if(hasBody){
-                        if (start) {
-                            matcher.appendReplacement(sb, "{excerpt:hidden=true}");
-                        } else {
-                            matcher.appendReplacement(sb, "{excerpt}");
-                        }
-                        start = !start;
-                    } else {
-                        matcher.appendReplacement(sb, "");
-                    }
-                }
-                matcher.appendTail(sb);
-                wiki = sb.toString();
-            }
+    public String preProcess(String storage, ConverterOptions options) throws ConversionException {
+    	final List<String> ignoredConfluenceMacros = options.getIgnoredConfluenceMacros();
+		if(ignoredConfluenceMacros != null) {
+	    	try {
+				storage = xhtmlUtils.replaceMacroDefinitionsWithString(storage, conversionContext, new MacroDefinitionReplacer() {
+					@Override
+					public String replace(MacroDefinition macroDefinition) throws XhtmlException {
+						String name = macroDefinition.getName();
+						if(ignoredConfluenceMacros.contains(name) || MetadataManager.WORDPRESS_METADATA_MACRO_NAME.equals(name)){
+							return "";
+						}
+						return xhtmlUtils.convertMacroDefinitionToStorage(macroDefinition, conversionContext);
+					}
+				});
+			} catch (XhtmlException e) {
+				throw new ConversionException("Could not preprocess storage", e);
+			}
+    	
         }
-    	return wiki;
+    	return storage;
     }
 
 }

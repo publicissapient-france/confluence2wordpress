@@ -18,6 +18,9 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -36,6 +39,14 @@ public class CssClassNameCleaner implements TagNodeVisitor {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
             tag.removeAttribute("class");
+            Map<String, String> attributes = tag.getAttributes();
+            Iterator<String> iterator = attributes.keySet().iterator();
+            while (iterator.hasNext()) {
+				String name = iterator.next();
+				if(name.startsWith("data-")){
+					iterator.remove();
+				}
+			}
         }
         return true;
     }
