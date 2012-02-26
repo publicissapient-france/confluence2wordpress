@@ -256,6 +256,31 @@ public class SettingsAction extends ConfluenceActionSupport {
 
     @Override
     public String execute() throws Exception {
+        saveSettings();
+        this.addActionMessage(getText(MSG_UPDATE));
+        actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
+        return SUCCESS;
+    }
+
+    public String testConnection() throws Exception{
+        saveSettings();
+        WordpressClient client = pluginSettingsManager.getWordpressClient();
+        try {
+            String expected = Long.toString(System.currentTimeMillis());
+            String actual = client.ping(expected);
+            if(expected.equals(actual)){
+                addActionMessage(getText(MSG_PING));
+            } else {
+                addActionError(getText(ERRORS_PING), "Expected: " + expected + ", actual: " + actual);
+            }
+        } catch (WordpressXmlRpcException e) {
+            addActionError(getText(ERRORS_PING), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+        }
+        actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
+        return SUCCESS;
+    }
+
+    private void saveSettings() {
         normalizeUrls();
         pluginSettingsManager.setWordpressRootUrl(wordpressRootUrl);
         pluginSettingsManager.setDefaultIgnoredConfluenceMacros(ignoredConfluenceMacros);
@@ -272,29 +297,9 @@ public class SettingsAction extends ConfluenceActionSupport {
         pluginSettingsManager.setWordpressMaxConnections(maxConnections);
         Map<String, String> tagAttributesMap = new LinkedHashMap<String, String>();
         for (int i = 0; i < tagNames.size(); i++) {
-        	tagAttributesMap.put(tagNames.get(i), tagAttributes.get(i));
-		}
-        pluginSettingsManager.setTagAttributes(tagAttributesMap);
-        this.addActionMessage(getText(MSG_UPDATE));
-        actionMessagesManager.storeActionErrorsAndMessagesInSession(this);
-        return SUCCESS;
-    }
-
-    public String testConnection(){
-        normalizeUrls();
-        WordpressClient client = pluginSettingsManager.getWordpressClient();
-        try {
-            String expected = Long.toString(System.currentTimeMillis());
-            String actual = client.ping(expected);
-            if(expected.equals(actual)){
-                addActionMessage(getText(MSG_PING));
-            } else {
-                addActionError(getText(ERRORS_PING), "Expected: " + expected + ", actual: " + actual);
-            }
-        } catch (WordpressXmlRpcException e) {
-            addActionError(getText(ERRORS_PING), e.getCause() == null ? e.getMessage() : e.getCause().getMessage());
+            tagAttributesMap.put(tagNames.get(i), tagAttributes.get(i));
         }
-        return SUCCESS;
+        pluginSettingsManager.setTagAttributes(tagAttributesMap);
     }
 
     private void normalizeUrls() {

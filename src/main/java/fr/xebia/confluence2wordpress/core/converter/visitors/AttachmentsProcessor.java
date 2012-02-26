@@ -27,7 +27,7 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
-import fr.xebia.confluence2wordpress.core.converter.UploadedFile;
+import fr.xebia.confluence2wordpress.core.attachments.SynchronizedAttachment;
 
 
 /**
@@ -36,15 +36,15 @@ import fr.xebia.confluence2wordpress.core.converter.UploadedFile;
  */
 public class AttachmentsProcessor implements TagNodeVisitor {
 
-    private List<UploadedFile> uploadedFiles;
+    private List<SynchronizedAttachment> synchronizedAttachments;
     
     private String serverRoot;
     
     private String contextPath;
 
-    public AttachmentsProcessor(URL confluenceRootUrl, List<UploadedFile> uploadedFiles) {
+    public AttachmentsProcessor(URL confluenceRootUrl, List<SynchronizedAttachment> synchronizedAttachments) {
         super();
-        this.uploadedFiles = uploadedFiles;
+        this.synchronizedAttachments = synchronizedAttachments;
         StringBuffer result = new StringBuffer();
     	result.append(confluenceRootUrl.getProtocol());
         result.append("://");
@@ -97,8 +97,8 @@ public class AttachmentsProcessor implements TagNodeVisitor {
 
     private String replaceAttachmentUrl(String url) {
     	String confluencePath = extractConfluenceRelativePath(url);
-        for (UploadedFile uploadedFile : uploadedFiles) {
-            String wordpressUrl = uploadedFile.getWordpressUrl(confluencePath);
+        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
+            String wordpressUrl = synchronizedAttachment.getWordpressUrl(confluencePath);
 			if(wordpressUrl != null) {
             	return wordpressUrl;
             }

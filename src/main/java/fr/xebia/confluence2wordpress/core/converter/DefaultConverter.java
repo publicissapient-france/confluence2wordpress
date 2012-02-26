@@ -39,15 +39,14 @@ import com.atlassian.confluence.xhtml.api.XhtmlContent;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.CodeMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosPreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
-import fr.xebia.confluence2wordpress.core.converter.visitors.LegacyCodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.NewCodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
 
@@ -80,7 +79,7 @@ public class DefaultConverter implements Converter {
         try {
         	//temporarily replace page title to get correct anchors
         	//(I know it's ugly)
-        	//Otherwise the anchors are build by
+        	//Otherwise the anchors are built by
         	//com.atlassian.renderer.v2.macro.basic.BasicAnchorMacro.getAnchor(RenderContext, String)
         	//basically it's GeneralUtil.urlEncode((page title + "-" + heading title).trim().replaceAll(" ", ""))
         	//see also com.atlassian.confluence.util.GeneralUtil.urlEncode(String)
@@ -169,10 +168,8 @@ public class DefaultConverter implements Converter {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
         visitors.add(new MoreMacroProcessor());
         visitors.add(new SyncInfoMacroProcessor());
-        visitors.add(new LegacyCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
-        visitors.add(new NewCodeMacroProcessor(options.getSyntaxHighlighterPlugin()));
-        if(options.getUploadedFiles() != null) {
-            visitors.add(new AttachmentsProcessor(options.getConfluenceRootUrl(), options.getUploadedFiles()));
+        if(options.getSynchronizedAttachments() != null) {
+            visitors.add(new AttachmentsProcessor(options.getConfluenceRootUrl(), options.getSynchronizedAttachments()));
         }
         if(options.getTagAttributes() != null && ! options.getTagAttributes().isEmpty()) {
         	visitors.add(new TagAttributesProcessor(options.getTagAttributes()));
@@ -186,6 +183,7 @@ public class DefaultConverter implements Converter {
     protected List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
         processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
+        processors.add(new CodeMacroPreprocessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin()));
         return processors;
 	}
 

@@ -26,7 +26,7 @@
   <body>
   
 #if ( $action.hasActionMessages())
-    <div class="aui-message success closeable shadowed">
+    <div class="aui-message success closeable">
         <p class="title">
             <span class="aui-icon icon-success"></span>
             <strong>
@@ -38,15 +38,13 @@
     </div>   
 #end
 #if ( $action.hasActionErrors())
-    <div class="aui-message error closeable shadowed">
-        <p class="title">
-            <span class="aui-icon icon-error"></span>
-            <strong>
-            #foreach ($message in $action.actionErrors)
-            $message
-            #end
-            </strong>
-        </p>
+    <div class="aui-message error closeable">
+        <p class="title"><span class="aui-icon icon-error"></span>$action.getText("settings.errors.title")</p>
+        <ul>
+        #foreach ($message in $action.actionErrors)
+        <li>$message</li>
+        #end
+        </ul>
     </div>   
 #end
 <form action="updateSettings.action" method="post" class="aui long-label">

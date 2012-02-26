@@ -13,22 +13,25 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core.converter;
+package fr.xebia.confluence2wordpress.core.attachments;
 
 import com.atlassian.confluence.pages.Attachment;
 
 import fr.xebia.confluence2wordpress.wp.WordpressFile;
 
-public class UploadedFile {
+public class SynchronizedAttachment {
 
+    private final Attachment confluenceAttachment;
+    
     private final WordpressFile wordpressFile;
 
 	private final String thumbnailPath;
 
 	private String attachmentPath;
 
-	public UploadedFile(Attachment confluenceAttachment, WordpressFile wordpressFile) {
+	public SynchronizedAttachment(Attachment confluenceAttachment, WordpressFile wordpressFile) {
 		super();
+		this.confluenceAttachment = confluenceAttachment;
 		this.wordpressFile = wordpressFile;
 		this.attachmentPath = confluenceAttachment.getDownloadPathWithoutVersion();
 		this.thumbnailPath = attachmentPath.replace("/attachments/", "/thumbnails/");

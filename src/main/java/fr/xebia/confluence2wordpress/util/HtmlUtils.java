@@ -50,4 +50,12 @@ public class HtmlUtils{
 		return StringUtils.containsOnly(text,WHITESPACE);
     }
 
+    public static String stripCdata(String text){
+        if(text.startsWith("<![CDATA[") && text.endsWith("]]>")) {
+            text = StringUtils.substringBetween(text, "<![CDATA[", "]]>");
+            //need to unescape because even between cdata characters like "<" come escaped
+            return escapeHtml(text);
+        }
+        return text;
+    }
 }

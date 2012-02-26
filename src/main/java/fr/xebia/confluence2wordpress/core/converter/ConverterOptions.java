@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
+import fr.xebia.confluence2wordpress.core.attachments.SynchronizedAttachment;
 import fr.xebia.confluence2wordpress.util.MapUtils;
 
 public class ConverterOptions {
@@ -49,7 +50,7 @@ public class ConverterOptions {
 
     private boolean includeTOC = false;
 
-    private List<UploadedFile> uploadedFiles;
+    private List<SynchronizedAttachment> synchronizedAttachments;
 
     private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
     
@@ -148,12 +149,12 @@ public class ConverterOptions {
         this.includeTOC = includeTOC;
     }
 
-    public List<UploadedFile> getUploadedFiles() {
-		return uploadedFiles;
+    public List<SynchronizedAttachment> getSynchronizedAttachments() {
+		return synchronizedAttachments;
 	}
 
-	public void setUploadedFiles(List<UploadedFile> uploadedFiles) {
-		this.uploadedFiles = uploadedFiles;
+	public void setSynchronizedAttachments(List<SynchronizedAttachment> synchronizedAttachments) {
+		this.synchronizedAttachments = synchronizedAttachments;
 	}
 
 	public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {

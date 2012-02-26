@@ -35,14 +35,14 @@ public enum SyntaxHighlighterPlugin {
         @Override
         public Map<String, String> getSubstitutionMap() {
             Map<String, String> map = new HashMap<String, String>();
-            map.put("first-line", "num");
-            map.put("gutter", "gutter");
+            map.put("firstline", "num");
+            map.put("linenumbers", "gutter");
             return map;
         }
         
         @Override
-		public String getTagName(Map<String, String> shOptions) {
-			return shOptions.get("brush");
+		public String getTagName(String language) {
+			return language;
 		}
     },
     
@@ -55,15 +55,15 @@ public enum SyntaxHighlighterPlugin {
         @Override
         public Map<String, String> getSubstitutionMap() {
             Map<String, String> map = new HashMap<String, String>();
-            map.put("brush", "language");
-            map.put("first-line", "firstline");
+            map.put("language", "language");
+            map.put("firstline", "firstline");
             map.put("collapse", "collapse");
-            map.put("gutter", "gutter");
+            map.put("linenumbers", "gutter");
             return map;
         }
 
 		@Override
-		public String getTagName(Map<String, String> shOptions) {
+		public String getTagName(String language) {
 			return "sourcecode";
 		}
     }
@@ -72,6 +72,6 @@ public enum SyntaxHighlighterPlugin {
 
     public abstract Map<String, String> getSubstitutionMap();
 
-	public abstract String getTagName(Map<String, String> shOptions);
+	public abstract String getTagName(String language);
 	
 }
