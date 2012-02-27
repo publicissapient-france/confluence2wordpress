@@ -1,7 +1,5 @@
 package fr.xebia.confluence2wordpress.core.sync;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 
 import com.atlassian.confluence.core.ContentEntityObject;
@@ -68,10 +66,7 @@ public class DefaultWordpressSynchronizer implements WordpressSynchronizer {
         options.setOptimizeForRDP(metadata.isOptimizeForRDP());
         options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
         String baseUrl = settingsManager.getGlobalSettings().getBaseUrl();
-        try {
-			options.setConfluenceRootUrl(new URL(baseUrl));
-        } catch (MalformedURLException e) {
-        }
+        options.setConfluenceRootUrl(baseUrl);
         options.setTagAttributes(metadata.getTagAttributes());
 		return options;
 	}

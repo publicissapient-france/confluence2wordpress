@@ -16,7 +16,6 @@
 package fr.xebia.confluence2wordpress.core.converter;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,7 +29,7 @@ public class ConverterOptions {
 
 	private String pageTitle;
 
-	private URL confluenceRootUrl;
+	private String confluenceRootUrl;
     
     private boolean omitXmlDeclaration = true;
 
@@ -148,16 +147,16 @@ public class ConverterOptions {
     public void setIncludeTOC(boolean includeTOC) {
         this.includeTOC = includeTOC;
     }
-
+	
     public List<SynchronizedAttachment> getSynchronizedAttachments() {
-		return synchronizedAttachments;
-	}
+        return synchronizedAttachments;
+    }
+    
+    public void setSynchronizedAttachments(List<SynchronizedAttachment> synchronizedAttachments) {
+        this.synchronizedAttachments = synchronizedAttachments;
+    }
 
-	public void setSynchronizedAttachments(List<SynchronizedAttachment> synchronizedAttachments) {
-		this.synchronizedAttachments = synchronizedAttachments;
-	}
-
-	public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {
+    public SyntaxHighlighterPlugin getSyntaxHighlighterPlugin() {
         return syntaxHighlighterPlugin;
     }
     
@@ -165,11 +164,11 @@ public class ConverterOptions {
         this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
     }
 
-	public URL getConfluenceRootUrl() {
+	public String getConfluenceRootUrl() {
 		return confluenceRootUrl;
 	}
 
-	public void setConfluenceRootUrl(URL confluenceRootUrl) {
+	public void setConfluenceRootUrl(String confluenceRootUrl) {
 		this.confluenceRootUrl = confluenceRootUrl;
 	}
 

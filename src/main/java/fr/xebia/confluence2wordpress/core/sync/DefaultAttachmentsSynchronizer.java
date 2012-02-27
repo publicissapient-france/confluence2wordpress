@@ -4,11 +4,8 @@ import static com.atlassian.confluence.content.render.xhtml.XhtmlConstants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -75,10 +72,10 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
         if(attachments == null || attachments.isEmpty()){
             return null;
         }
-        Map<String, Integer> versions = metadata.getAttachments();
-        if(versions == null) {
-        	versions = new HashMap<String, Integer>();
-        }
+//        Map<String, Integer> versions = metadata.getAttachments();
+//        if(versions == null) {
+//        	versions = new HashMap<String, Integer>();
+//        }
         //TODO
 //        Set<Attachment> filteredAttachments = new HashSet<Attachment>();
 //        for (Iterator<Attachment> iterator = attachments.iterator(); iterator.hasNext();) {
@@ -89,13 +86,13 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
 //			}
 //		}
         List<SynchronizedAttachment> synchronizedAttachments = uploadAttachments(attachments);
-        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
-        	Attachment confluenceAttachment = synchronizedAttachment.getConfluenceAttachment();
-			String fileName = confluenceAttachment.getDownloadPathWithoutVersion();
-        	Integer version = confluenceAttachment.getAttachmentVersion();
-        	versions.put(fileName, version);
-		}
-        metadata.setAttachments(versions);
+//        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
+//        	Attachment confluenceAttachment = synchronizedAttachment.getConfluenceAttachment();
+//			String fileName = confluenceAttachment.getDownloadPathWithoutVersion();
+//        	Integer version = confluenceAttachment.getAttachmentVersion();
+//        	versions.put(fileName, version);
+//		}
+//        metadata.setAttachments(versions);
 		return synchronizedAttachments;
     }
 
@@ -176,7 +173,8 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
         List<SynchronizedAttachment> synchronizedAttachments = new ArrayList<SynchronizedAttachment>(size);
         for (FutureHolder future : futures) {
         	try {
-	            synchronizedAttachments.add(future.toSynchronizedAttachment());
+	            SynchronizedAttachment synchronizedAttachment = future.toSynchronizedAttachment();
+                synchronizedAttachments.add(synchronizedAttachment);
 	        } catch (InterruptedException e) {
 	            throw new WordpressXmlRpcException("Cannot upload attachment", e);
 	        } catch (ExecutionException e) {

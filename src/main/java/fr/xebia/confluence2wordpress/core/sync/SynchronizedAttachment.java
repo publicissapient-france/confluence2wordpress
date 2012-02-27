@@ -27,7 +27,7 @@ public class SynchronizedAttachment {
 
 	private final String thumbnailPath;
 
-	private String attachmentPath;
+	private final String attachmentPath;
 
 	public SynchronizedAttachment(Attachment confluenceAttachment, WordpressFile wordpressFile) {
 		super();
@@ -45,29 +45,18 @@ public class SynchronizedAttachment {
 		return wordpressFile;
 	}
 
-	public String getWordpressUrl(String confluencePath){
-		if(confluencePath.equals(attachmentPath)){
-			return wordpressFile.getUrl();
-		}
-		//TODO reduced size (non thumbnail)
-		if(thumbnailPath.equals(confluencePath)){
-	        /*
-	        medium -> image is resized
-	        post-thumbnail
-	        small-feature
-	        thumbnail -> image is deformed to 150*150
-	         */
-			WordpressFile medium = wordpressFile.getAlternative("medium");
-			if(medium != null) {
-				return medium.getUrl();
-			}
-			WordpressFile thumbnail = wordpressFile.getAlternative("thumbnail");
-			if(thumbnail != null) {
-				return thumbnail.getUrl();
-			}
-			return wordpressFile.getUrl();
-		}
-		return null;
-	}
+	public String getWordpressUrl(String confluencePath, Integer width){
+        if(attachmentPath.equals(confluencePath) || thumbnailPath.equals(confluencePath)){
+            if(width != null){
+                WordpressFile alternative = wordpressFile.getBestAlternative(width);
+                if(alternative != null) {
+                    return alternative.getUrl();
+                }
+                
+            }
+            return wordpressFile.getUrl();
+        }
+        return null;
+    }
 
 }

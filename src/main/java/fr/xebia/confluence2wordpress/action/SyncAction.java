@@ -28,6 +28,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -478,9 +480,9 @@ public class SyncAction extends AbstractPageAwareAction {
                 }
             });
             try {
-                users.addAll(futureUsers.get());
-                categories.addAll(futureCategories.get());
-                tags.addAll(futureTags.get());
+                users.addAll(futureUsers.get(30, TimeUnit.SECONDS));
+                categories.addAll(futureCategories.get(30, TimeUnit.SECONDS));
+                tags.addAll(futureTags.get(30, TimeUnit.SECONDS));
             } catch (InterruptedException e) {
                 throw new WordpressXmlRpcException("Error contacting Wordpress server", e);
             } catch (ExecutionException e) {
@@ -488,6 +490,8 @@ public class SyncAction extends AbstractPageAwareAction {
                     throw (WordpressXmlRpcException) e.getCause();
                 }
                 throw new WordpressXmlRpcException("Error contacting Wordpress server", e.getCause());
+            } catch (TimeoutException e) {
+                throw new WordpressXmlRpcException("Connection to Wordpress timed out", e.getCause());
             } 
             setWordpressUsers(users);
             setWordpressCategories(categories);

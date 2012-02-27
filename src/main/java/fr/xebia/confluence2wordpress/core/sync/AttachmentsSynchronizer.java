@@ -9,6 +9,6 @@ import fr.xebia.confluence2wordpress.wp.WordpressXmlRpcException;
 
 public interface AttachmentsSynchronizer {
 
-	List<SynchronizedAttachment> synchronizeAttachments(ContentEntityObject page, Metadata metadata) throws SynchronizationException, WordpressXmlRpcException;
+    List<SynchronizedAttachment> synchronizeAttachments(ContentEntityObject page, Metadata metadata) throws SynchronizationException, WordpressXmlRpcException;
 
 }

@@ -118,4 +118,17 @@ public class WordpressFile {
 		alternatives.put(key, value);
 	}
 
+    public WordpressFile getBestAlternative(Integer width) {
+        int bestDelta = Math.abs(width - this.width);
+        WordpressFile bestAlternative = this;
+        for (WordpressFile wf : alternatives.values()) {
+            int delta = Math.abs(width - wf.width);
+            if(delta < bestDelta){
+                bestDelta = delta;
+                bestAlternative = wf;
+            }
+        }
+        return bestAlternative;
+    }
+
 }

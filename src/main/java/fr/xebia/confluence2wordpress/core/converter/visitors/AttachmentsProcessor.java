@@ -18,16 +18,14 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
 import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
+import fr.xebia.confluence2wordpress.util.UrlUtils;
 
 
 /**
@@ -36,21 +34,14 @@ import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
  */
 public class AttachmentsProcessor implements TagNodeVisitor {
 
-    private List<SynchronizedAttachment> synchronizedAttachments;
+    private final List<SynchronizedAttachment> synchronizedAttachments;
     
-    private String serverRoot;
-    
-    private String contextPath;
+    private final String confluenceRootUrl;
 
-    public AttachmentsProcessor(URL confluenceRootUrl, List<SynchronizedAttachment> synchronizedAttachments) {
+    public AttachmentsProcessor(String confluenceRootUrl, List<SynchronizedAttachment> synchronizedAttachments) {
         super();
         this.synchronizedAttachments = synchronizedAttachments;
-        StringBuffer result = new StringBuffer();
-    	result.append(confluenceRootUrl.getProtocol());
-        result.append("://");
-        result.append(confluenceRootUrl.getAuthority());
-        this.serverRoot = result.toString();
-        this.contextPath = confluenceRootUrl.getPath();
+        this.confluenceRootUrl = confluenceRootUrl;
     }
 
 
@@ -69,7 +60,8 @@ public class AttachmentsProcessor implements TagNodeVisitor {
                  * /confluence/download/thumbnails/983042/image.png (thumbnail)
                  */
                 if (url != null) {
-                    String src = replaceAttachmentUrl(url);
+                    Integer width = tag.getAttributeByName("width") == null ? null : Integer.valueOf(tag.getAttributeByName("width"));
+                    String src = findWordpressUrl(url, width);
                     if(src != null) {
                         tag.setAttribute("src", src);
                     }
@@ -83,42 +75,25 @@ public class AttachmentsProcessor implements TagNodeVisitor {
                  * /confluence/download/attachments/983042/armonia.png?version=1&amp;modificationDate=1327402370523 (image as attachment)
                  */
                 if (url != null) {
-                    String href = replaceAttachmentUrl(url);
+                    String href = findWordpressUrl(url, null);
                     if(href != null) {
                         tag.setAttribute("href", href);
                     }
                 }
             }
-            //TODO object
         }
         return true;
     }
 
-
-    private String replaceAttachmentUrl(String url) {
-    	String confluencePath = extractConfluenceRelativePath(url);
-        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
-            String wordpressUrl = synchronizedAttachment.getWordpressUrl(confluencePath);
-			if(wordpressUrl != null) {
-            	return wordpressUrl;
+    private String findWordpressUrl(String confluenceUrl, Integer width) {
+    	String confluencePath = UrlUtils.extractConfluenceRelativePath(confluenceUrl, confluenceRootUrl);
+    	for (SynchronizedAttachment sa : synchronizedAttachments) {
+            String wordpressUrl = sa.getWordpressUrl(confluencePath, width);
+            if(wordpressUrl != null){
+                return wordpressUrl;
             }
         }
-        return null;
+    	return null;
     }
-
-
-	private String extractConfluenceRelativePath(String url) {
-		//url may contain "&amp;" - due to htmlcleaner?
-        String path = StringEscapeUtils.unescapeXml(url);
-        path = StringUtils.substringBefore(path, "?");
-        if(path.startsWith(serverRoot)){
-            path = StringUtils.substringAfter(path, serverRoot);
-        }
-        if( ! "".equals(contextPath) && path.startsWith(contextPath)){
-            path = StringUtils.substringAfter(path, contextPath);
-        }
-		return path;
-	}
-
 
 }
