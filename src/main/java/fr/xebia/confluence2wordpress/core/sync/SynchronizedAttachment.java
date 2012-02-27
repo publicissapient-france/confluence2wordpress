@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package fr.xebia.confluence2wordpress.core.attachments;
+package fr.xebia.confluence2wordpress.core.sync;
 
 import com.atlassian.confluence.pages.Attachment;
 
@@ -37,10 +37,19 @@ public class SynchronizedAttachment {
 		this.thumbnailPath = attachmentPath.replace("/attachments/", "/thumbnails/");
 	}
 	
+	public Attachment getConfluenceAttachment() {
+		return confluenceAttachment;
+	}
+
+	public WordpressFile getWordpressFile() {
+		return wordpressFile;
+	}
+
 	public String getWordpressUrl(String confluencePath){
 		if(confluencePath.equals(attachmentPath)){
 			return wordpressFile.getUrl();
 		}
+		//TODO reduced size (non thumbnail)
 		if(thumbnailPath.equals(confluencePath)){
 	        /*
 	        medium -> image is resized

@@ -13,6 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *#
+#htmlSafe()
 <html>
 <head>
     <title>$action.page.displayTitle - $action.getText("preview.title")</title>
@@ -25,12 +26,12 @@
 
 <fieldset class="c2w_preview c2w_left">
     <legend><h3>$action.getText("preview.form.wiki")</h3></legend>
-    <textarea class="c2w_preview" rows="15" readonly="true" wrap="off">$action.wikiEscaped</textarea>
+    <textarea class="c2w_preview" rows="15" readonly="true" wrap="off">$action.storage</textarea>
 </fieldset>
 
 <fieldset class="c2w_preview c2w_right">
     <legend><h3>$action.getText("preview.form.html")</h3></legend>
-    <textarea class="c2w_preview" rows="15" readonly="true" wrap="off">$action.htmlEscaped</textarea>
+    <textarea class="c2w_preview" rows="15" readonly="true" wrap="off">$action.html</textarea>
 </fieldset>
     
 </body>

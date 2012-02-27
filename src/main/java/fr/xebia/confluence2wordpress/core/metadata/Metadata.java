@@ -72,6 +72,9 @@ public class Metadata implements Serializable {
     @MetadataItem    
     private Date dateCreated;
 
+    @MetadataItem
+    private Map<String,Integer> attachments;
+
     public String getPageTitle() {
         return pageTitle;
     }
@@ -197,6 +200,14 @@ public class Metadata implements Serializable {
 
 	public void setTagAttributes(Map<String, String> tagAttributes) {
 		this.tagAttributes = tagAttributes;
+	}
+
+	public Map<String, Integer> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(Map<String, Integer> attachments) {
+		this.attachments = attachments;
 	}
 
 	public WordpressPost createPost() {

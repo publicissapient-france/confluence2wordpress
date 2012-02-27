@@ -114,7 +114,7 @@ public class WordpressClient {
 	 * @return the list of {@link WordpressUser}s of the blog.
 	 * @throws WordpressXmlRpcException
 	 */
-	public Future<List<WordpressUser>> getUsers() throws WordpressXmlRpcException {
+	public Future<List<WordpressUser>> getUsers() {
 		return pool.submit(new Callable<List<WordpressUser>>() {
 
 			@Override
@@ -154,7 +154,7 @@ public class WordpressClient {
 	 * @return the list of {@link WordpressCategory}s of the blog.
 	 * @throws WordpressXmlRpcException
 	 */
-	public Future<List<WordpressCategory>> getCategories() throws WordpressXmlRpcException {
+	public Future<List<WordpressCategory>> getCategories() {
 		return pool.submit(new Callable<List<WordpressCategory>>() {
 
 			@Override
@@ -189,7 +189,7 @@ public class WordpressClient {
 	 * @return the list of {@link WordpressCategory}s of the blog.
 	 * @throws WordpressXmlRpcException
 	 */
-	public Future<List<WordpressTag>> getTags() throws WordpressXmlRpcException {
+	public Future<List<WordpressTag>> getTags() {
 		return pool.submit(new Callable<List<WordpressTag>>() {
 
 			@Override
@@ -321,7 +321,7 @@ public class WordpressClient {
 	 * @return
 	 * @throws WordpressXmlRpcException
 	 */
-	public Future<WordpressFile> uploadFile(final WordpressFile file) throws WordpressXmlRpcException {
+	public Future<WordpressFile> uploadFile(final WordpressFile file) {
 
 		return pool.submit(new Callable<WordpressFile>() {
 

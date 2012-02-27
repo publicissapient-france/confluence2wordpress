@@ -109,6 +109,7 @@
 			<parameter name="permalink" type="string" required="false" />
 			<parameter name="digest" type="string" required="false" />
 			<parameter name="dateCreated" type="string" required="false" />
+			<parameter name="attachments" type="string" required="false" />
         </parameters>
     </xhtml-macro>
     
@@ -176,9 +177,19 @@
         <interface>fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager</interface>
     </component>
     
-    <component key="pageLabelsSynchronizer" class="fr.xebia.confluence2wordpress.core.labels.DefaultPageLabelsSynchronizer">
+    <component key="wordpressSynchronizer" class="fr.xebia.confluence2wordpress.core.sync.DefaultWordpressSynchronizer">
+        <description>Synchronizes Confluence pages with Wordpress posts.</description>
+        <interface>fr.xebia.confluence2wordpress.core.sync.WordpressSynchronizer</interface>
+    </component>
+    
+    <component key="attachmentsSynchronizer" class="fr.xebia.confluence2wordpress.core.sync.DefaultAttachmentsSynchronizer">
+        <description>Synchronizes Confluence attachments with Wordpress files.</description>
+        <interface>fr.xebia.confluence2wordpress.core.sync.AttachmentsSynchronizer</interface>
+    </component>
+    
+    <component key="pageLabelsSynchronizer" class="fr.xebia.confluence2wordpress.core.sync.DefaultPageLabelsSynchronizer">
         <description>Synchronizes Confluence labels with Wordpress tags.</description>
-        <interface>fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer</interface>
+        <interface>fr.xebia.confluence2wordpress.core.sync.PageLabelsSynchronizer</interface>
     </component>
     
     <component key="metadataManager" class="fr.xebia.confluence2wordpress.core.metadata.DefaultMetadataManager">
@@ -187,7 +198,7 @@
     </component>
     
     <component key="converter" class="fr.xebia.confluence2wordpress.core.converter.DefaultConverter">
-        <description>Synchronizes Confluence html into Wordpress html.</description>
+        <description>Converts Confluence internal storage (xhtml) into Wordpress html.</description>
         <interface>fr.xebia.confluence2wordpress.core.converter.Converter</interface>
     </component>
     

@@ -66,7 +66,7 @@ public class MetadataMacro implements Macro {
 			throw new MacroExecutionException("Cannot extract Wordpress metadata", e);
 		}
         User user;
-        if(ServletActionContext.getRequest().getRemoteUser() == null){
+        if(ServletActionContext.getRequest() == null || ServletActionContext.getRequest().getRemoteUser() == null){
             user = AuthenticatedUserThreadLocal.getUser();
         } else {
 			user = userAccessor.getUser(ServletActionContext.getRequest().getRemoteUser());

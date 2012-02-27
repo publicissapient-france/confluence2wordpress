@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.DisposableBean;
 
 import com.atlassian.sal.api.pluginsettings.PluginSettings;
 import com.atlassian.sal.api.pluginsettings.PluginSettingsFactory;
@@ -36,7 +35,7 @@ import fr.xebia.confluence2wordpress.wp.WordpressConnection;
  * @author Alexandre Dutra
  *
  */
-public class DefaultPluginSettingsManager implements PluginSettingsManager, DisposableBean {
+public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private static final String KEY_PREFIX = "fr.xebia.confluence2wordpress:";
 
@@ -67,11 +66,6 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager, Disp
     public DefaultPluginSettingsManager(PluginSettingsFactory pluginSettingsFactory) {
         this.pluginSettingsFactory = pluginSettingsFactory;
     }
-
-	@Override
-	public void destroy() throws Exception {
-		this.destroyClient();
-	}
 
     @Override
 	public synchronized WordpressClient getWordpressClient() {

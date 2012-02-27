@@ -27,7 +27,7 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
-import fr.xebia.confluence2wordpress.core.attachments.SynchronizedAttachment;
+import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
 
 
 /**

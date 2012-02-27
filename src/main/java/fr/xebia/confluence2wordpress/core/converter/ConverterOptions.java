@@ -23,7 +23,7 @@ import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
-import fr.xebia.confluence2wordpress.core.attachments.SynchronizedAttachment;
+import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.xebia.confluence2wordpress.util.MapUtils;
 
 public class ConverterOptions {

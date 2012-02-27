@@ -13,7 +13,19 @@ import com.atlassian.confluence.core.ContentEntityObject;
 
 public class StaxUtils {
 
-    private static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
+	/*
+	 * see  com.atlassian.confluence.content.render.xhtml.DefaultXmlEventReaderFactory
+	 */
+	
+    private static final XMLInputFactory FACTORY;
+    
+    static {
+    	FACTORY = XMLInputFactory.newInstance();
+    	FACTORY.setProperty("javax.xml.stream.supportDTD", Boolean.TRUE);
+    	FACTORY.setProperty("javax.xml.stream.isCoalescing", Boolean.FALSE);
+    	FACTORY.setProperty("javax.xml.stream.isReplacingEntityReferences", Boolean.FALSE);
+    	FACTORY.setProperty("com.ctc.wstx.normalizeAttrValues", Boolean.FALSE);
+    }
 
     private static final String XML_START = 
         "<xml " +
@@ -27,7 +39,10 @@ public class StaxUtils {
         "</xml>" ;
 
     public static XMLEventReader getReader(ContentEntityObject page) throws XMLStreamException{
-        return FACTORY.createXMLEventReader(new StringReader(XML_START + page.getBodyAsString() + XML_END));
+        return getReader(page.getBodyAsString());
     }
     
+    public static XMLEventReader getReader(String storage) throws XMLStreamException {
+        return FACTORY.createXMLEventReader(new StringReader(XML_START + storage + XML_END));
+    }
 }

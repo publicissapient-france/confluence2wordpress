@@ -47,8 +47,6 @@
 <form id="options" action="sync.action" method="post" class="aui long-label">
 
     <input name="pageId" type="hidden" value="$action.pageId" />
-    <input name="metadata.digest" type="hidden" value="$!action.metadata.digest" />
-    <input name="metadata.permalink" type="hidden" value="$!action.metadata.permalink" />
 
     <h2>$action.getText("sync.form.title.conversionOptions")</h2>
     

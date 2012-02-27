@@ -28,14 +28,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        
-        <!-- <confluence.version>3.5.2</confluence.version> -->
         <confluence.version>4.0</confluence.version>
         <confluence.data.version>3.5</confluence.data.version>
         <amps.version>3.7.3</amps.version>
-        
-        <!-- <jericho.version>3.2</jericho.version> -->
-        <!-- <jtidy.version>r938</jtidy.version> -->
         <htmlcleaner.version>2.2</htmlcleaner.version>
     </properties>
     
@@ -48,12 +43,6 @@
             <artifactId>confluence</artifactId>
             <version>${confluence.version}</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.collections</groupId>
-                    <artifactId>google-collections</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         
         <dependency>
@@ -77,26 +66,16 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- this is provided by Confluence but we need it in compile scope -->
+		<!-- provided by Confluence -->
+		
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.4</version>
+			<scope>provided</scope>
+		</dependency>
         
-		<dependency>
-			<groupId>opensymphony</groupId>
-			<artifactId>xwork</artifactId>
-			<version>1.0.3.2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>ognl</groupId>
-			<artifactId>ognl</artifactId>
-			<version>2.6.5-atlassian-2</version>
-		</dependency>
-<!-- 
-        <dependency>
-            <groupId>com.atlassian.confluence</groupId>
-            <artifactId>confluence</artifactId>
-            <version>4.0</version>
-        </dependency>
-   -->
+				
         <!-- our dependencies -->
         
         <dependency>
@@ -104,21 +83,17 @@
             <artifactId>htmlcleaner</artifactId>
             <version>${htmlcleaner.version}</version>
             <scope>compile</scope>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.apache.ant</groupId>
+            		<artifactId>ant</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.jdom</groupId>
+            		<artifactId>jdom</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
-
-        <!-- <dependency>
-            <groupId>net.sf.jtidy</groupId>
-            <artifactId>jtidy</artifactId>
-            <version>${jtidy.version}</version>
-            <scope>compile</scope>
-        </dependency> -->
-
-        <!-- <dependency>
-            <groupId>net.htmlparser.jericho</groupId>
-            <artifactId>jericho-html</artifactId>
-            <version>${jericho.version}</version>
-            <scope>compile</scope>
-        </dependency> -->
 
         <dependency>
             <groupId>joda-time</groupId>
@@ -131,19 +106,6 @@
             <artifactId>joda-convert</artifactId>
             <version>1.1</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>11.0</version>
-        </dependency>
-
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.4</version>
-			<scope>provided</scope>
-		</dependency>
   
         <dependency>
             <groupId>junit</groupId>
@@ -172,6 +134,7 @@
             <version>1.4.9</version>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
 
     <build>
@@ -192,16 +155,29 @@
 	    
         <plugins>
 
-            <plugin>
-                <groupId>com.atlassian.maven.plugins</groupId>
-                <artifactId>maven-confluence-plugin</artifactId>
-                <version>3.7.3</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <productVersion>${confluence.version}</productVersion>
-                    <productDataVersion>${confluence.data.version}</productDataVersion>
-                </configuration>
-            </plugin>
+			<plugin>
+				<groupId>com.atlassian.maven.plugins</groupId>
+				<artifactId>maven-confluence-plugin</artifactId>
+				<version>3.7.3</version>
+				<extensions>true</extensions>
+				<configuration>
+					<productVersion>${confluence.version}</productVersion>
+					<productDataVersion>${confluence.data.version}</productDataVersion>
+					<instructions>
+						<!-- https://developer.atlassian.com/display/DOCS/Setting+OSGi+Manifest+Instructions+in+your+Plugin -->
+						<Import-Package>
+							org.apache.commons*;version="0.0",
+							com.google.common*;version="0.0",
+						    org.apache.xmlrpc*;version="0.0",
+						    javax.xml.namespace*;version="0.0",
+						    javax.xml.stream*;version="0.0",
+						    com.opensymphony*;version="0.0",
+					    	com.atlassian*;version="0.0"
+						</Import-Package>
+					</instructions>
+					<allowGoogleTracking>false</allowGoogleTracking>
+				</configuration>
+			</plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

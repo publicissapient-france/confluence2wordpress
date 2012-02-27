@@ -15,13 +15,9 @@
  */
 package fr.xebia.confluence2wordpress.action;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -34,36 +30,29 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
 
 import com.atlassian.confluence.macro.browser.MacroMetadataManager;
 import com.atlassian.confluence.macro.browser.beans.MacroMetadata;
-import com.atlassian.confluence.pages.AbstractPage;
-import com.atlassian.confluence.pages.Attachment;
-import com.atlassian.confluence.pages.AttachmentManager;
 import com.atlassian.confluence.pages.PageManager;
 import com.atlassian.confluence.pages.actions.AbstractPageAwareAction;
 import com.atlassian.xwork.ParameterSafe;
-import com.opensymphony.util.TextUtils;
 import com.opensymphony.xwork.util.XWorkList;
 
-import fr.xebia.confluence2wordpress.core.attachments.SynchronizedAttachment;
 import fr.xebia.confluence2wordpress.core.converter.ConversionException;
-import fr.xebia.confluence2wordpress.core.converter.Converter;
-import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
-import fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer;
 import fr.xebia.confluence2wordpress.core.messages.ActionMessagesManager;
 import fr.xebia.confluence2wordpress.core.metadata.Metadata;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
 import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
 import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
 import fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager;
+import fr.xebia.confluence2wordpress.core.sync.PageLabelsSynchronizer;
+import fr.xebia.confluence2wordpress.core.sync.SynchronizationException;
+import fr.xebia.confluence2wordpress.core.sync.WordpressSynchronizer;
 import fr.xebia.confluence2wordpress.util.CollectionUtils;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressClient;
-import fr.xebia.confluence2wordpress.wp.WordpressFile;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 import fr.xebia.confluence2wordpress.wp.WordpressTag;
 import fr.xebia.confluence2wordpress.wp.WordpressUser;
@@ -101,11 +90,13 @@ public class SyncAction extends AbstractPageAwareAction {
 
 	private static final String ERRORS_TAG_ATTRIBUTE_EMPTY_KEY = "sync.errors.tagAttribute.empty";
 
+    private static final String ERRORS_CONVERSION = "sync.errors.conversion";
+
     private static final String ERRORS_XMLRPC = "sync.errors.xmlrpc";
 
     private static final String ERRORS_METADATA = "sync.errors.metadata";
-    
-    private static final String ERRORS_CONVERSION = "sync.errors.conversion";
+
+    private static final String ERRORS_SYNC = "sync.errors.sync";
 
     private static final String JS_DATEPICKER_FORMAT_KEY = "sync.js.datepicker.format";
 
@@ -119,11 +110,7 @@ public class SyncAction extends AbstractPageAwareAction {
 
     private static final Pattern TAG_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
-    private Converter converter;
-
     private PageManager pageManager;
-
-    private AttachmentManager attachmentManager;
 
     private PluginPermissionsManager pluginPermissionsManager;
 
@@ -133,9 +120,9 @@ public class SyncAction extends AbstractPageAwareAction {
     
     private MetadataManager metadataManager;
 
-    private Metadata metadata;
-
     private String html;
+
+    private WordpressSynchronizer wordpressSynchronizer;
 
     private PageLabelsSynchronizer pageLabelsSynchronizer;
 
@@ -159,10 +146,6 @@ public class SyncAction extends AbstractPageAwareAction {
         this.pageManager = pageManager;
     }
 
-    public void setAttachmentManager(AttachmentManager attachmentManager) {
-        this.attachmentManager = attachmentManager;
-    }
-
     public void setMacroMetadataManager(MacroMetadataManager macroMetadataManager) {
         this.macroMetadataManager = macroMetadataManager;
     }
@@ -175,16 +158,16 @@ public class SyncAction extends AbstractPageAwareAction {
         this.pluginPermissionsManager = pluginPermissionsManager;
     }
 
-    public void setPageLabelsSynchronizer(PageLabelsSynchronizer pageLabelsSynchronizer) {
-        this.pageLabelsSynchronizer = pageLabelsSynchronizer;
-    }
-
-    public void setMetadataManager(MetadataManager metadataManager) {
-		this.metadataManager = metadataManager;
+	public void setPageLabelsSynchronizer(PageLabelsSynchronizer pageLabelsSynchronizer) {
+		this.pageLabelsSynchronizer = pageLabelsSynchronizer;
 	}
 
-    public void setConverter(Converter converter) {
-		this.converter = converter;
+	public void setWordpressSynchronizer(WordpressSynchronizer wordpressSynchronizer) {
+		this.wordpressSynchronizer = wordpressSynchronizer;
+	}
+
+	public void setMetadataManager(MetadataManager metadataManager) {
+		this.metadataManager = metadataManager;
 	}
 
 	public boolean isRemoteUserHasConfigurationPermission(){
@@ -285,31 +268,25 @@ public class SyncAction extends AbstractPageAwareAction {
 
 	@ParameterSafe
     public Metadata getMetadata() {
-        if(metadata == null){
-            metadata = new Metadata();
-        }
-        return metadata;
+        return (Metadata) getSession().get("METADATA_KEY");
     }
 
+	@SuppressWarnings("unchecked")
+	public void setMetadata(Metadata metadata) {
+    	getSession().put("METADATA_KEY", metadata);
+    }
+	
     public String getHtml() {
         return html;
     }
 
-    public String getWiki() {
+    public String getStorage() {
         return getPage().getBodyAsString();
-    }
-
-    public String getWikiEscaped() {
-        return TextUtils.htmlEncode(getWiki());
-    }
-
-    public String getHtmlEscaped() {
-        return TextUtils.htmlEncode(getHtml());
     }
 
     public String getEditLink() {
         return pluginSettingsManager.getWordpressRootUrl() + 
-        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), metadata.getPostId().toString());
+        MessageFormat.format(pluginSettingsManager.getWordpressEditPostRelativePath(), getMetadata().getPostId().toString());
     }
 
     public String getConfluenceRootUrl(){
@@ -434,9 +411,7 @@ public class SyncAction extends AbstractPageAwareAction {
      */
     public String preview() {
         try {
-            this.html = createPostBody(true);
-        } catch (WordpressXmlRpcException e) {
-            addActionError(ERRORS_XMLRPC, e.getMessage());
+            this.html = this.wordpressSynchronizer.preview(getPage(), getMetadata());
         } catch (ConversionException e) {
             addActionError(ERRORS_CONVERSION, e.getMessage());
         }
@@ -451,23 +426,22 @@ public class SyncAction extends AbstractPageAwareAction {
     public String sync() {
         try {
             // consider it a creation if no post ID
-            WordpressClient client = pluginSettingsManager.getWordpressClient();
-            boolean creation = this.metadata.getPostId() == null;
-            WordpressPost post = metadata.createPost();
-            post.setBody(createPostBody(false));
-            post = client.post(post);
-            metadata.updateFromPost(post);
-            pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
-            metadataManager.storeMetadata(getPage(), metadata);
+            boolean creation = this.getMetadata().getPostId() == null;
+            Metadata metadata = this.wordpressSynchronizer.synchronize(getPage(), getMetadata());
+			this.setMetadata(metadata);
+            this.metadataManager.storeMetadata(getPage(), metadata);
+            this.pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
             if(creation) {
                 addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
             } else {
                 addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
             }
-        } catch (WordpressXmlRpcException e) {
-            addActionError(ERRORS_XMLRPC, e.getMessage());
         } catch (ConversionException e) {
             addActionError(ERRORS_CONVERSION, e.getMessage());
+        } catch (WordpressXmlRpcException e) {
+            addActionError(ERRORS_XMLRPC, e.getMessage());
+        } catch (SynchronizationException e) {
+            addActionError(ERRORS_SYNC, e.getMessage());
         } catch (MetadataException e) {
             addActionError(ERRORS_METADATA, e.getMessage());
         }
@@ -530,7 +504,7 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     private void mergeLocalAndRemoteTags() {
-        List<String> tagNames = metadata.getTagNames();
+        List<String> tagNames = getMetadata().getTagNames();
         if(tagNames != null){
             for (String tagName : tagNames) {
                 boolean found = false;
@@ -549,20 +523,19 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     private void initMetadata() throws MetadataException {
-        if(metadata == null){
-            metadata = metadataManager.extractMetadata(getPage());
-            if(metadata == null) {
-                metadata = metadataManager.createMetadata(
-                    getPage(), 
-                    getWordpressUsers(), 
-                    getWordpressCategories()
-                );
-                metadata.setIgnoredConfluenceMacros(pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList());
-                metadata.setTagAttributes(pluginSettingsManager.getDefaultTagAttributes());
-            }
+    	Metadata metadata = metadataManager.extractMetadata(getPage());
+        if(metadata == null) {
+            metadata = metadataManager.createMetadata(
+                getPage(), 
+                getWordpressUsers(), 
+                getWordpressCategories()
+            );
+            metadata.setIgnoredConfluenceMacros(pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList());
+            metadata.setTagAttributes(pluginSettingsManager.getDefaultTagAttributes());
         }
         pageLabelsSynchronizer.pageLabelsToTagNames(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
+        setMetadata(metadata);
     }
 
     private void updateFormFields() {
@@ -579,65 +552,6 @@ public class SyncAction extends AbstractPageAwareAction {
 	        	tagAttributes.add(entry.getValue());
 			}
         }
-    }
-
-    private String createPostBody(boolean preview) throws WordpressXmlRpcException, ConversionException {
-        ConverterOptions options = new ConverterOptions();
-        options.setPageTitle(metadata.getPageTitle());
-        options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
-        options.setOptimizeForRDP(metadata.isOptimizeForRDP());
-        options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
-        try {
-            options.setConfluenceRootUrl(new URL(getConfluenceRootUrl()));
-        } catch (MalformedURLException e) {
-            throw new WordpressXmlRpcException("Malformed URL: " + getConfluenceRootUrl(), e);
-        }
-        options.setTagAttributes(metadata.getTagAttributes());
-        if( ! preview){
-        	List<SynchronizedAttachment> synchronizedAttachments = uploadFiles();
-            options.setSynchronizedAttachments(synchronizedAttachments);
-        }
-        return converter.convert(getPage(), options);
-    }
-
-    private List<SynchronizedAttachment> uploadFiles() throws WordpressXmlRpcException {
-        AbstractPage page = getPage();
-        List<Attachment> attachments = attachmentManager.getAttachments(page);
-        if(attachments == null || attachments.isEmpty()) {
-        	return null;
-        }
-        int size = attachments.size();
-        final WordpressClient client = pluginSettingsManager.getWordpressClient();
-        List<Future<WordpressFile>> files = new ArrayList<Future<WordpressFile>>(size);
-    	for (final Attachment attachment : attachments) {
-			byte[] data;
-            try {
-                data = IOUtils.toByteArray(attachment.getContentsAsStream());
-            } catch (IOException e) {
-                throw new WordpressXmlRpcException("Cannot read attachment: " + attachment.getFileName(), e);
-            }
-            WordpressFile file = new WordpressFile(
-                attachment.getFileName(),
-                attachment.getContentType(),
-                data);
-            files.add(client.uploadFile(file));
-        }
-    	List<SynchronizedAttachment> synchronizedAttachments = new ArrayList<SynchronizedAttachment>(size);
-    	for (int i = 0; i < size; i++) {
-    		WordpressFile wordpressFile;
-            try {
-                wordpressFile = files.get(i).get();
-            } catch (InterruptedException e) {
-                throw new WordpressXmlRpcException("Cannot upload attachment", e);
-            } catch (ExecutionException e) {
-                if(e.getCause() instanceof WordpressXmlRpcException){
-                    throw (WordpressXmlRpcException) e.getCause();
-                }
-                throw new WordpressXmlRpcException("Cannot upload attachment", e.getCause() == null ? e : e.getCause());
-            }
-            synchronizedAttachments.add(new SynchronizedAttachment(attachments.get(i), wordpressFile));
-		}
-        return synchronizedAttachments;
     }
 
 }
