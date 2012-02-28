@@ -1,6 +1,5 @@
 package fr.xebia.confluence2wordpress.core.metadata;
 
-import java.util.Map;
 import java.util.Set;
 
 import com.atlassian.confluence.core.ContentEntityObject;
@@ -18,6 +17,8 @@ public interface MetadataManager {
 
 	Metadata createMetadata(ContentEntityObject page, Set<WordpressUser> users, Set<WordpressCategory> categories);
 
-	Metadata createMetadata(Map<String, String> macroParameters) throws MetadataException;
+	Metadata unmarshalMetadata(String macroBody) throws MetadataException;
 
+	String marshalMetadata(Metadata metadata) throws MetadataException;
+	
 }

@@ -41,12 +41,14 @@ import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHe
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.CodeMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosPreProcessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.ImageMacroPreprocessor;
+import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
-import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
 
@@ -88,7 +90,9 @@ public class DefaultConverter implements Converter {
         } finally {
             page.setTitle(originalTitle);
         }
-
+        
+        //"<div class=\"error\">"
+        
         //HTML cleanup
         HtmlCleaner cleaner = getHtmlCleaner(options);
         TagNode root = cleaner.clean(confluenceHtml);
@@ -166,14 +170,15 @@ public class DefaultConverter implements Converter {
 
     protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
-        visitors.add(new MoreMacroProcessor());
+        //visitors.add(new MoreMacroProcessor());
         visitors.add(new SyncInfoMacroProcessor());
         if(options.getSynchronizedAttachments() != null) {
-            visitors.add(new AttachmentsProcessor(options.getConfluenceRootUrl(), options.getSynchronizedAttachments()));
+            visitors.add(new AttachmentsProcessor(options.getSynchronizedAttachments(), options.getConfluenceRootUrl()));
         }
         if(options.getTagAttributes() != null && ! options.getTagAttributes().isEmpty()) {
         	visitors.add(new TagAttributesProcessor(options.getTagAttributes()));
         }
+        visitors.add(new CodeMacroProcessor());
         visitors.add(new CdataProcessor());
         visitors.add(new CssClassNameCleaner());
         visitors.add(new EmptySpanStripper());
@@ -183,6 +188,8 @@ public class DefaultConverter implements Converter {
     protected List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
         processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
+        processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
+        processors.add(new ImageMacroPreprocessor(xhtmlUtils, conversionContext, options.getSynchronizedAttachments(), options.getConfluenceRootUrl()));
         processors.add(new CodeMacroPreprocessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin()));
         return processors;
 	}

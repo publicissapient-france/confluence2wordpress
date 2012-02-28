@@ -94,23 +94,6 @@
     
     <xhtml-macro key="wordpress-metadata" name="wordpress-metadata" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" hidden="true">
         <category name="external-content"/>
-        <parameters>
-            <parameter name="postId" type="int" required="false" />
-            <parameter name="draft" type="boolean" required="false" default="false"/>
-			<parameter name="postSlug" type="string" required="false" />
-			<parameter name="authorId" type="int" required="false" />
-			<parameter name="categoryNames" type="string" required="false" />
-			<parameter name="tagNames" type="string" required="false" />
-			<parameter name="pageTitle" type="string" required="false" />
-			<parameter name="ignoredConfluenceMacros" type="string" required="false" />
-			<parameter name="tagAttributes" type="string" required="false" />
-			<parameter name="optimizeForRDP" type="boolean" required="false" />
-			<parameter name="includeTOC" type="boolean" required="false" />
-			<parameter name="permalink" type="string" required="false" />
-			<parameter name="digest" type="string" required="false" />
-			<parameter name="dateCreated" type="string" required="false" />
-			<parameter name="attachments" type="string" required="false" />
-        </parameters>
     </xhtml-macro>
     
     <!-- legacy macros -->

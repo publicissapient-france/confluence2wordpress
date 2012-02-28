@@ -38,8 +38,7 @@ public class HtmlUtils{
     private static final String WHITESPACE = " \t\r\n\u000C\u200B";
 
 	public static String escapeHtml(String text) {
-        //better than StringEscapeUtils.escapeXml(text);
-        return text.replace("<", "&lt;").replace("&", "&amp;");
+        return text.replace("&", "&amp;").replace("<", "&lt;");
     }
     
 	public static String escapeQuotes(String text) {
@@ -52,9 +51,7 @@ public class HtmlUtils{
 
     public static String stripCdata(String text){
         if(text.startsWith("<![CDATA[") && text.endsWith("]]>")) {
-            text = StringUtils.substringBetween(text, "<![CDATA[", "]]>");
-            //need to unescape because even between cdata characters like "<" come escaped
-            return escapeHtml(text);
+            return StringUtils.substringBetween(text, "<![CDATA[", "]]>");
         }
         return text;
     }

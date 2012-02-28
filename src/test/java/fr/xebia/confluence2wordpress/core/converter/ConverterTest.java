@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 
 import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -33,6 +34,7 @@ import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 
 @RunWith(MockitoJUnitRunner.class)
+@Ignore
 public class ConverterTest {
 	
 	@Mock

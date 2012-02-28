@@ -18,117 +18,108 @@ package fr.xebia.confluence2wordpress.wp;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-
+@JsonIgnoreProperties({"data"})
 public class WordpressFile {
 
-    private String fileName;
+	private String fileName;
 
-    private String url;
+	private String url;
 
-    private String mimeType;
+	private String mimeType;
 
-    private byte[] data;
+	private Integer height = null;
 
-    private Integer height = null;
-    
-    private Integer width = null;
-    
-    private Map<String, WordpressFile> alternatives = new HashMap<String, WordpressFile>();
+	private Integer width = null;
 
-    public WordpressFile(String fileName, String mimeType, byte[] data) {
-        super();
-        this.fileName = fileName;
-        this.mimeType = mimeType;
-        this.data = data;
-    }
+	private Map<String, WordpressFile> alternatives = new HashMap<String, WordpressFile>();
 
-    public WordpressFile(String fileName) {
+	private transient byte[] data;
+
+	public WordpressFile() {
+		super();
+	}
+
+	public WordpressFile(String fileName) {
 		super();
 		this.fileName = fileName;
 	}
 
+	public WordpressFile(String fileName, String mimeType, byte[] data) {
+		super();
+		this.fileName = fileName;
+		this.mimeType = mimeType;
+		this.data = data;
+	}
 
 	public String getFileName() {
-        return fileName;
-    }
+		return fileName;
+	}
 
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
 
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
+	public byte[] getData() {
+		return data;
+	}
 
+	public void setData(byte[] data) {
+		this.data = data;
+	}
 
-    public byte[] getData() {
-        return data;
-    }
+	public String getUrl() {
+		return url;
+	}
 
+	public void setUrl(String url) {
+		this.url = url;
+	}
 
-    public void setData(byte[] data) {
-        this.data = data;
-    }
+	public String getMimeType() {
+		return mimeType;
+	}
 
-
-    public String getUrl() {
-        return url;
-    }
-
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-
-    public String getMimeType() {
-        return mimeType;
-    }
-
-
-    public void setMimeType(String type) {
-        this.mimeType = type;
-    }
-
+	public void setMimeType(String type) {
+		this.mimeType = type;
+	}
 
 	public Integer getHeight() {
 		return height;
 	}
 
-
 	public void setHeight(Integer height) {
 		this.height = height;
 	}
-
 
 	public Integer getWidth() {
 		return width;
 	}
 
-
 	public void setWidth(Integer width) {
 		this.width = width;
 	}
-
 
 	public WordpressFile getAlternative(String key) {
 		return alternatives.get(key);
 	}
 
-
 	public void putAlternative(String key, WordpressFile value) {
 		alternatives.put(key, value);
 	}
 
-    public WordpressFile getBestAlternative(Integer width) {
-        int bestDelta = Math.abs(width - this.width);
-        WordpressFile bestAlternative = this;
-        for (WordpressFile wf : alternatives.values()) {
-            int delta = Math.abs(width - wf.width);
-            if(delta < bestDelta){
-                bestDelta = delta;
-                bestAlternative = wf;
-            }
-        }
-        return bestAlternative;
-    }
+	public WordpressFile getBestAlternative(Integer width) {
+		int bestDelta = Math.abs(width - this.width);
+		WordpressFile bestAlternative = this;
+		for (WordpressFile wf : alternatives.values()) {
+			int delta = Math.abs(width - wf.width);
+			if (delta < bestDelta) {
+				bestDelta = delta;
+				bestAlternative = wf;
+			}
+		}
+		return bestAlternative;
+	}
 
 }

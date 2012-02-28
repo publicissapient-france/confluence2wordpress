@@ -68,6 +68,8 @@ public class SyncAction extends AbstractPageAwareAction {
 
 	private static final long serialVersionUID = 140791345328730095L;
 
+	// i18n keys
+	
     private static final String MSG_UPDATE_SUCCESS_KEY = "sync.msg.update.success";
 
     private static final String MSG_CREATION_SUCCESS_KEY = "sync.msg.creation.success";
@@ -102,6 +104,8 @@ public class SyncAction extends AbstractPageAwareAction {
 
     private static final String JS_DATEPICKER_FORMAT_KEY = "sync.js.datepicker.format";
 
+    // Session keys
+    
     private static final String WP_TAGS_KEY = "C2W_WP_TAGS";
 
     private static final String WP_CATEGORIES_KEY = "C2W_WP_CATEGORIES";
@@ -110,8 +114,16 @@ public class SyncAction extends AbstractPageAwareAction {
     
     private static final String MACROS_KEY = "C2W_MACROS";
 
+	private static final String METADATA_KEY = "C2W_METADATA";
+
+	// validating patterns
+	
     private static final Pattern TAG_NAME_PATTERN = Pattern.compile("[a-zA-Z0-9]+");
 
+	private static final Pattern POST_SLUG_PATTERN = Pattern.compile("[a-zA-Z0-9\\-_]+");
+
+    // injected dependencies
+    
     private PageManager pageManager;
 
     private PluginPermissionsManager pluginPermissionsManager;
@@ -122,16 +134,18 @@ public class SyncAction extends AbstractPageAwareAction {
     
     private MetadataManager metadataManager;
 
-    private String html;
-
     private WordpressSynchronizer wordpressSynchronizer;
 
     private PageLabelsSynchronizer pageLabelsSynchronizer;
 
+    private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
+
+    // form fields
+    
+    private String html;
+
     private boolean allowPostOverride = false;
 
-    private ActionMessagesManager actionMessagesManager = new ActionMessagesManager();
-    
     private String dateCreated;
     
     private String tagNamesAsString;
@@ -143,6 +157,8 @@ public class SyncAction extends AbstractPageAwareAction {
     
     @SuppressWarnings("unchecked")
     private List<String> tagAttributes = new XWorkList(String.class);
+    
+    
     
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -215,7 +231,17 @@ public class SyncAction extends AbstractPageAwareAction {
     private void setAvailableMacros(Set<String> macros) {
         getSession().put(MACROS_KEY, macros);
     }
-    
+
+	@ParameterSafe
+    public Metadata getMetadata() {
+        return (Metadata) getSession().get(METADATA_KEY);
+    }
+
+	@SuppressWarnings("unchecked")
+	public void setMetadata(Metadata metadata) {
+    	getSession().put(METADATA_KEY, metadata);
+    }
+	
     public void setPageId(long pageId){
         this.setPage(pageManager.getPage(pageId));
     }
@@ -268,16 +294,6 @@ public class SyncAction extends AbstractPageAwareAction {
 		this.tagAttributes = tagAttributes;
 	}
 
-	@ParameterSafe
-    public Metadata getMetadata() {
-        return (Metadata) getSession().get("METADATA_KEY");
-    }
-
-	@SuppressWarnings("unchecked")
-	public void setMetadata(Metadata metadata) {
-    	getSession().put("METADATA_KEY", metadata);
-    }
-	
     public String getHtml() {
         return html;
     }
@@ -381,7 +397,7 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     private void checkPostSlugSyntax() {
-        if( ! getMetadata().getPostSlug().matches("[a-zA-Z0-9\\-_]+")){
+        if( ! POST_SLUG_PATTERN.matcher(getMetadata().getPostSlug()).matches()){
             addActionError(getText(ERRORS_POST_SLUG_SYNTAX_KEY));
         }
     }

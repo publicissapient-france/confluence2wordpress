@@ -71,7 +71,8 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
          */
         Map<String, String> parameters = macroDefinition.getParameters();
         StringBuilder sb = new StringBuilder();
-        sb.append("\n[");
+        sb.append("\n<script type=\"syntaxhighlighter\"><![CDATA[");
+        sb.append("[");
         String pluginTagName = syntaxHighlighterPlugin.getTagName(parameters.get("language"));
         sb.append(pluginTagName);
         Map<String, String> substitutionMap = syntaxHighlighterPlugin.getSubstitutionMap();
@@ -82,12 +83,14 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
                 sb.append(' ').append(wordpressKey).append('=').append(entry.getValue());
             }
         }
-        String code = HtmlUtils.stripCdata(macroDefinition.getBodyText());
+        //it's deceiving: we need to escape it because HtmlCleaner cannot handle Cdata sections containing "<"
+        String code = HtmlUtils.escapeHtml(macroDefinition.getBodyText());
         sb.append("]\n").
-            append(code).
+	        append(code).
             append("\n[/").
             append(pluginTagName).
-            append("]\n");
+            append("]").
+        	append("]]></script>\n");
         return sb.toString();
     }
 

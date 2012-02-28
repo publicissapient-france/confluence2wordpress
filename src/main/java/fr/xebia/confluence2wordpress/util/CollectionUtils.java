@@ -46,6 +46,11 @@ public class CollectionUtils {
         return list;
     }
 
+    /**
+     * @param tagNames
+     * @param sep
+     * @return
+     */
     public static String join(List<String> tagNames, String sep) {
         if (tagNames == null || tagNames.isEmpty()) {
             return null;

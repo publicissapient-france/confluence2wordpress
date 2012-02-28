@@ -18,7 +18,9 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
@@ -34,14 +36,18 @@ import fr.xebia.confluence2wordpress.util.UrlUtils;
  */
 public class AttachmentsProcessor implements TagNodeVisitor {
 
-    private final List<SynchronizedAttachment> synchronizedAttachments;
-    
-    private final String confluenceRootUrl;
+    private final Map<String, SynchronizedAttachment> synchronizedAttachments;
 
-    public AttachmentsProcessor(String confluenceRootUrl, List<SynchronizedAttachment> synchronizedAttachments) {
+	private final String confluenceRootUrl;
+    
+    public AttachmentsProcessor(List<SynchronizedAttachment> synchronizedAttachments, String confluenceRootUrl) {
         super();
-        this.synchronizedAttachments = synchronizedAttachments;
         this.confluenceRootUrl = confluenceRootUrl;
+        this.synchronizedAttachments = new HashMap<String, SynchronizedAttachment>();
+        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
+			this.synchronizedAttachments.put(synchronizedAttachment.getAttachmentPath(), synchronizedAttachment);
+			this.synchronizedAttachments.put(synchronizedAttachment.getThumbnailPath(), synchronizedAttachment);
+		}
     }
 
 
@@ -53,6 +59,9 @@ public class AttachmentsProcessor implements TagNodeVisitor {
             TagNode tag = (TagNode) htmlNode;
             String tagName = tag.getName();
             if ("img".equals(tagName)) {
+            	
+            	//TODO confluence-embedded-image confluence-content-image-border image-center
+            	
                 String url = tag.getAttributeByName("src");
                 /*
                  * examples:
@@ -86,14 +95,12 @@ public class AttachmentsProcessor implements TagNodeVisitor {
     }
 
     private String findWordpressUrl(String confluenceUrl, Integer width) {
-    	String confluencePath = UrlUtils.extractConfluenceRelativePath(confluenceUrl, confluenceRootUrl);
-    	for (SynchronizedAttachment sa : synchronizedAttachments) {
-            String wordpressUrl = sa.getWordpressUrl(confluencePath, width);
-            if(wordpressUrl != null){
-                return wordpressUrl;
-            }
-        }
-    	return null;
+    	String path = UrlUtils.extractConfluenceRelativePath(confluenceUrl, confluenceRootUrl);
+    	SynchronizedAttachment synchronizedAttachment = this.synchronizedAttachments.get(path);
+		if(synchronizedAttachment != null) {
+            return synchronizedAttachment.findBestWordpressUrl(width);
+		}
+		return null;
     }
 
 }

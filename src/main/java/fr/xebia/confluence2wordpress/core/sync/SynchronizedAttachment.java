@@ -21,42 +21,80 @@ import fr.xebia.confluence2wordpress.wp.WordpressFile;
 
 public class SynchronizedAttachment {
 
-    private final Attachment confluenceAttachment;
-    
-    private final WordpressFile wordpressFile;
+    private WordpressFile wordpressFile;
 
-	private final String thumbnailPath;
+	private String thumbnailPath;
 
-	private final String attachmentPath;
+	private String attachmentPath;
+
+	private Integer attachmentVersion;
+
+	private long attachmentId;
+
+	public SynchronizedAttachment() {
+		super();
+	}
 
 	public SynchronizedAttachment(Attachment confluenceAttachment, WordpressFile wordpressFile) {
 		super();
-		this.confluenceAttachment = confluenceAttachment;
 		this.wordpressFile = wordpressFile;
 		this.attachmentPath = confluenceAttachment.getDownloadPathWithoutVersion();
 		this.thumbnailPath = attachmentPath.replace("/attachments/", "/thumbnails/");
+		this.attachmentVersion = confluenceAttachment.getAttachmentVersion();
+		this.attachmentId = confluenceAttachment.getId();
 	}
 	
-	public Attachment getConfluenceAttachment() {
-		return confluenceAttachment;
-	}
-
 	public WordpressFile getWordpressFile() {
 		return wordpressFile;
 	}
 
-	public String getWordpressUrl(String confluencePath, Integer width){
-        if(attachmentPath.equals(confluencePath) || thumbnailPath.equals(confluencePath)){
-            if(width != null){
-                WordpressFile alternative = wordpressFile.getBestAlternative(width);
-                if(alternative != null) {
-                    return alternative.getUrl();
-                }
-                
+	public String getThumbnailPath() {
+		return thumbnailPath;
+	}
+
+	public String getAttachmentPath() {
+		return attachmentPath;
+	}
+
+	public Integer getAttachmentVersion() {
+		return attachmentVersion;
+	}
+
+	public long getAttachmentId() {
+		return attachmentId;
+	}
+
+	public String findBestWordpressUrl(Integer imageWidth){
+        if(imageWidth != null){
+            WordpressFile alternative = wordpressFile.getBestAlternative(imageWidth);
+            if(alternative != null) {
+                return alternative.getUrl();
             }
-            return wordpressFile.getUrl();
+            
         }
-        return null;
+        return wordpressFile.getUrl();
     }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (attachmentId ^ (attachmentId >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SynchronizedAttachment other = (SynchronizedAttachment) obj;
+		if (attachmentId != other.attachmentId)
+			return false;
+		return true;
+	}
 
 }

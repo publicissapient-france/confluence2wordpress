@@ -20,7 +20,11 @@ package fr.xebia.confluence2wordpress.macro;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
+import com.atlassian.confluence.content.render.xhtml.macro.annotation.Format;
+import com.atlassian.confluence.content.render.xhtml.macro.annotation.RequiresFormat;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.macro.Macro;
 import com.atlassian.confluence.macro.MacroExecutionException;
@@ -57,13 +61,18 @@ public class MetadataMacro implements Macro {
     }
 
 	@Override
-	public String execute(Map<String, String> paramMap, String paramString, ConversionContext paramConversionContext) throws MacroExecutionException {
-        ContentEntityObject page = paramConversionContext.getEntity();
+	@RequiresFormat(Format.Storage)
+	public String execute(Map<String, String> parameters, String body, ConversionContext context) throws MacroExecutionException {
+        ContentEntityObject page = context.getEntity();
 		Metadata metadata;
-		try {
-			metadata = metadataManager.createMetadata(paramMap);
-		} catch (MetadataException e) {
-			throw new MacroExecutionException("Cannot extract Wordpress metadata", e);
+		if(StringUtils.isEmpty(body)) {
+			metadata = new Metadata();
+		} else {
+			try {
+				metadata = metadataManager.unmarshalMetadata(body);
+			} catch (MetadataException e) {
+				throw new MacroExecutionException("Cannot extract Wordpress metadata", e);
+			}
 		}
         User user;
         if(ServletActionContext.getRequest() == null || ServletActionContext.getRequest().getRemoteUser() == null){
@@ -77,7 +86,7 @@ public class MetadataMacro implements Macro {
 
 	@Override
 	public BodyType getBodyType() {
-		return BodyType.NONE;
+		return BodyType.PLAIN_TEXT;
 	}
 
 	@Override

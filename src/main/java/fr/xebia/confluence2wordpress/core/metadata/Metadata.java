@@ -20,181 +20,152 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 
 /**
  * @author Alexandre Dutra
- *
+ * 
  */
 public class Metadata implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @MetadataItem
-    private Integer postId;
-    
-    @MetadataItem
-    private boolean draft = true;
+	private Integer postId;
 
-    @MetadataItem
-    private String postSlug;
+	private boolean draft = true;
 
-    @MetadataItem
-    private Integer authorId;
+	private String postSlug;
 
-    @MetadataItem
-    private List<String> categoryNames;
+	private Integer authorId;
 
-    @MetadataItem
-    private List<String> tagNames;
+	private List<String> categoryNames;
 
-    @MetadataItem
-    private String pageTitle;
+	private List<String> tagNames;
 
-    @MetadataItem
-    private List<String> ignoredConfluenceMacros;
+	private String pageTitle;
 
-    @MetadataItem
-    private Map<String,String> tagAttributes;
+	private List<String> ignoredConfluenceMacros;
 
-    @MetadataItem
-    private boolean optimizeForRDP;
+	private Map<String, String> tagAttributes;
 
-    @MetadataItem
-    private boolean includeTOC;
-    
-    @MetadataItem    
-    private String permalink;
+	private boolean optimizeForRDP;
 
-    @MetadataItem    
-    private String digest;
-    
-    @MetadataItem    
-    private Date dateCreated;
+	private boolean includeTOC;
 
-    @MetadataItem
-    private Map<String,Integer> attachments;
+	private String permalink;
 
-    public String getPageTitle() {
-        return pageTitle;
-    }
+	private String digest;
 
-    public void setPageTitle(String pageTitle) {
-        this.pageTitle = pageTitle;
-    }
+	private Date dateCreated;
 
-    public List<String> getIgnoredConfluenceMacros() {
-        return ignoredConfluenceMacros;
-    }
+	private List<SynchronizedAttachment> attachments;
 
-    public void setIgnoredConfluenceMacros(List<String> ignoredConfluenceMacros) {
-        this.ignoredConfluenceMacros = ignoredConfluenceMacros;
-    }
+	public String getPageTitle() {
+		return pageTitle;
+	}
 
-    public Integer getPostId() {
-        return postId;
-    }
+	public void setPageTitle(String pageTitle) {
+		this.pageTitle = pageTitle;
+	}
 
-    public void setPostId(Integer postId) {
-        this.postId = postId;
-    }
+	public List<String> getIgnoredConfluenceMacros() {
+		return ignoredConfluenceMacros;
+	}
 
-    public String getPostSlug() {
-        return postSlug;
-    }
+	public void setIgnoredConfluenceMacros(List<String> ignoredConfluenceMacros) {
+		this.ignoredConfluenceMacros = ignoredConfluenceMacros;
+	}
 
-    public void setPostSlug(String postSlug) {
-        this.postSlug = postSlug;
-    }
-    
-    public Integer getAuthorId() {
-        return authorId;
-    }
-    
-    public void setAuthorId(Integer authorId) {
-        this.authorId = authorId;
-    }
-    
-    public List<String> getCategoryNames() {
-        return categoryNames;
-    }
+	public Integer getPostId() {
+		return postId;
+	}
 
-    
-    public void setCategoryNames(List<String> categoryNames) {
-        this.categoryNames = categoryNames;
-    }
+	public void setPostId(Integer postId) {
+		this.postId = postId;
+	}
 
-    
-    public List<String> getTagNames() {
-        return tagNames;
-    }
+	public String getPostSlug() {
+		return postSlug;
+	}
 
-    
-    public void setTagNames(List<String> tagNames) {
-        this.tagNames = tagNames;
-    }
+	public void setPostSlug(String postSlug) {
+		this.postSlug = postSlug;
+	}
 
-    
-    public boolean isDraft() {
-        return draft;
-    }
+	public Integer getAuthorId() {
+		return authorId;
+	}
 
-    
-    public void setDraft(boolean draft) {
-        this.draft = draft;
-    }
+	public void setAuthorId(Integer authorId) {
+		this.authorId = authorId;
+	}
 
-    
-    public boolean isOptimizeForRDP() {
-        return optimizeForRDP;
-    }
+	public List<String> getCategoryNames() {
+		return categoryNames;
+	}
 
-    
-    public void setOptimizeForRDP(boolean optimizeForRDP) {
-        this.optimizeForRDP = optimizeForRDP;
-    }
+	public void setCategoryNames(List<String> categoryNames) {
+		this.categoryNames = categoryNames;
+	}
 
-    
-    public String getPermalink() {
-        return permalink;
-    }
+	public List<String> getTagNames() {
+		return tagNames;
+	}
 
-    
-    public void setPermalink(String permalink) {
-        this.permalink = permalink;
-    }
+	public void setTagNames(List<String> tagNames) {
+		this.tagNames = tagNames;
+	}
 
-    
-    public boolean isIncludeTOC() {
-        return includeTOC;
-    }
+	public boolean isDraft() {
+		return draft;
+	}
 
-    
-    public void setIncludeTOC(boolean includeTOC) {
-        this.includeTOC = includeTOC;
-    }
-    
-    
-    public String getDigest() {
-        return digest;
-    }
+	public void setDraft(boolean draft) {
+		this.draft = draft;
+	}
 
-    
-    public void setDigest(String digest) {
-        this.digest = digest;
-    }
+	public boolean isOptimizeForRDP() {
+		return optimizeForRDP;
+	}
 
-    
-    public Date getDateCreated() {
-        return dateCreated;
-    }
+	public void setOptimizeForRDP(boolean optimizeForRDP) {
+		this.optimizeForRDP = optimizeForRDP;
+	}
 
-    
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
+	public String getPermalink() {
+		return permalink;
+	}
 
-    public Map<String, String> getTagAttributes() {
+	public void setPermalink(String permalink) {
+		this.permalink = permalink;
+	}
+
+	public boolean isIncludeTOC() {
+		return includeTOC;
+	}
+
+	public void setIncludeTOC(boolean includeTOC) {
+		this.includeTOC = includeTOC;
+	}
+
+	public String getDigest() {
+		return digest;
+	}
+
+	public void setDigest(String digest) {
+		this.digest = digest;
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
+	}
+
+	public Map<String, String> getTagAttributes() {
 		return tagAttributes;
 	}
 
@@ -202,53 +173,52 @@ public class Metadata implements Serializable {
 		this.tagAttributes = tagAttributes;
 	}
 
-	public Map<String, Integer> getAttachments() {
+	public List<SynchronizedAttachment> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(Map<String, Integer> attachments) {
+	public void setAttachments(List<SynchronizedAttachment> attachments) {
 		this.attachments = attachments;
 	}
 
 	public WordpressPost createPost() {
-        WordpressPost post = new WordpressPost();
-        post.setDraft(this.isDraft());
-        post.setPostId(this.getPostId());
-        post.setAuthorId(this.getAuthorId());
-        post.setTitle(this.getPageTitle());
-        post.setPostSlug(this.getPostSlug());
-        post.setDateCreated(this.getDateCreated());
-        if(this.getCategoryNames()!=null){
-            post.setCategoryNames(this.getCategoryNames()); //categories must exist.
-        }
-        if(this.getTagNames()!= null){
-            post.setTagNames(this.getTagNames()); //tags are dynamically created.
-        }
-        return post;
-    }
-    
-    public void updateFromPost(WordpressPost post) {
-        this.setPostId(post.getPostId());
-        this.setDraft(post.isDraft());
-        this.setPageTitle(post.getTitle());
-        this.setPostSlug(post.getPostSlug());
-        this.setAuthorId(post.getAuthorId());
-        this.setDateCreated(post.getDateCreated());
-        this.setCategoryNames(post.getCategoryNames());
-        this.setTagNames(post.getTagNames());
-        String permalink = post.getLink();
-		//it seems that WP does not always send back the query string
-		//containing "preview=true"...
-		if(post.isDraft() && ! permalink.contains("preview=true")) {
-			if(permalink.contains("?")){
-	    		permalink += "&preview=true";
-			} else {
-	    		permalink += "?preview=true";
-			}
-        }
-        this.setPermalink(permalink);
-        this.setDigest(post.getDigest());
-    }
+		WordpressPost post = new WordpressPost();
+		post.setDraft(this.isDraft());
+		post.setPostId(this.getPostId());
+		post.setAuthorId(this.getAuthorId());
+		post.setTitle(this.getPageTitle());
+		post.setPostSlug(this.getPostSlug());
+		post.setDateCreated(this.getDateCreated());
+		if (this.getCategoryNames() != null) {
+			post.setCategoryNames(this.getCategoryNames()); // categories must exist.
+		}
+		if (this.getTagNames() != null) {
+			post.setTagNames(this.getTagNames()); // tags are dynamically created.
+		}
+		return post;
+	}
 
+	public void updateFromPost(WordpressPost post) {
+		this.setPostId(post.getPostId());
+		this.setDraft(post.isDraft());
+		this.setPageTitle(post.getTitle());
+		this.setPostSlug(post.getPostSlug());
+		this.setAuthorId(post.getAuthorId());
+		this.setDateCreated(post.getDateCreated());
+		this.setCategoryNames(post.getCategoryNames());
+		this.setTagNames(post.getTagNames());
+		String permalink = post.getLink();
+		// it seems that WP does not always send back the query string
+		// containing "preview=true"...
+		if (post.isDraft() && !permalink.contains("preview=true")) {
+			if (permalink.contains("?")) {
+				permalink += "&preview=true";
+			} else {
+				permalink += "?preview=true";
+			}
+		}
+		this.setPermalink(permalink);
+		this.setDigest(post.getDigest());
+	}
 
 }

@@ -59,8 +59,7 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
     
     private PluginSettingsManager pluginSettingsManager;
 
-
-	private DefaultAttachmentsSynchronizer(AttachmentManager attachmentManager, PageManager pageManager, PluginSettingsManager pluginSettingsManager) {
+	public DefaultAttachmentsSynchronizer(AttachmentManager attachmentManager, PageManager pageManager, PluginSettingsManager pluginSettingsManager) {
 		super();
 		this.attachmentManager = attachmentManager;
 		this.pageManager = pageManager;
@@ -72,29 +71,42 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
         if(attachments == null || attachments.isEmpty()){
             return null;
         }
-//        Map<String, Integer> versions = metadata.getAttachments();
-//        if(versions == null) {
-//        	versions = new HashMap<String, Integer>();
-//        }
-        //TODO
-//        Set<Attachment> filteredAttachments = new HashSet<Attachment>();
-//        for (Iterator<Attachment> iterator = attachments.iterator(); iterator.hasNext();) {
-//			Attachment attachment = iterator.next();
-//			Integer version = versions.get(attachment.getDownloadPathWithoutVersion());
-//			if (version == null || attachment.getAttachmentVersion() > version){
-//				filteredAttachments.add(attachment);
-//			}
-//		}
-        List<SynchronizedAttachment> synchronizedAttachments = uploadAttachments(attachments);
-//        for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {
-//        	Attachment confluenceAttachment = synchronizedAttachment.getConfluenceAttachment();
-//			String fileName = confluenceAttachment.getDownloadPathWithoutVersion();
-//        	Integer version = confluenceAttachment.getAttachmentVersion();
-//        	versions.put(fileName, version);
-//		}
-//        metadata.setAttachments(versions);
-		return synchronizedAttachments;
+        Set<Attachment> toUpload = filterAttachments(metadata, attachments);
+        List<SynchronizedAttachment> uploaded = uploadAttachments(toUpload);
+        Set<SynchronizedAttachment> metadataAttachments = new HashSet<SynchronizedAttachment>();
+        //modified first
+        if(uploaded != null) {
+        	metadataAttachments.addAll(uploaded);
+        }
+        if(metadata.getAttachments() != null) {
+        	metadataAttachments.addAll(metadata.getAttachments());
+        }
+        ArrayList<SynchronizedAttachment> newAttachments = new ArrayList<SynchronizedAttachment>(metadataAttachments);
+		metadata.setAttachments(newAttachments);
+		return newAttachments;
     }
+
+	private Set<Attachment> filterAttachments(Metadata metadata, Set<Attachment> attachments) {
+		Set<Attachment> filteredAttachments = new HashSet<Attachment>();
+		List<SynchronizedAttachment> metadataAttachments = metadata.getAttachments();
+        if(metadataAttachments == null || metadataAttachments.isEmpty()) {
+        	filteredAttachments.addAll(attachments);
+        } else {
+        	outer: for (Attachment attachment : attachments) {
+        		for (SynchronizedAttachment metadataAttachment : metadataAttachments) {
+					if(metadataAttachment.getAttachmentId() == attachment.getId()) {
+		        		Integer version = metadataAttachment.getAttachmentVersion();
+		        		if (version == null || attachment.getAttachmentVersion() > version){
+		        			filteredAttachments.add(attachment);
+		        		}
+	        			continue outer;
+					}
+				}
+    			filteredAttachments.add(attachment);
+        	}
+        }
+		return filteredAttachments;
+	}
 
     private Set<Attachment> parseForAttachmentsToUpload(ContentEntityObject page) throws SynchronizationException {
     	Set<Attachment> attachments = new HashSet<Attachment>();

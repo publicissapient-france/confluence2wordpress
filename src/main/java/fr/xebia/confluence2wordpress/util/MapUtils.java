@@ -20,9 +20,11 @@ package fr.xebia.confluence2wordpress.util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.lang.StringUtils;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 
 /**
@@ -31,7 +33,14 @@ import org.apache.commons.lang.StringUtils;
  */
 public class MapUtils {
 
-    public static Map<String, String> split(String str, String entrySep, String keyValueSep) {
+    private static final Function<String, String> TRIM_TO_NULL = new Function<String, String>() {
+		@Override
+		public String apply(String from) {
+			return StringUtils.trimToNull(from);
+		}
+	};
+
+	public static Map<String, String> split(String str, String entrySep, String keyValueSep) {
         if(StringUtils.isEmpty(str)){
             return null;
         }
@@ -47,26 +56,7 @@ public class MapUtils {
     }
 
     public static <K> Map<K,String> trimValues(Map<K, String> map) {
-        Map<K, String> newMap = new HashMap<K, String>(map.size());
-        for (Entry<K,String> entry : map.entrySet()) {
-            newMap.put(entry.getKey(), StringUtils.trimToNull(entry.getValue()));
-        }
-        return newMap;
+		return Maps.transformValues(map, TRIM_TO_NULL);
     }
 
-    public static String join(Map<String, String> map, String entrySep, String keyValueSep) {
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Entry<String,String> entry : map.entrySet()) {
-            if(first){
-                first = false;
-            } else {
-                sb.append(entrySep);
-            }
-            sb.append(entry.getKey());
-            sb.append(keyValueSep);
-            sb.append(entry.getValue());
-        }
-        return sb.toString();
-    }
 }
