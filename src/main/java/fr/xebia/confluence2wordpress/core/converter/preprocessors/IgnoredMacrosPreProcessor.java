@@ -37,6 +37,7 @@ public class IgnoredMacrosPreProcessor extends PreProcessorBase {
         List<String> ignoredConfluenceMacros = options.getIgnoredConfluenceMacros();
         return 
             (ignoredConfluenceMacros != null && ignoredConfluenceMacros.contains(name)) || 
+            MetadataManager.WORDPRESS_SYNC_INFO_MACRO_NAME.equals(name) || 
             MetadataManager.WORDPRESS_METADATA_MACRO_NAME.equals(name);
     }
 

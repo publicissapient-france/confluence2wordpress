@@ -30,8 +30,8 @@ public class VelocityHelper {
 
     private static final String MORE_VM = "/vm/more.vm";
     
-	private static final String SYNC_INFO_VM = "/vm/metadata.vm";
-	
+	private static final String SYNC_INFO_VM = "/vm/sync-info.vm";
+
 	private static final String TOC_VM = "/vm/toc.vm";
 	
 	private static final String RDP_HEADER_VM = "/vm/rdp-header.vm";

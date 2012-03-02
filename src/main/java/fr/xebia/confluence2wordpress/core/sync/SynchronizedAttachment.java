@@ -44,10 +44,6 @@ public class SynchronizedAttachment {
 		this.attachmentId = confluenceAttachment.getId();
 	}
 	
-	public WordpressFile getWordpressFile() {
-		return wordpressFile;
-	}
-
 	public String getThumbnailPath() {
 		return thumbnailPath;
 	}
@@ -64,16 +60,9 @@ public class SynchronizedAttachment {
 		return attachmentId;
 	}
 
-	public String findBestWordpressUrl(Integer imageWidth){
-        if(imageWidth != null){
-            WordpressFile alternative = wordpressFile.getBestAlternative(imageWidth);
-            if(alternative != null) {
-                return alternative.getUrl();
-            }
-            
-        }
-        return wordpressFile.getUrl();
-    }
+	public WordpressFile getWordpressFile() {
+		return wordpressFile;
+	}
 
 	@Override
 	public int hashCode() {

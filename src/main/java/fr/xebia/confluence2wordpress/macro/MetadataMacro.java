@@ -20,24 +20,11 @@ package fr.xebia.confluence2wordpress.macro;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.content.render.xhtml.macro.annotation.Format;
 import com.atlassian.confluence.content.render.xhtml.macro.annotation.RequiresFormat;
-import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.macro.Macro;
 import com.atlassian.confluence.macro.MacroExecutionException;
-import com.atlassian.confluence.user.AuthenticatedUserThreadLocal;
-import com.atlassian.confluence.user.UserAccessor;
-import com.atlassian.user.User;
-import com.opensymphony.webwork.ServletActionContext;
-
-import fr.xebia.confluence2wordpress.core.metadata.Metadata;
-import fr.xebia.confluence2wordpress.core.metadata.MetadataException;
-import fr.xebia.confluence2wordpress.core.metadata.MetadataManager;
-import fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager;
-import fr.xebia.confluence2wordpress.core.velocity.VelocityHelper;
 
 
 /**
@@ -45,43 +32,10 @@ import fr.xebia.confluence2wordpress.core.velocity.VelocityHelper;
  */
 public class MetadataMacro implements Macro {
 
-	private VelocityHelper velocityHelper = new VelocityHelper();
-	
-	private MetadataManager metadataManager;
-    
-	private PluginPermissionsManager pluginPermissionsManager;
-	
-	private UserAccessor userAccessor;
-	
-    public MetadataMacro(MetadataManager metadataManager, PluginPermissionsManager pluginPermissionsManager, UserAccessor userAccessor) {
-        super();
-        this.metadataManager = metadataManager;
-        this.pluginPermissionsManager = pluginPermissionsManager;
-        this.userAccessor = userAccessor;
-    }
-
 	@Override
 	@RequiresFormat(Format.Storage)
 	public String execute(Map<String, String> parameters, String body, ConversionContext context) throws MacroExecutionException {
-        ContentEntityObject page = context.getEntity();
-		Metadata metadata;
-		if(StringUtils.isEmpty(body)) {
-			metadata = new Metadata();
-		} else {
-			try {
-				metadata = metadataManager.unmarshalMetadata(body);
-			} catch (MetadataException e) {
-				throw new MacroExecutionException("Cannot extract Wordpress metadata", e);
-			}
-		}
-        User user;
-        if(ServletActionContext.getRequest() == null || ServletActionContext.getRequest().getRemoteUser() == null){
-            user = AuthenticatedUserThreadLocal.getUser();
-        } else {
-			user = userAccessor.getUser(ServletActionContext.getRequest().getRemoteUser());
-        }
-        boolean checkUsagePermission = pluginPermissionsManager.checkUsagePermission(user, page);
-        return velocityHelper.generateMetadataHtml(page, checkUsagePermission, metadata);
+        return "";
 	}
 
 	@Override

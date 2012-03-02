@@ -36,6 +36,10 @@ import fr.xebia.confluence2wordpress.util.HtmlUtils;
  */
 public class CodeMacroPreprocessor extends PreProcessorBase {
 
+	public static final String SCRIPT_TYPE = "c2w-syntaxhighlighter";
+	
+	private static final String SCRIPT_START = "<script type=\""+SCRIPT_TYPE+"\">";
+	
     private static final String CODE_MACRO_NAME = "code";
     
     private final SyntaxHighlighterPlugin syntaxHighlighterPlugin;
@@ -52,7 +56,11 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
 
     @Override
     protected String processMacro(ConverterOptions options, MacroDefinition macroDefinition) {
+    	
         /*
+          
+         Original storage:
+         
         <ac:macro ac:name="code">
         <ac:parameter ac:name="title">mon code</ac:parameter>
         <ac:parameter ac:name="linenumbers">true</ac:parameter>
@@ -62,16 +70,18 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
         <ac:plain-text-body><![CDATA[...]]></ac:plain-text-body>
         </ac:macro>
             
-        Converts to
+        Converts to:
 
+		<script type="syntaxhhighlighter">
         [java gutter=true firstline=20 collapse=true]
         ...
         [/java]
-
+		</script>
+		
          */
         Map<String, String> parameters = macroDefinition.getParameters();
         StringBuilder sb = new StringBuilder();
-        sb.append("\n<script type=\"syntaxhighlighter\"><![CDATA[");
+        sb.append(SCRIPT_START);
         sb.append("[");
         String pluginTagName = syntaxHighlighterPlugin.getTagName(parameters.get("language"));
         sb.append(pluginTagName);
@@ -80,7 +90,11 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
             String confluenceKey = entry.getKey();
             if(substitutionMap.containsKey(confluenceKey)){
                 String wordpressKey = substitutionMap.get(confluenceKey);
-                sb.append(' ').append(wordpressKey).append('=').append(entry.getValue());
+                String value = entry.getValue();
+                if("language".equals(wordpressKey) && "html/xml".equals(value)) {
+                	value = "xml";
+                }
+				sb.append(' ').append(wordpressKey).append('=').append(value);
             }
         }
         //it's deceiving: we need to escape it because HtmlCleaner cannot handle Cdata sections containing "<"
@@ -90,7 +104,7 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
             append("\n[/").
             append(pluginTagName).
             append("]").
-        	append("]]></script>\n");
+        	append("</script>");
         return sb.toString();
     }
 

@@ -19,7 +19,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 
 public class WordpressPost implements Serializable {
@@ -129,63 +131,23 @@ public class WordpressPost implements Serializable {
         this.link = link;
     }
 
-    public String getDigest() {
-        return DigestUtils.sha256Hex(toString());
+    @Override
+	public int hashCode() {
+    	return HashCodeBuilder.reflectionHashCode(this);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return EqualsBuilder.reflectionEquals(this, obj);
+	}
+
+	public String getDigest() {
+        return Integer.toString(hashCode());
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("WordpressPost [");
-        if (postId != null) {
-            builder.append("postId=");
-            builder.append(postId);
-            builder.append(", ");
-        }
-        if (dateCreated != null) {
-            builder.append("dateCreated=");
-            builder.append(dateCreated);
-            builder.append(", ");
-        }
-        builder.append("draft=");
-        builder.append(draft);
-        builder.append(", ");
-        if (title != null) {
-            builder.append("title=");
-            builder.append(title);
-            builder.append(", ");
-        }
-        if (postSlug != null) {
-            builder.append("postSlug=");
-            builder.append(postSlug);
-            builder.append(", ");
-        }
-        if (body != null) {
-            builder.append("body=");
-            builder.append(body);
-            builder.append(", ");
-        }
-        if (authorId != null) {
-            builder.append("authorId=");
-            builder.append(authorId);
-            builder.append(", ");
-        }
-        if (categoryNames != null) {
-            builder.append("categoryNames=");
-            builder.append(categoryNames);
-            builder.append(", ");
-        }
-        if (tagNames != null) {
-            builder.append("tagNames=");
-            builder.append(tagNames);
-            builder.append(", ");
-        }
-        if (link != null) {
-            builder.append("link=");
-            builder.append(link);
-        }
-        builder.append("]");
-        return builder.toString();
+        return ToStringBuilder.reflectionToString(this);
     }
 
 }

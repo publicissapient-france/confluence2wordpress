@@ -1,0 +1,58 @@
+{
+  "attachments": [
+    {
+      "attachmentId": 2686977, 
+      "attachmentPath": "/download/attachments/2588674/landscape.jpg", 
+      "attachmentVersion": 1, 
+      "thumbnailPath": "/download/thumbnails/2588674/landscape.jpg", 
+      "wordpressFile": {
+        "alternative": false, 
+        "fileName": "landscape.jpg", 
+        "height": 300, 
+        "mimeType": "image/jpeg", 
+        "url": "http://localhost/wordpress/wp-content/uploads/2012/03/landscape.jpg", 
+        "width": 450
+      }
+    }, 
+    {
+      "attachmentId": 3244033, 
+      "attachmentPath": "/download/attachments/2588674/graphviz6978086981751652013.png", 
+      "attachmentVersion": 1, 
+      "thumbnailPath": "/download/thumbnails/2588674/graphviz6978086981751652013.png", 
+      "wordpressFile": {
+        "alternative": false, 
+        "fileName": "graphviz6978086981751652013.png", 
+        "height": 923, 
+        "mimeType": "image/png", 
+        "url": "http://localhost/wordpress/wp-content/uploads/2012/03/graphviz6978086981751652013.png", 
+        "width": 10672
+      }
+    }
+  ], 
+  "authorId": 1, 
+  "categoryNames": [
+    "Uncategorized"
+  ], 
+  "dateCreated": 1330693920000, 
+  "digest": "7e0cb48cb807c098d34206091c862d449652d1d6581e82b20e29f5e223f768fd", 
+  "draft": true, 
+  "ignoredConfluenceMacros": [
+    "tip", 
+    "info", 
+    "note", 
+    "warning"
+  ], 
+  "includeTOC": false, 
+  "optimizeForRDP": false, 
+  "pageTitle": "Lorem ipsum", 
+  "permalink": "http://localhost/wordpress/?p=564&preview=true", 
+  "postId": 564, 
+  "postSlug": "", 
+  "tagAttributes": {
+  	"img": "style=\"float:left\"" 
+  }, 
+  "tagNames": [
+    "ipsum", 
+    "lorem"
+  ]
+}

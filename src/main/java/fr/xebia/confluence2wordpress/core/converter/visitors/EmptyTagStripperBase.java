@@ -18,34 +18,24 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import org.htmlcleaner.CommentNode;
-import org.htmlcleaner.ContentNode;
-import org.htmlcleaner.HtmlNode;
+import java.util.Collection;
+
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
-
-import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class MoreMacroProcessor implements TagNodeVisitor {
+public abstract class EmptyTagStripperBase implements TagNodeVisitor {
 
-    private static final String MORE = "more";
-
-	/**
-     * @inheritdoc
-     */
-    public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
-        if (htmlNode instanceof TagNode) {
-            TagNode tag = (TagNode) htmlNode;
-            if(MoreMacroPreprocessor.WORDPRESS_MORE.equals(tag.getName())){
-            	parentNode.removeChild(htmlNode);
-                CommentNode more = new CommentNode(MORE);
-				parentNode.getParent().insertChildAfter(parentNode, more);
-				parentNode.getParent().insertChildAfter(more, new ContentNode("\n\n"));
+    protected boolean hasNoAttributes(TagNode tag) {
+        Collection<String> values = tag.getAttributes().values();
+        for (String value : values) {
+            if(StringUtils.isNotBlank(value)){
+                return false;
             }
         }
         return true;

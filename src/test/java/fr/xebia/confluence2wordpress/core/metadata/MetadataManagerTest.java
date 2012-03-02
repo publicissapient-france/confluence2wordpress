@@ -16,24 +16,30 @@
 package fr.xebia.confluence2wordpress.core.metadata;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Ignore;
+import org.apache.commons.io.FileUtils;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.atlassian.confluence.core.ContentEntityObject;
+import com.atlassian.confluence.xhtml.api.MacroDefinitionHandler;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 import com.google.common.collect.Maps;
 
-@RunWith(MockitoJUnitRunner.class)
+import fr.xebia.confluence2wordpress.wp.WordpressFile;
+
+@RunWith(PowerMockRunner.class)
 public class MetadataManagerTest {
 
 	private static final String WORDPRESS_META_TAG_START = "<ac:macro ac:name=\"wordpress-metadata\">";
@@ -66,30 +72,45 @@ public class MetadataManagerTest {
 
 	@Mock
 	private ContentEntityObject page;
+
+	private String json;
 	
-	@Test
-	public void testReadMetadataMacroBody() throws MetadataException {
-//		when(page.getBodyAsString()).thenReturn(body);
-//		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
-//		Metadata metadata = m.extractMetadata(page);
-//		assertEquals(true, metadata.isIncludeTOC());
-//		assertEquals(Arrays.asList(new String[]{"maven", "mindmapping"}), metadata.getTagNames());
-//		assertEquals(43, metadata.getPostId().intValue());
+	@Before
+	public void prepare() throws IOException {
+		json = FileUtils.readFileToString(new File("src/test/resources/metadata.json"));
 	}
 	
 	@Test
-	public void testWriteMetadataMacroBody() throws MetadataException {
-//		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
-//		Metadata metadata = new Metadata();
-//		metadata.setIncludeTOC(true);
-//		metadata.setPostId(43);
-//		metadata.setTagNames(Arrays.asList(new String[]{"maven", "mindmapping"}));
-//		HashMap<String,String> map = Maps.newLinkedHashMap();
-//		map.put("img", "style=\"foo\" class='bar'");
-//		map.put("a", "");
-//		map.put("p", "alt=\"foo\"");
-//		metadata.setTagAttributes(map);
-//		metadata.setPermalink("http://wordpress.dutra.fr/2011/08/28/le-mind-mapping-applique-aux-dependances-des-projets-mavenises");
+	public void testUnmarshalMetadata() throws Exception {
+		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
+		Metadata metadata = m.unmarshalMetadata(json);
+		assertEquals(new Date(1330693920000L), metadata.getDateCreated());
+		assertEquals("7e0cb48cb807c098d34206091c862d449652d1d6581e82b20e29f5e223f768fd", metadata.getDigest());
+		assertEquals(true, metadata.isDraft());
+		assertEquals("info", metadata.getIgnoredConfluenceMacros().get(1));
+		assertEquals("Lorem ipsum", metadata.getPageTitle());
+		assertEquals(564, metadata.getPostId().intValue());
+		assertEquals("style=\"float:left\"", metadata.getTagAttributes().get("img"));
+		assertEquals("/download/attachments/2588674/landscape.jpg", metadata.getAttachments().get(0).getAttachmentPath());
+		assertEquals(false, metadata.isIncludeTOC());
+		assertEquals(Arrays.asList(new String[]{"ipsum", "lorem"}), metadata.getTagNames());
+	}
+	
+	@Test
+	public void testMarshallMetadata() throws MetadataException {
+		Metadata metadata = new Metadata();
+		metadata.setIncludeTOC(true);
+		metadata.setPostId(43);
+		metadata.setTagNames(Arrays.asList(new String[]{"lorem", "ipsum"}));
+		HashMap<String,String> map = Maps.newLinkedHashMap();
+		map.put("img", "style=\"foo\" class='bar'");
+		map.put("a", "");
+		map.put("p", "alt=\"foo\"");
+		metadata.setTagAttributes(map);
+		metadata.setPermalink("http://foo.com/bar");
+		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
+		String json = m.marshalMetadata(metadata);
+		
 //		Map<String, String> macroParameters = m.getMacroParameters(metadata);
 //		String body = m.writeMetadataMacroBody(macroParameters).toString();
 //		assertTrue(body.contains(permalink));

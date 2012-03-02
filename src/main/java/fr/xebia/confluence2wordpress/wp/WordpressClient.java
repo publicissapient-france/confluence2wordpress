@@ -380,6 +380,7 @@ public class WordpressClient {
 
 	private WordpressFile createAlternative(Map<String, ?> value, String mimeType, String baseUrl) {
 		WordpressFile alternative = new WordpressFile((String) value.get("file"));
+		alternative.setAlternative(true);
 		alternative.setMimeType(mimeType);
 		String fileName = (String) value.get("file");
 		alternative.setFileName(fileName);

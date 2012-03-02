@@ -47,6 +47,8 @@ public class DefaultMetadataManager implements MetadataManager {
 	//see com.atlassian.confluence.content.render.xhtml.XhtmlConstants
 	//see com.atlassian.confluence.content.render.xhtml.storage.macro.StorageMacroConstants
 	  
+	private static final String WORDPRESS_SYNC_INFO_TAG = "<ac:macro ac:name=\""+ WORDPRESS_SYNC_INFO_MACRO_NAME + "\" />";
+
 	private static final String WORDPRESS_META_TAG_START = "<ac:macro ac:name=\""+ WORDPRESS_METADATA_MACRO_NAME + "\">";
 
     private static final String WORDPRESS_META_TAG_END = "</ac:macro>";
@@ -77,49 +79,31 @@ public class DefaultMetadataManager implements MetadataManager {
 
     public Metadata extractMetadata(ContentEntityObject page) throws MetadataException {
     	//https://developer.atlassian.com/display/CONFDEV/Creating+a+new+Confluence+4.0+Macro
-    	final List<MacroDefinition> metadataMacros = new ArrayList<MacroDefinition>();
-		try {
-			xhtmlUtils.handleMacroDefinitions(page.getBodyAsString(), null, new MacroDefinitionHandler() {
-				@Override
-				public void handle(MacroDefinition macroDefinition) {
-					if(macroDefinition.getName().equals(WORDPRESS_METADATA_MACRO_NAME)){
-						metadataMacros.add(macroDefinition);
-					}
-				}
-			});
-		} catch (XhtmlException e) {
-			throw new MetadataException("Could not parse page: " + page.getTitle(), e);
-		}
-		if(metadataMacros.isEmpty()) {
-			return null;
-		}
-		MacroDefinition metadataMacro = metadataMacros.get(0);
+    	MacroDefinition metadataMacro = extractMacroDefinition(page, WORDPRESS_METADATA_MACRO_NAME);
 		String macroBody = metadataMacro.getBodyText();
 		if(StringUtils.isEmpty(macroBody)) {
 			return null;
 		}
 		return unmarshalMetadata(macroBody);
     }
-    
+
     public void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException{
         String content = page.getBodyAsString();
-        StringBuilder macro = new StringBuilder();
-        macro.append(WORDPRESS_META_TAG_START);
-        macro.append(BODY_TAG_START);
-    	String macroBody = marshalMetadata(metadata);
-        macro.append(macroBody);
-        macro.append(BODY_TAG_END);
-        macro.append(WORDPRESS_META_TAG_END);
-        int start = content.indexOf(WORDPRESS_META_TAG_START);
-        int end = start == -1 ? -1 : content.indexOf(WORDPRESS_META_TAG_END, start);
         StringBuilder newContent = new StringBuilder();
-        if(start != -1 && end != -1){
-        	newContent.append(content.substring(0, start));
+        int syncInfo = content.indexOf(WORDPRESS_SYNC_INFO_TAG);
+        if(syncInfo == -1){
+        	newContent.append(WORDPRESS_SYNC_INFO_TAG);
+        }
+        int startMeta = content.indexOf(WORDPRESS_META_TAG_START);
+        int endMeta = startMeta == -1 ? -1 : content.indexOf(WORDPRESS_META_TAG_END, startMeta);
+        StringBuilder macro = buildMacroBody(metadata);
+        if(startMeta != -1 && endMeta != -1){
+        	newContent.append(content.substring(0, startMeta));
         	newContent.append(macro);
-        	newContent.append(content.substring(end + WORDPRESS_META_TAG_END.length()));
+        	newContent.append(content.substring(endMeta + WORDPRESS_META_TAG_END.length()));
         } else {
-        	newContent.append(macro);
         	newContent.append(content);
+        	newContent.append(macro);
         }
         page.setBodyAsString(newContent.toString());
     }
@@ -195,4 +179,37 @@ public class DefaultMetadataManager implements MetadataManager {
 			throw new MetadataException("Cannot marshal metadata: " + metadata, e);
 		}
     }
+
+	private StringBuilder buildMacroBody(Metadata metadata) throws MetadataException {
+		StringBuilder macro = new StringBuilder();
+        macro.append(WORDPRESS_META_TAG_START);
+        macro.append(BODY_TAG_START);
+    	String macroBody = marshalMetadata(metadata);
+        macro.append(macroBody);
+        macro.append(BODY_TAG_END);
+        macro.append(WORDPRESS_META_TAG_END);
+		return macro;
+	}
+
+	private MacroDefinition extractMacroDefinition(ContentEntityObject page, final String macroName) throws MetadataException {
+		final List<MacroDefinition> metadataMacros = new ArrayList<MacroDefinition>();
+		try {
+			xhtmlUtils.handleMacroDefinitions(page.getBodyAsString(), null, new MacroDefinitionHandler() {
+				@Override
+				public void handle(MacroDefinition macroDefinition) {
+					if(macroDefinition.getName().equals(macroName)){
+						metadataMacros.add(macroDefinition);
+					}
+				}
+			});
+		} catch (XhtmlException e) {
+			throw new MetadataException("Could not parse page: " + page.getTitle(), e);
+		}
+		if(metadataMacros.isEmpty()) {
+			return null;
+		}
+		MacroDefinition metadataMacro = metadataMacros.get(0);
+		return metadataMacro;
+	}
+    
 }

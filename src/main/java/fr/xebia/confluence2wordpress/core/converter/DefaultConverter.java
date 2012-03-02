@@ -18,6 +18,7 @@ package fr.xebia.confluence2wordpress.core.converter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.htmlcleaner.CleanerProperties;
@@ -41,16 +42,19 @@ import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHe
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.CodeMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosPreProcessor;
-import fr.xebia.confluence2wordpress.core.converter.preprocessors.ImageMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.AttachmentsProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.AnchorProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
+import fr.xebia.confluence2wordpress.core.converter.visitors.EmptyParagraphStripper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
+import fr.xebia.confluence2wordpress.core.converter.visitors.ImageProcessor;
+import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
+import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
 
 public class DefaultConverter implements Converter {
 
@@ -77,7 +81,7 @@ public class DefaultConverter implements Converter {
         
         //wiki -> html conversion
         String originalTitle = page.getTitle();
-        String confluenceHtml;
+        String view;
         try {
         	//temporarily replace page title to get correct anchors
         	//(I know it's ugly)
@@ -86,16 +90,16 @@ public class DefaultConverter implements Converter {
         	//basically it's GeneralUtil.urlEncode((page title + "-" + heading title).trim().replaceAll(" ", ""))
         	//see also com.atlassian.confluence.util.GeneralUtil.urlEncode(String)
             page.setTitle(options.getPageTitle());
-			confluenceHtml = renderer.render(storage, conversionContext);
+			view = renderer.render(storage, conversionContext);
         } finally {
             page.setTitle(originalTitle);
         }
         
-        //"<div class=\"error\">"
+        //TODO "<div class=\"error\">"
         
         //HTML cleanup
         HtmlCleaner cleaner = getHtmlCleaner(options);
-        TagNode root = cleaner.clean(confluenceHtml);
+        TagNode root = cleaner.clean(view);
         TagNode body = root.findElementByName("body", false);
 
         //DOM traversal
@@ -168,31 +172,34 @@ public class DefaultConverter implements Converter {
         return transformations;
     }
 
+    protected List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
+        List<PreProcessor> processors = new ArrayList<PreProcessor>();
+        processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
+        processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
+        processors.add(new CodeMacroPreprocessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin()));
+        return processors;
+	}
+
     protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
-        //visitors.add(new MoreMacroProcessor());
+        visitors.add(new MoreMacroProcessor());
         visitors.add(new SyncInfoMacroProcessor());
-        if(options.getSynchronizedAttachments() != null) {
-            visitors.add(new AttachmentsProcessor(options.getSynchronizedAttachments(), options.getConfluenceRootUrl()));
+        List<SynchronizedAttachment> attachments = options.getSynchronizedAttachments();
+		if(attachments != null && ! attachments.isEmpty()) {
+            visitors.add(new ImageProcessor(attachments, options.getConfluenceRootUrl()));
+            visitors.add(new AnchorProcessor(attachments, options.getConfluenceRootUrl()));
         }
-        if(options.getTagAttributes() != null && ! options.getTagAttributes().isEmpty()) {
-        	visitors.add(new TagAttributesProcessor(options.getTagAttributes()));
+        Map<String, String> tagAttributes = options.getTagAttributes();
+		if(tagAttributes != null && ! tagAttributes.isEmpty()) {
+        	visitors.add(new TagAttributesProcessor(tagAttributes));
         }
         visitors.add(new CodeMacroProcessor());
         visitors.add(new CdataProcessor());
         visitors.add(new CssClassNameCleaner());
         visitors.add(new EmptySpanStripper());
+        visitors.add(new EmptyParagraphStripper());
         return visitors;
     }
-
-    protected List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
-        List<PreProcessor> processors = new ArrayList<PreProcessor>();
-        processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
-        processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
-        processors.add(new ImageMacroPreprocessor(xhtmlUtils, conversionContext, options.getSynchronizedAttachments(), options.getConfluenceRootUrl()));
-        processors.add(new CodeMacroPreprocessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin()));
-        return processors;
-	}
 
     protected List<PostProcessor> getPostProcessors(ConverterOptions options) {
         List<PostProcessor> processors = new ArrayList<PostProcessor>();

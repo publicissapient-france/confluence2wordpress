@@ -51,7 +51,7 @@ public abstract class PreProcessorBase implements PreProcessor {
 
             });
         } catch (XhtmlException e) {
-            throw new ConversionException("Could not preprocess storage", e);
+            throw new ConversionException("Could not preprocess storage: " + e.getMessage(), e);
         }
     	return storage;
     }

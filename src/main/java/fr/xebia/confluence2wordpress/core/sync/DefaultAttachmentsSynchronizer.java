@@ -5,6 +5,7 @@ import static com.atlassian.confluence.content.render.xhtml.XhtmlConstants.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -67,48 +68,19 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
 	}
 
 	public List<SynchronizedAttachment> synchronizeAttachments(ContentEntityObject page, Metadata metadata) throws SynchronizationException, WordpressXmlRpcException {
-		Set<Attachment> attachments = parseForAttachmentsToUpload(page);
+		Set<Attachment> attachments = parseForAttachments(page);
+        removeOldAttachments(metadata, attachments);
         if(attachments == null || attachments.isEmpty()){
             return null;
         }
-        Set<Attachment> toUpload = filterAttachments(metadata, attachments);
+        Set<Attachment> toUpload = findNewAttachments(metadata, attachments);
         List<SynchronizedAttachment> uploaded = uploadAttachments(toUpload);
-        Set<SynchronizedAttachment> metadataAttachments = new HashSet<SynchronizedAttachment>();
-        //modified first
-        if(uploaded != null) {
-        	metadataAttachments.addAll(uploaded);
-        }
-        if(metadata.getAttachments() != null) {
-        	metadataAttachments.addAll(metadata.getAttachments());
-        }
-        ArrayList<SynchronizedAttachment> newAttachments = new ArrayList<SynchronizedAttachment>(metadataAttachments);
+        ArrayList<SynchronizedAttachment> newAttachments = mergeOldAndNewAttachments(metadata, uploaded);
 		metadata.setAttachments(newAttachments);
 		return newAttachments;
     }
 
-	private Set<Attachment> filterAttachments(Metadata metadata, Set<Attachment> attachments) {
-		Set<Attachment> filteredAttachments = new HashSet<Attachment>();
-		List<SynchronizedAttachment> metadataAttachments = metadata.getAttachments();
-        if(metadataAttachments == null || metadataAttachments.isEmpty()) {
-        	filteredAttachments.addAll(attachments);
-        } else {
-        	outer: for (Attachment attachment : attachments) {
-        		for (SynchronizedAttachment metadataAttachment : metadataAttachments) {
-					if(metadataAttachment.getAttachmentId() == attachment.getId()) {
-		        		Integer version = metadataAttachment.getAttachmentVersion();
-		        		if (version == null || attachment.getAttachmentVersion() > version){
-		        			filteredAttachments.add(attachment);
-		        		}
-	        			continue outer;
-					}
-				}
-    			filteredAttachments.add(attachment);
-        	}
-        }
-		return filteredAttachments;
-	}
-
-    private Set<Attachment> parseForAttachmentsToUpload(ContentEntityObject page) throws SynchronizationException {
+    private Set<Attachment> parseForAttachments(ContentEntityObject page) throws SynchronizationException {
     	Set<Attachment> attachments = new HashSet<Attachment>();
         try {
 			XMLEventReader r = StaxUtils.getReader(page);
@@ -161,6 +133,62 @@ public class DefaultAttachmentsSynchronizer implements AttachmentsSynchronizer {
 		}
         return attachments;
     }
+
+	private void removeOldAttachments(Metadata metadata, Set<Attachment> attachments) {
+		if(attachments == null || attachments.isEmpty()) {
+			metadata.setAttachments(null);
+        	return;
+        }
+		List<SynchronizedAttachment> metadataAttachments = metadata.getAttachments();
+		if(metadataAttachments == null || metadataAttachments.isEmpty()) {
+        	return;
+        }
+		Iterator<SynchronizedAttachment> it = metadataAttachments.iterator();
+    	outer: while(it.hasNext()){
+    		SynchronizedAttachment sa = it.next();
+    		for (Attachment attachment : attachments) {
+				if(attachment.getId() == sa.getAttachmentId()) {
+					continue outer;
+				}
+			}
+    		it.remove();
+    	}
+	}
+
+	private Set<Attachment> findNewAttachments(Metadata metadata, Set<Attachment> attachments) {
+		Set<Attachment> newAttachments = new HashSet<Attachment>();
+		List<SynchronizedAttachment> metadataAttachments = metadata.getAttachments();
+        if(metadataAttachments == null || metadataAttachments.isEmpty()) {
+        	newAttachments.addAll(attachments);
+        } else {
+        	outer: for (Attachment attachment : attachments) {
+        		for (SynchronizedAttachment metadataAttachment : metadataAttachments) {
+					if(metadataAttachment.getAttachmentId() == attachment.getId()) {
+		        		Integer version = metadataAttachment.getAttachmentVersion();
+		        		if (version == null || attachment.getAttachmentVersion() > version){
+		        			newAttachments.add(attachment);
+		        		}
+	        			continue outer;
+					}
+				}
+    			newAttachments.add(attachment);
+        	}
+        }
+		return newAttachments;
+	}
+
+	private ArrayList<SynchronizedAttachment> mergeOldAndNewAttachments(Metadata metadata, List<SynchronizedAttachment> uploaded) {
+		Set<SynchronizedAttachment> metadataAttachments = new HashSet<SynchronizedAttachment>();
+        //modified first
+        if(uploaded != null) {
+        	metadataAttachments.addAll(uploaded);
+        }
+        if(metadata.getAttachments() != null) {
+        	metadataAttachments.addAll(metadata.getAttachments());
+        }
+        ArrayList<SynchronizedAttachment> newAttachments = new ArrayList<SynchronizedAttachment>(metadataAttachments);
+		return newAttachments;
+	}
 
     private List<SynchronizedAttachment> uploadAttachments(Set<Attachment> attachments) throws WordpressXmlRpcException, SynchronizationException {
         if(attachments == null || attachments.isEmpty()) {

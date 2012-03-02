@@ -34,13 +34,13 @@ import fr.xebia.confluence2wordpress.util.UrlUtils;
  * @author Alexandre Dutra
  *
  */
-public class AttachmentsProcessor implements TagNodeVisitor {
+public class AnchorProcessor implements TagNodeVisitor {
 
     private final Map<String, SynchronizedAttachment> synchronizedAttachments;
 
 	private final String confluenceRootUrl;
     
-    public AttachmentsProcessor(List<SynchronizedAttachment> synchronizedAttachments, String confluenceRootUrl) {
+    public AnchorProcessor(List<SynchronizedAttachment> synchronizedAttachments, String confluenceRootUrl) {
         super();
         this.confluenceRootUrl = confluenceRootUrl;
         this.synchronizedAttachments = new HashMap<String, SynchronizedAttachment>();
@@ -50,7 +50,6 @@ public class AttachmentsProcessor implements TagNodeVisitor {
 		}
     }
 
-
     /**
      * @inheritdoc
      */
@@ -58,33 +57,10 @@ public class AttachmentsProcessor implements TagNodeVisitor {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
             String tagName = tag.getName();
-            if ("img".equals(tagName)) {
-            	
-            	//TODO confluence-embedded-image confluence-content-image-border image-center
-            	
-                String url = tag.getAttributeByName("src");
-                /*
-                 * examples:
-                 * /confluence/download/attachments/983042/image.png?version=1&amp;modificationDate=1327402370523 (image)
-                 * /confluence/download/thumbnails/983042/image.png (thumbnail)
-                 */
-                if (url != null) {
-                    Integer width = tag.getAttributeByName("width") == null ? null : Integer.valueOf(tag.getAttributeByName("width"));
-                    String src = findWordpressUrl(url, width);
-                    if(src != null) {
-                        tag.setAttribute("src", src);
-                    }
-                }
-            } else if ("a".equals(tagName)) {
+            if ("a".equals(tagName)) {
                 String url = tag.getAttributeByName("href");
-                /*
-                 * examples:
-                 * http://localhost:1990/confluence/download/attachments/983042/image.png (image)
-                 * /confluence/download/attachments/983042/pom.xml?version=1&amp;modificationDate=1327402370710 (attachment)
-                 * /confluence/download/attachments/983042/armonia.png?version=1&amp;modificationDate=1327402370523 (image as attachment)
-                 */
                 if (url != null) {
-                    String href = findWordpressUrl(url, null);
+                    String href = findWordpressUrl(url);
                     if(href != null) {
                         tag.setAttribute("href", href);
                     }
@@ -94,11 +70,11 @@ public class AttachmentsProcessor implements TagNodeVisitor {
         return true;
     }
 
-    private String findWordpressUrl(String confluenceUrl, Integer width) {
+    private String findWordpressUrl(String confluenceUrl) {
     	String path = UrlUtils.extractConfluenceRelativePath(confluenceUrl, confluenceRootUrl);
     	SynchronizedAttachment synchronizedAttachment = this.synchronizedAttachments.get(path);
 		if(synchronizedAttachment != null) {
-            return synchronizedAttachment.findBestWordpressUrl(width);
+            return synchronizedAttachment.getWordpressFile().getUrl();
 		}
 		return null;
     }

@@ -11,6 +11,8 @@ public interface MetadataManager {
 
 	String WORDPRESS_METADATA_MACRO_NAME = "wordpress-metadata";
 
+	String WORDPRESS_SYNC_INFO_MACRO_NAME = "wordpress-sync-info";
+
 	Metadata extractMetadata(ContentEntityObject page) throws MetadataException;
 
 	void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException;

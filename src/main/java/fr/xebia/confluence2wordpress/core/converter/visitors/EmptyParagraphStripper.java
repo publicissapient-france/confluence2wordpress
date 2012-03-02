@@ -18,22 +18,20 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import org.htmlcleaner.CommentNode;
+import java.util.List;
+
 import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
-import org.htmlcleaner.TagNodeVisitor;
-
-import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class MoreMacroProcessor implements TagNodeVisitor {
+public class EmptyParagraphStripper extends EmptyTagStripperBase {
 
-    private static final String MORE = "more";
+    private static final String TWO_LINE_BREAKS = "\n\n";
 
 	/**
      * @inheritdoc
@@ -41,14 +39,21 @@ public class MoreMacroProcessor implements TagNodeVisitor {
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            if(MoreMacroPreprocessor.WORDPRESS_MORE.equals(tag.getName())){
-            	parentNode.removeChild(htmlNode);
-                CommentNode more = new CommentNode(MORE);
-				parentNode.getParent().insertChildAfter(parentNode, more);
-				parentNode.getParent().insertChildAfter(more, new ContentNode("\n\n"));
+            if("p".equals(tag.getName()) && hasNoAttributes(tag)) {
+                stripTag(parentNode, tag);
             }
         }
         return true;
     }
+
+	private void stripTag(TagNode parentNode, TagNode tag) {
+		@SuppressWarnings("unchecked")
+		List<HtmlNode> children = tag.getChildren();
+		for (HtmlNode child : children) {
+		    parentNode.insertChildAfter(tag, child);
+		    parentNode.insertChildAfter(child, new ContentNode(TWO_LINE_BREAKS));
+		}
+		parentNode.removeChild(tag);
+	}
 
 }

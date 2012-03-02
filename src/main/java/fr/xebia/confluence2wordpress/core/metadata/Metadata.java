@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+
 import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.xebia.confluence2wordpress.wp.WordpressPost;
 
@@ -220,5 +222,10 @@ public class Metadata implements Serializable {
 		this.setPermalink(permalink);
 		this.setDigest(post.getDigest());
 	}
+	
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this);
+    }
 
 }

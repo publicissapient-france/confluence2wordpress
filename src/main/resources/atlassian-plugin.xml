@@ -87,30 +87,34 @@
     
     <!-- new macros -->
     
-	<xhtml-macro key="wordpress-more" name="wordpress-more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" >
+	<xhtml-macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" >
         <category name="external-content"/>
         <parameters />
 	</xhtml-macro>
     
-    <xhtml-macro key="wordpress-metadata" name="wordpress-metadata" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" hidden="true">
+    <xhtml-macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
+        <category name="external-content"/>
+    </xhtml-macro>
+    
+    <xhtml-macro key="wordpress-metadata" name="wordpress-metadata" class="fr.xebia.confluence2wordpress.macro.MetadataMacro" hidden="true" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
     </xhtml-macro>
     
     <!-- legacy macros -->
     
-    <macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.legacy.MoreLegacyMacro" hidden="true">
+    <macro key="more-legacy" name="more" class="fr.xebia.confluence2wordpress.macro.legacy.MoreLegacyMacro" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
         <parameters />
     </macro>
     
-    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.legacy.SyncInfoLegacyMacro" hidden="true" >
+    <macro key="wordpress-sync-info-legacy" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.legacy.SyncInfoLegacyMacro" hidden="true" icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
         <parameters />
     </macro>
     
     <!-- xwork actions -->
     
-    <xwork key="action" name="Confluence-to-Wordpress Converter Action">
+    <xwork key="action" name="Confluence-to-Wordpress Sync Actions">
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
             

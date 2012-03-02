@@ -33,6 +33,8 @@ public class WordpressFile {
 
 	private Integer width = null;
 
+	private boolean alternative = false;
+	
 	private Map<String, WordpressFile> alternatives = new HashMap<String, WordpressFile>();
 
 	private transient byte[] data;
@@ -59,6 +61,14 @@ public class WordpressFile {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public boolean isAlternative() {
+		return alternative;
+	}
+
+	public void setAlternative(boolean alternative) {
+		this.alternative = alternative;
 	}
 
 	public byte[] getData() {
@@ -101,6 +111,14 @@ public class WordpressFile {
 		this.width = width;
 	}
 
+	public Map<String, WordpressFile> getAlternatives() {
+		return alternatives;
+	}
+
+	public void setAlternatives(Map<String, WordpressFile> alternatives) {
+		this.alternatives = alternatives;
+	}
+
 	public WordpressFile getAlternative(String key) {
 		return alternatives.get(key);
 	}
@@ -110,13 +128,18 @@ public class WordpressFile {
 	}
 
 	public WordpressFile getBestAlternative(Integer width) {
+		if(width == null || this.width == null) {
+			return this;
+		}
 		int bestDelta = Math.abs(width - this.width);
 		WordpressFile bestAlternative = this;
 		for (WordpressFile wf : alternatives.values()) {
-			int delta = Math.abs(width - wf.width);
-			if (delta < bestDelta) {
-				bestDelta = delta;
-				bestAlternative = wf;
+			if(wf.width != null) {
+				int delta = Math.abs(width - wf.width);
+				if (delta < bestDelta) {
+					bestDelta = delta;
+					bestAlternative = wf;
+				}
 			}
 		}
 		return bestAlternative;

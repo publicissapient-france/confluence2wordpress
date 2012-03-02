@@ -26,6 +26,10 @@ import org.apache.commons.lang.StringUtils;
  */
 public class HtmlUtils{
 
+	private static final String CDATA_START = "<![CDATA[";
+	
+	private static final String CDATA_END = "]]>";
+	
 	/**
 	 * @see "http://www.w3.org/TR/html401/struct/text.html#h-9.1"
 	 * ASCII space (&#x0020;)
@@ -37,6 +41,10 @@ public class HtmlUtils{
 	 */
     private static final String WHITESPACE = " \t\r\n\u000C\u200B";
 
+    private static final String NON_BREAKING_WHITESPACE = 
+    	"\u00A0\u2007\u202F";
+
+    
 	public static String escapeHtml(String text) {
         return text.replace("&", "&amp;").replace("<", "&lt;");
     }
@@ -46,12 +54,27 @@ public class HtmlUtils{
     }
 	
     public static boolean isHtmlWhitespace(String text){
-		return StringUtils.containsOnly(text,WHITESPACE);
+		return StringUtils.containsOnly(text, WHITESPACE);
     }
 
+    public static boolean isLargeWhitespace(String text){
+    	if (text == null) {
+            return false;
+        }
+        int sz = text.length();
+        for (int i = 0; i < sz; i++) {
+            char c = text.charAt(i);
+			if ( ! Character.isWhitespace(c) && 
+					NON_BREAKING_WHITESPACE.indexOf(c) == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public static String stripCdata(String text){
-        if(text.startsWith("<![CDATA[") && text.endsWith("]]>")) {
-            return StringUtils.substringBetween(text, "<![CDATA[", "]]>");
+        if(text.startsWith(CDATA_START) && text.endsWith(CDATA_END)) {
+            return StringUtils.substringBetween(text, CDATA_START, CDATA_END);
         }
         return text;
     }
