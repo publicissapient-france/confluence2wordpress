@@ -18,9 +18,6 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import java.util.List;
-
-import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 
@@ -29,9 +26,9 @@ import org.htmlcleaner.TagNode;
  * @author Alexandre Dutra
  *
  */
-public class EmptyParagraphStripper extends EmptyTagStripperBase {
+public class EmptyParagraphStripper extends TagStripperBase {
 
-    private static final String TWO_LINE_BREAKS = "\n\n";
+	private static final String PARAGRAPH = "p";
 
 	/**
      * @inheritdoc
@@ -39,21 +36,16 @@ public class EmptyParagraphStripper extends EmptyTagStripperBase {
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            if("p".equals(tag.getName()) && hasNoAttributes(tag)) {
-                stripTag(parentNode, tag);
+            if(PARAGRAPH.equals(tag.getName())) {
+            	//normally a paragraph should have at least one child character
+            	//if it doesn't, it is probably a container for a deleted macro
+            	//and can be safely removed
+            	if(! tag.hasChildren()) {
+            		parentNode.removeChild(tag);
+                }
             }
         }
         return true;
     }
-
-	private void stripTag(TagNode parentNode, TagNode tag) {
-		@SuppressWarnings("unchecked")
-		List<HtmlNode> children = tag.getChildren();
-		for (HtmlNode child : children) {
-		    parentNode.insertChildAfter(tag, child);
-		    parentNode.insertChildAfter(child, new ContentNode(TWO_LINE_BREAKS));
-		}
-		parentNode.removeChild(tag);
-	}
 
 }

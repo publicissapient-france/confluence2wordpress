@@ -81,7 +81,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     @Override
-    public void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath){
+    public synchronized void setWordpressXmlRpcRelativePath(String wordpressXmlRpcRelativePath){
     	this.destroyClient();
         storeSettings("wordpressXmlRpcRelativePath", wordpressXmlRpcRelativePath);
     }
@@ -92,7 +92,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     @Override
-    public void setProxyHost(String proxyHost){
+    public synchronized void setProxyHost(String proxyHost){
     	this.destroyClient();
         storeSettings("proxyHost", proxyHost);
     }
@@ -103,7 +103,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
     
     @Override
-    public void setProxyPort(String proxyPort){
+    public synchronized void setProxyPort(String proxyPort){
     	this.destroyClient();
         storeSettings("proxyPort", proxyPort);
     }
@@ -114,7 +114,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
 	@Override
-	public void setWordpressMaxConnections(String maxConnections) {
+	public synchronized void setWordpressMaxConnections(String maxConnections) {
 		this.destroyClient();
         storeSettings("maxConnections", maxConnections);
 	}
@@ -125,7 +125,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 	}
 
     @Override
-    public void setWordpressUserName(String wordpressUserName){
+    public synchronized void setWordpressUserName(String wordpressUserName){
     	this.destroyClient();
         storeSettings("wordpressUserName", wordpressUserName);
     }
@@ -136,7 +136,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     @Override
-    public void setWordpressPassword(String wordpressPassword){
+    public synchronized void setWordpressPassword(String wordpressPassword){
     	this.destroyClient();
         storeSettings("wordpressPassword", wordpressPassword);
     }
@@ -147,7 +147,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     @Override
-    public void setWordpressBlogId(String wordpressBlogId){
+    public synchronized void setWordpressBlogId(String wordpressBlogId){
     	this.destroyClient();
         storeSettings("wordpressBlogId", wordpressBlogId);
     }
@@ -213,7 +213,7 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
     }
 
     @Override
-    public void setWordpressRootUrl(String wordpressRootUrl){
+    public synchronized void setWordpressRootUrl(String wordpressRootUrl){
     	this.destroyClient();
         storeSettings("wordpressRootUrl", wordpressRootUrl);
     }

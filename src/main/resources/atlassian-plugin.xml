@@ -119,7 +119,7 @@
             <default-interceptor-ref name="defaultStack" />
             
             <action name="syncOptions" class="fr.xebia.confluence2wordpress.action.SyncAction" method="input">
-                <result name="success" type="velocity">/vm/sync-options.vm</result>
+                <result name="success" type="velocity">/vm/sync.vm</result>
             </action>
             <action name="preview" class="fr.xebia.confluence2wordpress.action.SyncAction" method="preview">
                  <result name="success" type="velocity">/vm/preview.vm</result>
@@ -127,7 +127,7 @@
             <action name="sync" class="fr.xebia.confluence2wordpress.action.SyncAction" method="sync">
                  <interceptor-ref name="validatingStack" />
                  <result name="success" type="redirect">syncOptions.action?pageId=${pageId}</result>
-                 <result name="input" type="velocity">/vm/sync-options.vm</result>
+                 <result name="input" type="velocity">/vm/sync.vm</result>
             </action>
             
             <action name="settings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="input">

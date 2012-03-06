@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.xml.xpath.XPathExpressionException;
+
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.SourceFormatter;
+
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.CleanerTransformations;
 import org.htmlcleaner.HtmlCleaner;
@@ -37,6 +42,7 @@ import com.atlassian.confluence.content.render.xhtml.Renderer;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
+import fr.xebia.confluence2wordpress.core.converter.postprocessors.CodeMacroPostprocessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
 import fr.xebia.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
@@ -45,30 +51,36 @@ import fr.xebia.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosP
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
 import fr.xebia.confluence2wordpress.core.converter.preprocessors.PreProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.AnchorProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CdataProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CodeMacroProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.CssClassNameCleaner;
+import fr.xebia.confluence2wordpress.core.converter.visitors.AttributesCleaner;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptyParagraphStripper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
 import fr.xebia.confluence2wordpress.core.converter.visitors.ImageProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
-import fr.xebia.confluence2wordpress.core.converter.visitors.SyncInfoMacroProcessor;
 import fr.xebia.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
 import fr.xebia.confluence2wordpress.core.sync.SynchronizedAttachment;
+import fr.xebia.confluence2wordpress.util.XPathUtils;
 
 public class DefaultConverter implements Converter {
 
-    private Renderer renderer;
+    private static final String ERROR_DIV_END = "</div>";
+
+	private static final String ERROR_DIV_START = "<div class=\"error\">";
+
+	private static final String XPATH_ERROR_MSG = "/div[@class = 'error']";
+
+	private static final String XPATH_COUNT_ALL_BUT_ERRORS = "count(/*[name() != 'div' or @class != 'error'])";
+
+	private final Renderer renderer;
 
 	private final XhtmlContent xhtmlUtils;
-
+	
     public DefaultConverter(Renderer renderer, XhtmlContent xhtmlUtils) {
-        super();
-        this.renderer = renderer;
+		super();
+		this.renderer = renderer;
 		this.xhtmlUtils = xhtmlUtils;
 	}
 
-    public String convert(ContentEntityObject page, ConverterOptions options) throws ConversionException {
+	public String convert(ContentEntityObject page, ConverterOptions options) throws ConversionException {
     	
         String storage = page.getBodyAsString();
         DefaultConversionContext conversionContext = new DefaultConversionContext(page.toPageContext());
@@ -95,7 +107,7 @@ public class DefaultConverter implements Converter {
             page.setTitle(originalTitle);
         }
         
-        //TODO "<div class=\"error\">"
+        handleConversionErrors(view);
         
         //HTML cleanup
         HtmlCleaner cleaner = getHtmlCleaner(options);
@@ -109,7 +121,7 @@ public class DefaultConverter implements Converter {
         }
         
         //serialization
-        String html = serialize(body, cleaner.getProperties());
+        String html = serialize(body, cleaner.getProperties(), options);
 
         //HTML post-processing
         List<PostProcessor> postProcessors = getPostProcessors(options);
@@ -120,7 +132,24 @@ public class DefaultConverter implements Converter {
         return html;
     }
 
-    protected HtmlCleaner getHtmlCleaner(ConverterOptions options) {
+    private void handleConversionErrors(String view) throws ConversionException {
+        /*
+         * <div class="error">error msg</div>
+         */
+    	if(view.startsWith(ERROR_DIV_START) && view.endsWith(ERROR_DIV_END)) {
+	    	try {
+				int count = XPathUtils.evaluateXPathAsInt(view , XPATH_COUNT_ALL_BUT_ERRORS);
+				if(count == 0) {
+					String errorMsg = XPathUtils.evaluateXPathAsString(view, XPATH_ERROR_MSG);
+					throw new ConversionException(errorMsg);
+				}
+			} catch (XPathExpressionException e) {
+				//in case of exception, we assume the view is not the expected one
+			}
+    	}
+	}
+
+	private HtmlCleaner getHtmlCleaner(ConverterOptions options) {
         //HtmlCleaner is NOT thread-safe
     	CleanerProperties cleanerProps = getCleanerProperties(options);
         HtmlCleaner cleaner = new HtmlCleaner(new WhitespaceTolerantTagInfoProvider(), cleanerProps);
@@ -129,19 +158,29 @@ public class DefaultConverter implements Converter {
 		return cleaner;
 	}
 
-	protected String serialize(TagNode body, CleanerProperties cleanerProps) {
+	private String serialize(TagNode body, CleanerProperties cleanerProps, ConverterOptions options) {
+		String html;
         try {
             //PrettyHtmlSerializer does not work very well
-            //JTidy is too violent and Jericho almost OK but no
             HtmlSerializer serializer = new SimpleHtmlSerializer(cleanerProps);
-            return serializer.getAsString(body, "UTF-8", true);
+            html = serializer.getAsString(body, "UTF-8", true);
         } catch (IOException e) {
             // should not occur with string writers
             return null;
         }
+        if(options.isFormatHtml()) {
+	        SourceFormatter sourceFormatter = new SourceFormatter(new Source(html));
+	        sourceFormatter.setIndentString("  ");
+			try {
+				html = sourceFormatter.toString();
+			} catch (Exception e) {
+				//TODO
+			}
+        }
+		return html;
     }
     
-    protected CleanerProperties getCleanerProperties(ConverterOptions options) {
+	private CleanerProperties getCleanerProperties(ConverterOptions options) {
         CleanerProperties properties = new CleanerProperties();
         properties.setOmitXmlDeclaration(options.isOmitXmlDeclaration());
         properties.setUseCdataForScriptAndStyle(options.isUseCdataForScriptAndStyle());
@@ -150,7 +189,7 @@ public class DefaultConverter implements Converter {
         return properties;
     }
 
-    protected CleanerTransformations getCleanerTransformations(ConverterOptions options) {
+	private CleanerTransformations getCleanerTransformations(ConverterOptions options) {
         CleanerTransformations transformations = new CleanerTransformations();
         //tag transformations
         if(options.getTagTransformations() != null) {
@@ -172,7 +211,7 @@ public class DefaultConverter implements Converter {
         return transformations;
     }
 
-    protected List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
+	private List<PreProcessor> getPreProcessors(ConverterOptions options, ConversionContext conversionContext) {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
         processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
         processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
@@ -180,29 +219,29 @@ public class DefaultConverter implements Converter {
         return processors;
 	}
 
-    protected List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
+	private List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
         visitors.add(new MoreMacroProcessor());
-        visitors.add(new SyncInfoMacroProcessor());
         List<SynchronizedAttachment> attachments = options.getSynchronizedAttachments();
 		if(attachments != null && ! attachments.isEmpty()) {
             visitors.add(new ImageProcessor(attachments, options.getConfluenceRootUrl()));
             visitors.add(new AnchorProcessor(attachments, options.getConfluenceRootUrl()));
         }
+		//must be done:
+		//after image and anchor processing
+        visitors.add(new AttributesCleaner());
         Map<String, String> tagAttributes = options.getTagAttributes();
 		if(tagAttributes != null && ! tagAttributes.isEmpty()) {
         	visitors.add(new TagAttributesProcessor(tagAttributes));
         }
-        visitors.add(new CodeMacroProcessor());
-        visitors.add(new CdataProcessor());
-        visitors.add(new CssClassNameCleaner());
         visitors.add(new EmptySpanStripper());
         visitors.add(new EmptyParagraphStripper());
         return visitors;
     }
 
-    protected List<PostProcessor> getPostProcessors(ConverterOptions options) {
+	private List<PostProcessor> getPostProcessors(ConverterOptions options) {
         List<PostProcessor> processors = new ArrayList<PostProcessor>();
+        processors.add(new CodeMacroPostprocessor());
         processors.add(new TableOfContentsPostProcessor());
         processors.add(new PressReviewHeaderPostProcessor());
         return processors;

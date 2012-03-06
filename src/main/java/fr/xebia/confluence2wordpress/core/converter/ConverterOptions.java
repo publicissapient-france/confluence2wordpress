@@ -55,6 +55,8 @@ public class ConverterOptions {
     
     private Map<String,String> tagAttributes;
     
+    private boolean formatHtml;
+    
     public ConverterOptions() {
         this.tagTransformations = MapUtils.split("tt=code", ",", "=");
     }
@@ -178,6 +180,14 @@ public class ConverterOptions {
 
 	public void setTagAttributes(Map<String, String> tagAttributes) {
 		this.tagAttributes = tagAttributes;
+	}
+
+	public boolean isFormatHtml() {
+		return formatHtml;
+	}
+
+	public void setFormatHtml(boolean formatHtml) {
+		this.formatHtml = formatHtml;
 	}
 
 }

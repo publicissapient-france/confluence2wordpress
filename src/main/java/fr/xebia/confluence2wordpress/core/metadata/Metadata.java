@@ -63,6 +63,8 @@ public class Metadata implements Serializable {
 
 	private List<SynchronizedAttachment> attachments;
 
+	private boolean formatHtml = true;
+	
 	public String getPageTitle() {
 		return pageTitle;
 	}
@@ -181,6 +183,14 @@ public class Metadata implements Serializable {
 
 	public void setAttachments(List<SynchronizedAttachment> attachments) {
 		this.attachments = attachments;
+	}
+
+	public boolean isFormatHtml() {
+		return formatHtml;
+	}
+
+	public void setFormatHtml(boolean formatHtml) {
+		this.formatHtml = formatHtml;
 	}
 
 	public WordpressPost createPost() {

@@ -30,9 +30,11 @@ import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.atlassian.confluence.content.render.xhtml.XhtmlException;
+import com.atlassian.confluence.content.render.xhtml.definition.PlainTextMacroBody;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.xhtml.api.MacroDefinition;
 import com.atlassian.confluence.xhtml.api.MacroDefinitionHandler;
+import com.atlassian.confluence.xhtml.api.MacroDefinitionUpdater;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
@@ -80,6 +82,9 @@ public class DefaultMetadataManager implements MetadataManager {
     public Metadata extractMetadata(ContentEntityObject page) throws MetadataException {
     	//https://developer.atlassian.com/display/CONFDEV/Creating+a+new+Confluence+4.0+Macro
     	MacroDefinition metadataMacro = extractMacroDefinition(page, WORDPRESS_METADATA_MACRO_NAME);
+    	if(metadataMacro == null) {
+    		return null;
+    	}
 		String macroBody = metadataMacro.getBodyText();
 		if(StringUtils.isEmpty(macroBody)) {
 			return null;
@@ -88,24 +93,20 @@ public class DefaultMetadataManager implements MetadataManager {
     }
 
     public void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException{
-        String content = page.getBodyAsString();
-        StringBuilder newContent = new StringBuilder();
-        int syncInfo = content.indexOf(WORDPRESS_SYNC_INFO_TAG);
-        if(syncInfo == -1){
+    	String macroBody = marshalMetadata(metadata);
+    	if( ! updateMacroDefinition(page, WORDPRESS_METADATA_MACRO_NAME, macroBody)) {
+    		StringBuilder newContent = new StringBuilder();
+        	newContent.append(page.getBodyAsString());
+        	newContent.append(buildMetadataMacroTag(macroBody));
+    		page.setBodyAsString(newContent.toString());
+    	}
+    	MacroDefinition syncInfoMacro = extractMacroDefinition(page, WORDPRESS_SYNC_INFO_MACRO_NAME);
+    	if(syncInfoMacro == null) {
+    		StringBuilder newContent = new StringBuilder();
         	newContent.append(WORDPRESS_SYNC_INFO_TAG);
-        }
-        int startMeta = content.indexOf(WORDPRESS_META_TAG_START);
-        int endMeta = startMeta == -1 ? -1 : content.indexOf(WORDPRESS_META_TAG_END, startMeta);
-        StringBuilder macro = buildMacroBody(metadata);
-        if(startMeta != -1 && endMeta != -1){
-        	newContent.append(content.substring(0, startMeta));
-        	newContent.append(macro);
-        	newContent.append(content.substring(endMeta + WORDPRESS_META_TAG_END.length()));
-        } else {
-        	newContent.append(content);
-        	newContent.append(macro);
-        }
-        page.setBodyAsString(newContent.toString());
+        	newContent.append(page.getBodyAsString());
+    		page.setBodyAsString(newContent.toString());
+    	}
     }
 
     public Metadata createMetadata(
@@ -180,11 +181,10 @@ public class DefaultMetadataManager implements MetadataManager {
 		}
     }
 
-	private StringBuilder buildMacroBody(Metadata metadata) throws MetadataException {
+	private StringBuilder buildMetadataMacroTag(String macroBody) throws MetadataException {
 		StringBuilder macro = new StringBuilder();
         macro.append(WORDPRESS_META_TAG_START);
         macro.append(BODY_TAG_START);
-    	String macroBody = marshalMetadata(metadata);
         macro.append(macroBody);
         macro.append(BODY_TAG_END);
         macro.append(WORDPRESS_META_TAG_END);
@@ -192,24 +192,49 @@ public class DefaultMetadataManager implements MetadataManager {
 	}
 
 	private MacroDefinition extractMacroDefinition(ContentEntityObject page, final String macroName) throws MetadataException {
-		final List<MacroDefinition> metadataMacros = new ArrayList<MacroDefinition>();
+		final List<MacroDefinition> definitions = new ArrayList<MacroDefinition>();
 		try {
 			xhtmlUtils.handleMacroDefinitions(page.getBodyAsString(), null, new MacroDefinitionHandler() {
 				@Override
 				public void handle(MacroDefinition macroDefinition) {
 					if(macroDefinition.getName().equals(macroName)){
-						metadataMacros.add(macroDefinition);
+						definitions.add(macroDefinition);
 					}
 				}
 			});
 		} catch (XhtmlException e) {
 			throw new MetadataException("Could not parse page: " + page.getTitle(), e);
 		}
-		if(metadataMacros.isEmpty()) {
+		if(definitions.isEmpty()) {
 			return null;
 		}
-		MacroDefinition metadataMacro = metadataMacros.get(0);
-		return metadataMacro;
+		MacroDefinition definition = definitions.get(0);
+		return definition;
 	}
     
+
+	private boolean updateMacroDefinition(ContentEntityObject page, final String macroName, final String macroBody) throws MetadataException {
+		final List<MacroDefinition> definitions = new ArrayList<MacroDefinition>();
+		String body;
+		try {
+			body = xhtmlUtils.updateMacroDefinitions(page.getBodyAsString(), null, new MacroDefinitionUpdater() {
+				@Override
+				public MacroDefinition update(MacroDefinition macroDefinition) {
+					if(macroName.equals(macroDefinition.getName())){
+						macroDefinition.setBody(new PlainTextMacroBody(macroBody));
+						definitions.add(macroDefinition);
+					}
+					return macroDefinition;
+				}
+			});
+			
+		} catch (XhtmlException e) {
+			throw new MetadataException("Could not parse page: " + page.getTitle(), e);
+		}
+		if(definitions.isEmpty()) {
+			return false;
+		}
+		page.setBodyAsString(body);
+		return true;
+	}
 }

@@ -36,7 +36,11 @@ import fr.xebia.confluence2wordpress.util.UrlUtils;
  */
 public class AnchorProcessor implements TagNodeVisitor {
 
-    private final Map<String, SynchronizedAttachment> synchronizedAttachments;
+    private static final String A = "a";
+
+	private static final String HREF = "href";
+
+	private final Map<String, SynchronizedAttachment> synchronizedAttachments;
 
 	private final String confluenceRootUrl;
     
@@ -57,12 +61,12 @@ public class AnchorProcessor implements TagNodeVisitor {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
             String tagName = tag.getName();
-            if ("a".equals(tagName)) {
-                String url = tag.getAttributeByName("href");
+            if (A.equals(tagName)) {
+                String url = tag.getAttributeByName(HREF);
                 if (url != null) {
                     String href = findWordpressUrl(url);
                     if(href != null) {
-                        tag.setAttribute("href", href);
+                        tag.setAttribute(HREF, href);
                     }
                 }
             }

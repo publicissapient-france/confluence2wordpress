@@ -21,12 +21,11 @@ package fr.xebia.confluence2wordpress.core.converter.visitors;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
-
-import fr.xebia.confluence2wordpress.util.HtmlUtils;
 
 
 /**
@@ -49,7 +48,7 @@ public class TagAttributesProcessor implements TagNodeVisitor {
             if (attributesString != null) {
                 Map<String, String> attributes = extractAttributes(attributesString);
             	for (Entry<String,String> entry : attributes.entrySet()) {
-                	tag.setAttribute(entry.getKey(), HtmlUtils.escapeQuotes(entry.getValue()));
+                	tag.setAttribute(entry.getKey(), StringEscapeUtils.escapeXml(entry.getValue()));
 				}
             }
         }

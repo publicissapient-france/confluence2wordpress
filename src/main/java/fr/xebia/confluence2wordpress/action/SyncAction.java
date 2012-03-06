@@ -524,21 +524,23 @@ public class SyncAction extends AbstractPageAwareAction {
     }
 
     private void mergeLocalAndRemoteTags() {
-        List<String> tagNames = getMetadata().getTagNames();
-        if(tagNames != null){
-            for (String tagName : tagNames) {
-                boolean found = false;
-                Set<WordpressTag> wordpressTags = getWordpressTags();
-                for (WordpressTag tag : wordpressTags) {
-                    if(tag.getName().equals(tagName)){
-                        found = true;
-                        break;
-                    }
-                }
-                if( ! found){
-                    wordpressTags.add(new WordpressTag(tagName));
-                }
-            }
+        Set<WordpressTag> wordpressTags = getWordpressTags();
+        if(wordpressTags != null) {
+	        List<String> tagNames = getMetadata().getTagNames();
+	        if(tagNames != null){
+	            for (String tagName : tagNames) {
+	                boolean found = false;
+	                for (WordpressTag tag : wordpressTags) {
+	                    if(tag.getName().equals(tagName)){
+	                        found = true;
+	                        break;
+	                    }
+	                }
+	                if( ! found){
+	                    wordpressTags.add(new WordpressTag(tagName));
+	                }
+	            }
+	        }
         }
     }
 

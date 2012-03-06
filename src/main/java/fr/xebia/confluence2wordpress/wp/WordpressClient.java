@@ -395,11 +395,6 @@ public class WordpressClient {
 	}
 
 	private WordpressPost convertToPost(Map<String, Object> map) {
-		/*
-		 * Sample of the response structure:
-		 * 
-		 * userid=3, mt_allow_pings=1, postid=40, wp_author_id=3, date_created_gmt=Wed May 04 14:32:57 CEST 2011, wp_password=, link=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/, mt_keywords=tag1, tag2, dateCreated=Wed May 04 16:32:57 CEST 2011, categories=[test], post_status=publish, mt_allow_comments=1, wp_slug=revue-de-presse-xebia-9, permaLink=http://localhost/wordpress/2011/05/04/revue-de-presse-xebia-9/, description=coucou c'est un draft, custom_fields=[], mt_text_more=, mt_excerpt=, sticky=false, title=Revue de Presse Xebia, wp_author_display_name=xebia-france
-		 */
 
 		WordpressPost post = new WordpressPost();
 
@@ -418,6 +413,13 @@ public class WordpressClient {
 			body.append((String) map.get("description"));
 		}
 		if (map.get("mt_text_more") != null) {
+			//tricky: if the post is saved on wordpress side,
+			//even without modification, wordpress will append an "\n" before the "more" tag
+			//but if the post has never been edited on wordpress,
+			//then the "\n" is missing
+			if(body.charAt(body.length()-1) != '\n'){
+				body.append("\n");
+			}
 			body.append("<!--more-->");
 			body.append((String) map.get("mt_text_more"));
 		}
@@ -430,10 +432,10 @@ public class WordpressClient {
 
 		@SuppressWarnings("unchecked")
 		List<String> categoryNames = (List<String>) map.get("categories");
-		post.setCategoryNames(categoryNames);
+		post.setCategoryNames(new ArrayList<String>(categoryNames));
 
 		List<String> tagNames = CollectionUtils.split((String) map.get("mt_keywords"), ",");
-		post.setTagNames(tagNames);
+		post.setTagNames(new ArrayList<String>(tagNames));
 
 		String slug = (String) map.get("wp_slug");
 		post.setPostSlug(slug);

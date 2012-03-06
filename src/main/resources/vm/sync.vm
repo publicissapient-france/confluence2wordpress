@@ -146,6 +146,16 @@
       </div>
     </fieldset>
 
+   <fieldset class="group">
+      <div class="checkbox">
+        <input id="formatHtml" name="metadata.formatHtml" value="true" type="checkbox" class="checkbox" #if($action.metadata.formatHtml)checked="checked"#end />
+        <label for="formatHtml">$action.getText("sync.form.formatHtml.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("sync.form.formatHtml.description")</div>
+      </div>
+    </fieldset>
+
     <h2>$action.getText("sync.form.title.syncOptions")</h2>
 
     <input name="metadata.draft" value="$action.metadata.draft" type="hidden" />

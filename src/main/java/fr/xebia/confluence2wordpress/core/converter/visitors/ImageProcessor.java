@@ -61,7 +61,6 @@ public class ImageProcessor implements TagNodeVisitor {
             TagNode tag = (TagNode) htmlNode;
             String tagName = tag.getName();
             if ("img".equals(tagName)) {
-            	//TODO confluence-embedded-image confluence-content-image-border image-center
                 String url = tag.getAttributeByName("src");
                 if (url != null) {
 					WordpressFile wpFile = findWordpressFile(url);
@@ -90,7 +89,7 @@ public class ImageProcessor implements TagNodeVisitor {
                         	style.append("float:right; margin:0 0 10px 10px;");
                         }
                     	tag.setAttribute("style", style.toString());
-                        if(src.isAlternative()) {
+                        if(src.isAlternative() && ! (parentNode instanceof TagNode && ((TagNode)parentNode).getName().equals("a"))) {
                         	TagNode link = new TagNode("a");
                         	link.setAttribute("href", wpFile.getUrl());
                         	link.setAttribute("target", "_blank");

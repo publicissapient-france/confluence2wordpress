@@ -59,6 +59,7 @@ public class DefaultWordpressSynchronizer implements WordpressSynchronizer {
 		options.setTagAttributes(metadata.getTagAttributes());
 		String baseUrl = settingsManager.getGlobalSettings().getBaseUrl();
 		options.setConfluenceRootUrl(baseUrl);
+		options.setFormatHtml(metadata.isFormatHtml());
 		return options;
 	}
 

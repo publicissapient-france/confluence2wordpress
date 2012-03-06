@@ -21,13 +21,14 @@ package fr.xebia.confluence2wordpress.core.converter.preprocessors;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.xhtml.api.MacroDefinition;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 import fr.xebia.confluence2wordpress.core.converter.ConverterOptions;
 import fr.xebia.confluence2wordpress.core.converter.SyntaxHighlighterPlugin;
-import fr.xebia.confluence2wordpress.util.HtmlUtils;
 
 
 /**
@@ -36,12 +37,27 @@ import fr.xebia.confluence2wordpress.util.HtmlUtils;
  */
 public class CodeMacroPreprocessor extends PreProcessorBase {
 
-	public static final String SCRIPT_TYPE = "c2w-syntaxhighlighter";
-	
-	private static final String SCRIPT_START = "<script type=\""+SCRIPT_TYPE+"\">";
-	
+	/*
+	 * We use "pre" tags so that code formatters do not mess up the code inside;
+	 * the "lang" attribute is not wiped out by attribute cleaners.
+	 */
+	public static final String PRE_START = "<pre lang=\"c2w-syntaxhighlighter\">";
+	public static final String PRE_END = "</pre>";
+
     private static final String CODE_MACRO_NAME = "code";
-    
+
+	private static final String LANGUAGE = "language";
+	private static final String XML = "xml";
+	private static final String HTML_XML = "html/xml";
+
+	private static final String OPEN_BRACKET = "[";
+	private static final String CLOSE_BRACKET = "]";
+	private static final String OPEN_BRACKET_SLASH = "[/";
+
+	private static final char EQUALS = '=';
+	private static final char SPACE = ' ';
+	private static final String LINE_BREAK = "\n";
+
     private final SyntaxHighlighterPlugin syntaxHighlighterPlugin;
     
     public CodeMacroPreprocessor(XhtmlContent xhtmlUtils, ConversionContext conversionContext, SyntaxHighlighterPlugin syntaxHighlighterPlugin) {
@@ -62,7 +78,7 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
          Original storage:
          
         <ac:macro ac:name="code">
-        <ac:parameter ac:name="title">mon code</ac:parameter>
+        <ac:parameter ac:name="title">my code</ac:parameter>
         <ac:parameter ac:name="linenumbers">true</ac:parameter>
         <ac:parameter ac:name="language">java</ac:parameter>
         <ac:parameter ac:name="firstline">20</ac:parameter>
@@ -70,43 +86,52 @@ public class CodeMacroPreprocessor extends PreProcessorBase {
         <ac:plain-text-body><![CDATA[...]]></ac:plain-text-body>
         </ac:macro>
             
-        Converts to:
-
-		<script type="syntaxhhighlighter">
-        [java gutter=true firstline=20 collapse=true]
-        ...
-        [/java]
-		</script>
-		
          */
         Map<String, String> parameters = macroDefinition.getParameters();
         StringBuilder sb = new StringBuilder();
-        sb.append(SCRIPT_START);
-        sb.append("[");
-        String pluginTagName = syntaxHighlighterPlugin.getTagName(parameters.get("language"));
-        sb.append(pluginTagName);
+        sb.append(PRE_START);
+        appendSHPluginStartTag(sb, parameters);
+        sb.append(LINE_BREAK);
+        //we need to escape "<" and "&" at least, but we escape all XML entities since Confluence renderer 
+        //would do it anyway
+	    sb.append(StringEscapeUtils.escapeXml(macroDefinition.getBodyText()));
+	    sb.append(LINE_BREAK);
+	    appendSHPluginEndTag(sb, parameters);
+        sb.append(PRE_END);
+        String string = sb.toString();
+		return string;
+    }
+
+	private void appendSHPluginStartTag(StringBuilder sb, Map<String, String> parameters) {
+		sb.append(OPEN_BRACKET);
+        String language = getCodeLanguage(parameters);
+		sb.append(language);
         Map<String, String> substitutionMap = syntaxHighlighterPlugin.getSubstitutionMap();
         for (Entry<String, String> entry : parameters.entrySet()) {
             String confluenceKey = entry.getKey();
             if(substitutionMap.containsKey(confluenceKey)){
                 String wordpressKey = substitutionMap.get(confluenceKey);
                 String value = entry.getValue();
-                if("language".equals(wordpressKey) && "html/xml".equals(value)) {
-                	value = "xml";
-                }
-				sb.append(' ').append(wordpressKey).append('=').append(value);
+				sb.append(SPACE).append(wordpressKey).append(EQUALS).append(value);
             }
         }
-        //it's deceiving: we need to escape it because HtmlCleaner cannot handle Cdata sections containing "<"
-        String code = HtmlUtils.escapeHtml(macroDefinition.getBodyText());
-        sb.append("]\n").
-	        append(code).
-            append("\n[/").
-            append(pluginTagName).
-            append("]").
-        	append("</script>");
-        return sb.toString();
-    }
+        sb.append(CLOSE_BRACKET);
+	}
 
+	private void appendSHPluginEndTag(StringBuilder sb, Map<String, String> parameters) {
+		sb.append(OPEN_BRACKET_SLASH);
+        String language = getCodeLanguage(parameters);
+        sb.append(language);
+        sb.append(CLOSE_BRACKET);
+	}
+
+	private String getCodeLanguage(Map<String, String> parameters) {
+		String language = parameters.get(LANGUAGE);
+        //no equivalent in wordpress
+        if(HTML_XML.equals(language)) {
+        	language = XML;
+        }
+		return language;
+	}
     
 }

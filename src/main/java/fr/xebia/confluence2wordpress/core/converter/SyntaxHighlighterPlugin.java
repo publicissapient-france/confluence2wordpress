@@ -27,7 +27,6 @@ import java.util.Map;
 public enum SyntaxHighlighterPlugin {
 
     /**
-     * @see "http://wordpress.org/extend/plugins/syntax-highlighter/"
      * @see "http://wppluginsj.sourceforge.jp/syntax-highlighter/"
      */
     SH_LEGACY {
@@ -40,10 +39,6 @@ public enum SyntaxHighlighterPlugin {
             return map;
         }
         
-        @Override
-		public String getTagName(String language) {
-			return language;
-		}
     },
     
     /**
@@ -55,23 +50,17 @@ public enum SyntaxHighlighterPlugin {
         @Override
         public Map<String, String> getSubstitutionMap() {
             Map<String, String> map = new HashMap<String, String>();
-            map.put("language", "language");
+            //map.put("language", "language");
             map.put("firstline", "firstline");
             map.put("collapse", "collapse");
             map.put("linenumbers", "gutter");
             return map;
         }
 
-		@Override
-		public String getTagName(String language) {
-			return "sourcecode";
-		}
     }
     
     ;
 
     public abstract Map<String, String> getSubstitutionMap();
 
-	public abstract String getTagName(String language);
-	
 }

@@ -22,56 +22,22 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.atlassian.confluence.core.ContentEntityObject;
-import com.atlassian.confluence.xhtml.api.MacroDefinitionHandler;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 import com.google.common.collect.Maps;
 
-import fr.xebia.confluence2wordpress.wp.WordpressFile;
-
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class MetadataManagerTest {
-
-	private static final String WORDPRESS_META_TAG_START = "<ac:macro ac:name=\"wordpress-metadata\">";
-
-    private static final String WORDPRESS_META_TAG_END = "</ac:macro>";
-
-	private String includeTOC = "<ac:parameter ac:name=\"includeTOC\">true</ac:parameter>";
-	
-	private String tags = "<ac:parameter ac:name=\"tagNames\">maven,mindmapping</ac:parameter>";
-	
-	private String tagAttributes = "<ac:parameter ac:name=\"tagAttributes\">img=\"style=\"\"foo\"\" class='bar'\",a=,p=\"alt=\"\"foo\"\"\"</ac:parameter>";
-	
-	private String postId = "<ac:parameter ac:name=\"postId\">43</ac:parameter>";
-	
-	private String permalink = "<ac:parameter ac:name=\"permalink\">http://wordpress.dutra.fr/2011/08/28/le-mind-mapping-applique-aux-dependances-des-projets-mavenises</ac:parameter>";
-	
-	private String macroBody = 
-		WORDPRESS_META_TAG_START +
-		includeTOC +
-		tags +
-		postId +
-		permalink +
-		tagAttributes +
-		WORDPRESS_META_TAG_END;
-	
-	private String body = "foo" + macroBody + "<ac:macro ac:name=\"foo\"></ac:macro>";
 
     @Mock
     private XhtmlContent xhtmlUtils;
-
-	@Mock
-	private ContentEntityObject page;
 
 	private String json;
 	
@@ -110,14 +76,9 @@ public class MetadataManagerTest {
 		metadata.setPermalink("http://foo.com/bar");
 		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
 		String json = m.marshalMetadata(metadata);
-		
-//		Map<String, String> macroParameters = m.getMacroParameters(metadata);
-//		String body = m.writeMetadataMacroBody(macroParameters).toString();
-//		assertTrue(body.contains(permalink));
-//		assertTrue(body.contains(tags));
-//		assertTrue(body.contains(postId));
-//		assertTrue(body.contains(includeTOC));
-//		assertTrue(body.contains(tagAttributes));
+		assertTrue(json.contains("\"tagNames\":[\"lorem\",\"ipsum\"]"));
+		assertTrue(json.contains("\"tagAttributes\":{\"img\":\"style=\\\"foo\\\" class='bar'\",\"a\":\"\",\"p\":\"alt=\\\"foo\\\"\"}"));
+		assertTrue(json.contains("\"permalink\":\"http://foo.com/bar\""));
 	}
 
 }

@@ -18,34 +18,28 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import org.htmlcleaner.ContentNode;
+import java.util.List;
+
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
-
-import fr.xebia.confluence2wordpress.util.HtmlUtils;
 
 
 /**
  * @author Alexandre Dutra
  *
  */
-public class CdataProcessor implements TagNodeVisitor {
+public abstract class TagStripperBase implements TagNodeVisitor {
 
-    /**
-     * @inheritdoc
-     */
-    public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
-        if (htmlNode instanceof ContentNode) {
-            ContentNode tag = (ContentNode) htmlNode;
-            String code = tag.getContent().toString();
-            if(code.startsWith("<![CDATA[") && code.endsWith("]]>")) {
-                code = HtmlUtils.stripCdata(code);
-                ContentNode replacement = new ContentNode(code);
-                parentNode.replaceChild(tag, replacement);
-            }
-        }
-        return true;
-    }
+	protected void stripTag(TagNode parentNode, TagNode tag) {
+		if(tag.hasChildren()) {
+			@SuppressWarnings("unchecked")
+			List<HtmlNode> children = tag.getChildren();
+			for (HtmlNode child : children) {
+			    parentNode.insertChildAfter(tag, child);
+			}
+		}
+		parentNode.removeChild(tag);
+	}
 
 }

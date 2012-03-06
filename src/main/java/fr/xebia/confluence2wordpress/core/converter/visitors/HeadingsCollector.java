@@ -32,7 +32,15 @@ import org.htmlcleaner.TagNodeVisitor;
  */
 public class HeadingsCollector implements TagNodeVisitor {
 
-    private Heading h3;
+    private static final String NAME = "name";
+
+	private static final String A = "a";
+
+	private static final String H3 = "h3";
+
+	private static final String H4 = "h4";
+
+	private Heading h3;
 
     private List<Heading> headings = new ArrayList<Heading>();
 
@@ -43,16 +51,16 @@ public class HeadingsCollector implements TagNodeVisitor {
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            if("h3".equals(tag.getName())) {
+            if(H3.equals(tag.getName())) {
                 h3 = new Heading();
                 h3.setLabel(tag.getText().toString());
                 headings.add(h3);
-            } else if(h3 != null && "h4".equals(tag.getName())) {
+            } else if(h3 != null && H4.equals(tag.getName())) {
                 Heading h4 = new Heading();
                 h4.setLabel(tag.getText().toString());
-                TagNode link = tag.findElementByName("a", false);
+                TagNode link = tag.findElementByName(A, false);
                 if(link != null) {
-                    String name = link.getAttributeByName("name");
+                    String name = link.getAttributeByName(NAME);
                     h4.setAnchor(name);
                 }
                 h3.addChild(h4);

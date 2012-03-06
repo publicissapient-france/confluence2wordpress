@@ -21,6 +21,7 @@ package fr.xebia.confluence2wordpress.core.converter.visitors;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -30,15 +31,25 @@ import org.htmlcleaner.TagNodeVisitor;
  * @author Alexandre Dutra
  *
  */
-public class CssClassNameCleaner implements TagNodeVisitor {
+public class AttributesCleaner implements TagNodeVisitor {
 
-    /**
+    private static final String STYLE = "style";
+    
+	private static final String MARGIN_LEFT = "margin-left: 0.0px;";
+	
+	private static final String TEXT_ALIGN = "text-align: justify;";
+	
+	/**
      * @inheritdoc
      */
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
+            
+            //remove css classes
             tag.removeAttribute("class");
+            
+            //remove "data-" HTML5 attributes
             Map<String, String> attributes = tag.getAttributes();
             Iterator<String> iterator = attributes.keySet().iterator();
             while (iterator.hasNext()) {
@@ -47,6 +58,19 @@ public class CssClassNameCleaner implements TagNodeVisitor {
 					iterator.remove();
 				}
 			}
+            
+            //style cleanup
+            String style = tag.getAttributeByName(STYLE);
+            if(style != null) {
+            	style = style.replace(MARGIN_LEFT, "");
+            	style = style.replace(TEXT_ALIGN, "");
+            	style = StringUtils.trimToNull(style);
+            	if(style == null){
+             		tag.removeAttribute(STYLE);
+            	} else {
+            		tag.setAttribute(STYLE, style);
+            	}
+            }
         }
         return true;
     }

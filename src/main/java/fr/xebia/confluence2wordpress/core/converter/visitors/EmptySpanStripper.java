@@ -18,8 +18,9 @@
  */
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
-import java.util.List;
+import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 
@@ -28,28 +29,31 @@ import org.htmlcleaner.TagNode;
  * @author Alexandre Dutra
  *
  */
-public class EmptySpanStripper extends EmptyTagStripperBase {
+public class EmptySpanStripper extends TagStripperBase {
 
-    /**
+    private static final String SPAN = "span";
+
+	/**
      * @inheritdoc
      */
     public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
-            if("span".equals(tag.getName()) && hasNoAttributes(tag)) {
+            if(SPAN.equals(tag.getName()) && hasNoAttributes(tag)) {
             	stripTag(parentNode, tag);
             }
         }
         return true;
     }
 
-	private void stripTag(TagNode parentNode, TagNode tag) {
-		@SuppressWarnings("unchecked")
-		List<HtmlNode> children = tag.getChildren();
-		for (HtmlNode child : children) {
-		    parentNode.insertChildAfter(tag, child);
-		}
-		parentNode.removeChild(tag);
-	}
+    private boolean hasNoAttributes(TagNode tag) {
+        Collection<String> values = tag.getAttributes().values();
+        for (String value : values) {
+            if(StringUtils.isNotBlank(value)){
+                return false;
+            }
+        }
+        return true;
+    }
 
 }

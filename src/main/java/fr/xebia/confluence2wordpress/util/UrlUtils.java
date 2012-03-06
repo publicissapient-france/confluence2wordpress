@@ -23,8 +23,6 @@ public class UrlUtils {
      * examples:
      * /confluence/download/attachments/983042/image.png?version=1&amp;modificationDate=1327402370523 (image)
      * /confluence/download/thumbnails/983042/image.png (thumbnail)
-     * 
-     * examples:
      * http://localhost:1990/confluence/download/attachments/983042/image.png (image)
      * /confluence/download/attachments/983042/pom.xml?version=1&amp;modificationDate=1327402370710 (attachment)
      * /confluence/download/attachments/983042/armonia.png?version=1&amp;modificationDate=1327402370523 (image as attachment)

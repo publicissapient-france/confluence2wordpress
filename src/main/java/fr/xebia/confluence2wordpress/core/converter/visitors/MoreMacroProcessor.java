@@ -19,7 +19,6 @@
 package fr.xebia.confluence2wordpress.core.converter.visitors;
 
 import org.htmlcleaner.CommentNode;
-import org.htmlcleaner.ContentNode;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -33,7 +32,9 @@ import fr.xebia.confluence2wordpress.core.converter.preprocessors.MoreMacroPrepr
  */
 public class MoreMacroProcessor implements TagNodeVisitor {
 
-    private static final String MORE = "more";
+    private static final String BODY = "body";
+    
+	private static final String MORE = "more";
 
 	/**
      * @inheritdoc
@@ -42,10 +43,13 @@ public class MoreMacroProcessor implements TagNodeVisitor {
         if (htmlNode instanceof TagNode) {
             TagNode tag = (TagNode) htmlNode;
             if(MoreMacroPreprocessor.WORDPRESS_MORE.equals(tag.getName())){
-            	parentNode.removeChild(htmlNode);
-                CommentNode more = new CommentNode(MORE);
-				parentNode.getParent().insertChildAfter(parentNode, more);
-				parentNode.getParent().insertChildAfter(more, new ContentNode("\n\n"));
+        		CommentNode more = new CommentNode(MORE);
+        		//most often the more macro comes nested in a surrounding block tag, usually "p": we can safely delete it
+            	if( ! parentNode.getName().equals(BODY) && parentNode.getChildTagList().size() == 1) {
+    				parentNode.getParent().replaceChild(parentNode, more);
+            	} else {
+    				parentNode.replaceChild(tag, more);
+            	}
             }
         }
         return true;
