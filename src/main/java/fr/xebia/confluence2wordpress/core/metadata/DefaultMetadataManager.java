@@ -37,6 +37,7 @@ import com.atlassian.confluence.xhtml.api.MacroDefinitionHandler;
 import com.atlassian.confluence.xhtml.api.MacroDefinitionUpdater;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
+import fr.xebia.confluence2wordpress.util.CodecUtils;
 import fr.xebia.confluence2wordpress.wp.WordpressCategory;
 import fr.xebia.confluence2wordpress.wp.WordpressUser;
 
@@ -159,7 +160,8 @@ public class DefaultMetadataManager implements MetadataManager {
 
     public Metadata unmarshalMetadata(String macroBody) throws MetadataException {
 		try {
-			return mapper.readValue(macroBody, Metadata.class);
+			String expanded = CodecUtils.decodeAndExpand(macroBody);
+			return mapper.readValue(expanded, Metadata.class);
 		} catch (JsonParseException e) {
 			throw new MetadataException("Cannot unmarshal macro body: " + macroBody, e);
 		} catch (JsonMappingException e) {
@@ -171,7 +173,8 @@ public class DefaultMetadataManager implements MetadataManager {
 
     public String marshalMetadata(Metadata metadata) throws MetadataException {
 		try {
-			return mapper.writeValueAsString(metadata);
+			String json = mapper.writeValueAsString(metadata);
+			return CodecUtils.compressAndEncode(json);
 		} catch (JsonParseException e) {
 			throw new MetadataException("Cannot marshal metadata: " + metadata, e);
 		} catch (JsonMappingException e) {

@@ -33,6 +33,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 import com.google.common.collect.Maps;
 
+import fr.xebia.confluence2wordpress.util.CodecUtils;
+
 @RunWith(MockitoJUnitRunner.class)
 public class MetadataManagerTest {
 
@@ -49,7 +51,7 @@ public class MetadataManagerTest {
 	@Test
 	public void testUnmarshalMetadata() throws Exception {
 		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
-		Metadata metadata = m.unmarshalMetadata(json);
+		Metadata metadata = m.unmarshalMetadata(CodecUtils.compressAndEncode(json));
 		assertEquals(new Date(1330693920000L), metadata.getDateCreated());
 		assertEquals("7e0cb48cb807c098d34206091c862d449652d1d6581e82b20e29f5e223f768fd", metadata.getDigest());
 		assertEquals(true, metadata.isDraft());
@@ -63,7 +65,7 @@ public class MetadataManagerTest {
 	}
 	
 	@Test
-	public void testMarshallMetadata() throws MetadataException {
+	public void testMarshallMetadata() throws Exception {
 		Metadata metadata = new Metadata();
 		metadata.setIncludeTOC(true);
 		metadata.setPostId(43);
@@ -76,6 +78,7 @@ public class MetadataManagerTest {
 		metadata.setPermalink("http://foo.com/bar");
 		MetadataManager m = new DefaultMetadataManager(xhtmlUtils);
 		String json = m.marshalMetadata(metadata);
+		json = CodecUtils.decodeAndExpand(json);
 		assertTrue(json.contains("\"tagNames\":[\"lorem\",\"ipsum\"]"));
 		assertTrue(json.contains("\"tagAttributes\":{\"img\":\"style=\\\"foo\\\" class='bar'\",\"a\":\"\",\"p\":\"alt=\\\"foo\\\"\"}"));
 		assertTrue(json.contains("\"permalink\":\"http://foo.com/bar\""));

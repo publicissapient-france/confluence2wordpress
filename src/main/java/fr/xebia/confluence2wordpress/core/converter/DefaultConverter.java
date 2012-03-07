@@ -34,7 +34,6 @@ import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 import org.htmlcleaner.TagTransformation;
-import org.htmlcleaner.WhitespaceTolerantTagInfoProvider;
 
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.content.render.xhtml.DefaultConversionContext;
@@ -152,7 +151,7 @@ public class DefaultConverter implements Converter {
 	private HtmlCleaner getHtmlCleaner(ConverterOptions options) {
         //HtmlCleaner is NOT thread-safe
     	CleanerProperties cleanerProps = getCleanerProperties(options);
-        HtmlCleaner cleaner = new HtmlCleaner(new WhitespaceTolerantTagInfoProvider(), cleanerProps);
+        HtmlCleaner cleaner = new HtmlCleaner(cleanerProps);
         CleanerTransformations transformations = getCleanerTransformations(options);
         cleaner.setTransformations(transformations);
 		return cleaner;
