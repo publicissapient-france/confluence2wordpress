@@ -21,7 +21,11 @@ import fr.xebia.confluence2wordpress.wp.WordpressFile;
 
 public class SynchronizedAttachment {
 
-    private WordpressFile wordpressFile;
+    private static final String THUMBNAILS = "/thumbnails/";
+
+	private static final String ATTACHMENTS = "/attachments/";
+
+	private WordpressFile wordpressFile;
 
 	private String thumbnailPath;
 
@@ -32,14 +36,12 @@ public class SynchronizedAttachment {
 	private long attachmentId;
 
 	public SynchronizedAttachment() {
-		super();
 	}
 
 	public SynchronizedAttachment(Attachment confluenceAttachment, WordpressFile wordpressFile) {
-		super();
 		this.wordpressFile = wordpressFile;
 		this.attachmentPath = confluenceAttachment.getDownloadPathWithoutVersion();
-		this.thumbnailPath = attachmentPath.replace("/attachments/", "/thumbnails/");
+		this.thumbnailPath = attachmentPath.replace(ATTACHMENTS, THUMBNAILS);
 		this.attachmentVersion = confluenceAttachment.getAttachmentVersion();
 		this.attachmentId = confluenceAttachment.getId();
 	}
