@@ -196,6 +196,7 @@
                 <version>2.8.1</version>
                 <configuration>
                 	<useSystemClassLoader>false</useSystemClassLoader>
+                	<classpathDependencyExcludes>dom4j:dom4j</classpathDependencyExcludes>
                 </configuration>
             </plugin>
             
