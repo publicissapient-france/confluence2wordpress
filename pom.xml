@@ -177,7 +177,6 @@
 						</Import-Package>
 					</instructions>
 					<allowGoogleTracking>false</allowGoogleTracking>
-					<jvmArgs>-Xms256m -Xmx256m -XX:MaxPermSize=128m</jvmArgs>
 				</configuration>
 			</plugin>
 
