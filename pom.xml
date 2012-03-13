@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>fr.dutra</groupId>
     <artifactId>confluence2wordpress</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.8-SNAPSHOT</version>
     <packaging>atlassian-plugin</packaging>
 
     <name>Confluence to Wordpress Synchronizer</name>
@@ -51,7 +51,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <confluence.version>3.5.2</confluence.version>
         <confluence.data.version>3.5</confluence.data.version>
-        <amps.version>3.3.4</amps.version>
+        <amps.version>3.7.3</amps.version>
         <htmlcleaner.version>2.2</htmlcleaner.version>
     </properties>
     
@@ -198,7 +198,8 @@
 							com.google.common*;version="0.0",
 							org.apache.xmlrpc*;version="0.0",
 							com.opensymphony*;version="0.0",
-							com.atlassian*;version="0.0"
+							com.atlassian*;version="0.0",
+							javax.servlet*;version="0.0"
 						</Import-Package>
 					</instructions>
                 </configuration>
