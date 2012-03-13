@@ -19,7 +19,7 @@
         <tr> 
             <td width="50%"><div style="border-bottom:1px solid #BBB;height:16px"></div></td> 
             <td width="0" style="white-space:nowrap">
-                <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" width="32" height="32" alt="" border="0" style="vertical-align:middle">
+                <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" width="32" height="32" alt="" border="0" style="vertical-align:middle">
                 <span style="vertical-align:middle">$i18n.getText("macro.more.text")</span>
             </td>
             <td width="50%"><div style="border-bottom:1px solid #BBB;height:16px"></div></td>

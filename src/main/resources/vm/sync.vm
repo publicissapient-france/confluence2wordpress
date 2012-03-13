@@ -18,7 +18,7 @@
 <head>
     <title>$action.page.displayTitle - $action.getText("sync.title")</title>
     <meta name="decorator" content="atl.general"/>
-    #requireResource("fr.xebia.confluence2wordpress:conversion-resources")
+    #requireResource("fr.dutra.confluence2wordpress:conversion-resources")
     #requireResource($action.getText("sync.js.datepicker.resource"))
 </head>
 <body>

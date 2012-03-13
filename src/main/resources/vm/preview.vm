@@ -18,7 +18,7 @@
 <head>
     <title>$action.page.displayTitle - $action.getText("preview.title")</title>
     <meta name="decorator" content="atl.popup"/>
-    #requireResource("fr.xebia.confluence2wordpress:preview-resources")
+    #requireResource("fr.dutra.confluence2wordpress:preview-resources")
 </head>
 <body>
 

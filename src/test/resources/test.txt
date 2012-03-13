@@ -3,7 +3,7 @@
 &lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
  xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd&quot;&gt;
   &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-  &lt;groupId&gt;fr.xebia&lt;/groupId&gt;
+  &lt;groupId&gt;fr.dutra&lt;/groupId&gt;
   &lt;artifactId&gt;confluence2wordpress&lt;/artifactId&gt;
   &lt;version&gt;0.9.8-confluence4&lt;/version&gt;
   &lt;packaging&gt;atlassian-plugin&lt;/packaging&gt;

@@ -20,7 +20,7 @@
   <head>
     <title>$action.getText("settings.title")</title>
     <meta name="decorator" content="atl.admin">
-    #requireResource("fr.xebia.confluence2wordpress:settings-resources")
+    #requireResource("fr.dutra.confluence2wordpress:settings-resources")
   </head>
   
   <body>
