@@ -15,7 +15,7 @@
        limitations under the License.
 
 -->
-<atlassian-plugin key="fr.xebia.confluence2wordpress" name="Confluence to Wordpress Synchronizer" plugins-version="2">
+<atlassian-plugin key="fr.dutra.confluence2wordpress" name="Confluence to Wordpress Synchronizer" plugins-version="2">
 
     <plugin-info>
         <description>${project.description}</description>
@@ -80,19 +80,19 @@
         <link>/confluence2wordpress/syncOptions.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
         <icon height="18" width="18">
-            <link>/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png</link>
+            <link>/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png</link>
         </icon>
-        <condition class="fr.xebia.confluence2wordpress.condition.PluginPermissionsCondition" />
+        <condition class="fr.dutra.confluence2wordpress.condition.PluginPermissionsCondition" />
     </web-item>
     
-    <macro key="more" name="more" class="fr.xebia.confluence2wordpress.macro.MoreMacro" 
-        icon="/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png">
+    <macro key="more" name="more" class="fr.dutra.confluence2wordpress.macro.MoreMacro" 
+        icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
         <!-- <description>Generates a Wordpress "more" markup.</description> -->
         <category name="external-content"/>
         <parameters />
     </macro>
     
-    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.xebia.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
+    <macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.dutra.confluence2wordpress.macro.SyncInfoMacro" hidden="true" >
     	<description>Displays a message indicating that the current page is synchronized with a Wordpress post.</description>
         <category name="external-content"/>
         <parameters />
@@ -102,27 +102,27 @@
         <package name="confluence2wordpress" extends="default" namespace="/confluence2wordpress">
             <default-interceptor-ref name="defaultStack" />
             
-            <action name="syncOptions" class="fr.xebia.confluence2wordpress.action.SyncAction" method="input">
+            <action name="syncOptions" class="fr.dutra.confluence2wordpress.action.SyncAction" method="input">
                 <result name="success" type="velocity">/vm/sync-options.vm</result>
             </action>
-            <action name="preview" class="fr.xebia.confluence2wordpress.action.SyncAction" method="preview">
+            <action name="preview" class="fr.dutra.confluence2wordpress.action.SyncAction" method="preview">
                  <result name="success" type="velocity">/vm/preview.vm</result>
             </action>
-            <action name="sync" class="fr.xebia.confluence2wordpress.action.SyncAction" method="sync">
+            <action name="sync" class="fr.dutra.confluence2wordpress.action.SyncAction" method="sync">
                  <interceptor-ref name="validatingStack" />
                  <result name="success" type="redirect">syncOptions.action?pageId=${pageId}</result>
                  <result name="input" type="velocity">/vm/sync-options.vm</result>
             </action>
             
-            <action name="settings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="input">
+            <action name="settings" class="fr.dutra.confluence2wordpress.action.SettingsAction" method="input">
                 <result name="success" type="velocity">/vm/settings.vm</result>
             </action>
-            <action name="updateSettings" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="execute">
+            <action name="updateSettings" class="fr.dutra.confluence2wordpress.action.SettingsAction" method="execute">
                 <interceptor-ref name="validatingStack" />
                 <result name="success" type="redirect">settings.action?pageUrl=${pageUrl}</result>
                 <result name="input" type="velocity">/vm/settings.vm</result>
             </action>
-            <action name="testConnection" class="fr.xebia.confluence2wordpress.action.SettingsAction" method="testConnection">
+            <action name="testConnection" class="fr.dutra.confluence2wordpress.action.SettingsAction" method="testConnection">
                 <interceptor-ref name="validatingStack" />
                 <result name="success" type="velocity">/vm/settings.vm</result>
                 <result name="input" type="velocity">/vm/settings.vm</result>
@@ -138,19 +138,19 @@
 
     <component-import key="pluginSettingsFactory" interface="com.atlassian.sal.api.pluginsettings.PluginSettingsFactory" />
 
-    <component key="pluginSettingsManager" class="fr.xebia.confluence2wordpress.core.settings.DefaultPluginSettingsManager">
+    <component key="pluginSettingsManager" class="fr.dutra.confluence2wordpress.core.settings.DefaultPluginSettingsManager">
         <description>Provides access to the plugin settings.</description>
-        <interface>fr.xebia.confluence2wordpress.core.settings.PluginSettingsManager</interface>
+        <interface>fr.dutra.confluence2wordpress.core.settings.PluginSettingsManager</interface>
     </component>
 
-    <component key="pluginPermissionsManager" class="fr.xebia.confluence2wordpress.core.permissions.DefaultPluginPermissionsManager">
+    <component key="pluginPermissionsManager" class="fr.dutra.confluence2wordpress.core.permissions.DefaultPluginPermissionsManager">
         <description>Provides a convenient way to check permissions for this plugin.</description>
-        <interface>fr.xebia.confluence2wordpress.core.permissions.PluginPermissionsManager</interface>
+        <interface>fr.dutra.confluence2wordpress.core.permissions.PluginPermissionsManager</interface>
     </component>
     
-    <component key="pageLabelsSynchronizer" class="fr.xebia.confluence2wordpress.core.labels.DefaultPageLabelsSynchronizer">
+    <component key="pageLabelsSynchronizer" class="fr.dutra.confluence2wordpress.core.labels.DefaultPageLabelsSynchronizer">
         <description>Synchronizes Confluence labels with Wordpress tags.</description>
-        <interface>fr.xebia.confluence2wordpress.core.labels.PageLabelsSynchronizer</interface>
+        <interface>fr.dutra.confluence2wordpress.core.labels.PageLabelsSynchronizer</interface>
     </component>
     
     

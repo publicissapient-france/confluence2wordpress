@@ -15,7 +15,7 @@
  */
 package org.htmlcleaner;
 
-import fr.xebia.confluence2wordpress.util.HtmlUtils;
+import fr.dutra.confluence2wordpress.util.HtmlUtils;
 
 public class WhitespaceTolerantTagInfo extends TagInfo {
 	

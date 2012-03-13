@@ -82,7 +82,7 @@ Pellentesque velit odio, consectetur vel sodales vitae, tristique eu enim.
 h4. Java
 
 {code:java}
-package fr.xebia.confluence2wordpress.action;
+package fr.dutra.confluence2wordpress.action;
 
 import java.io.IOException;
 
@@ -106,7 +106,7 @@ h4. XML
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>fr.xebia</groupId>
+    <groupId>fr.dutra</groupId>
     <artifactId>confluence2wordpress</artifactId>
     <version>0.1-SNAPSHOT</version>
     <packaging>atlassian-plugin</packaging>

@@ -21,7 +21,7 @@
         <tbody>
             <tr>
                 <td valign="top">
-                    <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.xebia.confluence2wordpress/confluence2wordpress.png" width="32" height="32" align="absmiddle" alt="" border="0">
+                    <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" width="32" height="32" align="absmiddle" alt="" border="0">
                 </td>
                 <td>
                     <b>$i18n.getText("macro.metadata.heading")</b><br/>
