@@ -15,14 +15,14 @@
  */
 package fr.dutra.confluence2wordpress.core.sync;
 
-import com.atlassian.confluence.core.ContentEntityObject;
+import com.atlassian.confluence.labels.Labelable;
 
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
 
 public interface PageLabelsSynchronizer {
 
-    void tagNamesToPageLabels(ContentEntityObject page, Metadata metadata);
+    void tagNamesToPageLabels(Labelable page, Metadata metadata);
 
-    void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata);
+    void pageLabelsToTagNames(Labelable page, Metadata metadata);
 
 }

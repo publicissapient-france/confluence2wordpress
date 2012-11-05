@@ -434,8 +434,11 @@ public class WordpressClient {
 		List<String> categoryNames = (List<String>) map.get("categories");
 		post.setCategoryNames(new ArrayList<String>(categoryNames));
 
+		//optional field
 		List<String> tagNames = CollectionUtils.split((String) map.get("mt_keywords"), ",");
-		post.setTagNames(new ArrayList<String>(tagNames));
+		if(tagNames != null) {
+			post.setTagNames(new ArrayList<String>(tagNames));
+		}
 
 		String slug = (String) map.get("wp_slug");
 		post.setPostSlug(slug);

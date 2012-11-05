@@ -17,26 +17,29 @@ public class XmlRpcClientRequestProcessor extends org.apache.xmlrpc.XmlRpcClient
 	@Override
 	public void encodeRequest(XmlRpcClientRequest request, String encoding, OutputStream out) throws XmlRpcClientException, IOException {
 		XmlWriter writer = new XmlWriter(out, encoding);
-		writer.startElement("methodCall");
-		writer.startElement("methodName");
-		writer.write(request.getMethodName());
-		writer.endElement("methodName");
-		writer.startElement("params");
-
-		int l = request.getParameterCount();
-		for (int i = 0; i < l; i++) {
-			writer.startElement("param");
-			try {
-				writer.writeObject(request.getParameter(i));
-			} catch (XmlRpcException e) {
-				throw new XmlRpcClientException("Failure writing request", e);
+		try {
+			writer.startElement("methodCall");
+			writer.startElement("methodName");
+			writer.write(request.getMethodName());
+			writer.endElement("methodName");
+			writer.startElement("params");
+	
+			int l = request.getParameterCount();
+			for (int i = 0; i < l; i++) {
+				writer.startElement("param");
+				try {
+					writer.writeObject(request.getParameter(i));
+				} catch (XmlRpcException e) {
+					throw new XmlRpcClientException("Failure writing request", e);
+				}
+				writer.endElement("param");
 			}
-			writer.endElement("param");
+			writer.endElement("params");
+			writer.endElement("methodCall");
+			writer.flush();
+		} finally {
+			writer.close();
 		}
-		writer.endElement("params");
-		writer.endElement("methodCall");
-		writer.flush();
 	}
-
 }
 

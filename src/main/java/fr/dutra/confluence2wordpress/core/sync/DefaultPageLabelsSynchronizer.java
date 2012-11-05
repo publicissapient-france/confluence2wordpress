@@ -18,9 +18,9 @@ package fr.dutra.confluence2wordpress.core.sync;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.labels.Label;
 import com.atlassian.confluence.labels.LabelManager;
+import com.atlassian.confluence.labels.Labelable;
 import com.atlassian.confluence.util.LabelUtil;
 
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
@@ -39,7 +39,7 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
     }
 
     @Override
-    public void tagNamesToPageLabels(ContentEntityObject page, Metadata metadata) {
+    public void tagNamesToPageLabels(Labelable page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
         if (tagNames != null) {
             for (String tagName : tagNames) {
@@ -80,7 +80,7 @@ public class DefaultPageLabelsSynchronizer implements PageLabelsSynchronizer {
     }
 
     @Override
-    public void pageLabelsToTagNames(ContentEntityObject page, Metadata metadata) {
+    public void pageLabelsToTagNames(Labelable page, Metadata metadata) {
         List<String> tagNames = metadata.getTagNames();
         List<Label> labels = page.getLabels();
         if (labels != null && !labels.isEmpty()) {

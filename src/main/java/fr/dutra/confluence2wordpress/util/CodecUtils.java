@@ -22,6 +22,7 @@ public class CodecUtils {
 		try {
 			gzos.write(text.getBytes(UTF_8));
 		} finally {
+			baos.close();
 			gzos.close();
 		}
 		return new String(baos.toByteArray(), UTF_8);
@@ -33,11 +34,13 @@ public class CodecUtils {
 				new Base64InputStream(
 					new ByteArrayInputStream(
 						encoded.getBytes(UTF_8)), false, 0, null));
+		Scanner scanner = new Scanner(gzis, UTF_8);
 		try {
-			String decoded = new Scanner(gzis, UTF_8).useDelimiter(REGEX).next();
+			String decoded = scanner.useDelimiter(REGEX).next();
 			return decoded;
 		} finally {
 			gzis.close();
+			scanner.close();
 		}
 	}
 }

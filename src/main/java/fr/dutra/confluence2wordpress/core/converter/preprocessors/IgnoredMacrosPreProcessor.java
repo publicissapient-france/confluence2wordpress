@@ -43,7 +43,7 @@ public class IgnoredMacrosPreProcessor extends PreProcessorBase {
 
     @Override
     protected String processMacro(ConverterOptions options, MacroDefinition macroDefinition) {
-        return ">";
+        return "";
     }
 
 }
