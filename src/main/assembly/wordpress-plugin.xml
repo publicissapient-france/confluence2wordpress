@@ -30,5 +30,13 @@
       <lineEnding>unix</lineEnding>
       <filtered>true</filtered>
     </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/resources/img</directory>
+      <outputDirectory>/img</outputDirectory>
+      <fileMode>644</fileMode>
+      <!-- http://jira.codehaus.org/browse/MASSEMBLY-412 -->
+      <!-- <lineEnding>unix</lineEnding> -->
+      <filtered>false</filtered>
+    </fileSet>
   </fileSets>
 </assembly>

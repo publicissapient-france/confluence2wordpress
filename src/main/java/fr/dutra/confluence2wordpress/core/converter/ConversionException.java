@@ -9,6 +9,10 @@ public class ConversionException extends Exception {
 		super(message);
 	}
 
+	public ConversionException(Throwable cause) {
+		super(cause);
+	}
+
 	public ConversionException(String message, Throwable cause) {
 		super(message, cause);
 	}

@@ -39,10 +39,14 @@ public class StaxUtils {
         "</xml>" ;
 
     public static XMLEventReader getReader(ContentEntityObject page) throws XMLStreamException{
-        return getReader(page.getBodyAsString());
+        return getXMLEventReader(page.getBodyAsString());
     }
     
-    public static XMLEventReader getReader(String storage) throws XMLStreamException {
-        return INPUT_FACTORY.createXMLEventReader(new StringReader(XML_START + storage + XML_END));
+    public static XMLEventReader getXMLEventReader(String storage) throws XMLStreamException {
+        return INPUT_FACTORY.createXMLEventReader(getReader(storage));
+    }
+
+    public static StringReader getReader(String storage) throws XMLStreamException {
+        return new StringReader(XML_START + storage + XML_END);
     }
 }

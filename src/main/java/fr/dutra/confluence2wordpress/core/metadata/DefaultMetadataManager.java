@@ -93,7 +93,7 @@ public class DefaultMetadataManager implements MetadataManager {
 		return unmarshalMetadata(macroBody);
     }
 
-    public void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException{
+    public void storeMetadata(ContentEntityObject page, Metadata metadata) throws MetadataException {
     	String macroBody = marshalMetadata(metadata);
     	if( ! updateMacroDefinition(page, WORDPRESS_METADATA_MACRO_NAME, macroBody)) {
     		StringBuilder newContent = new StringBuilder();

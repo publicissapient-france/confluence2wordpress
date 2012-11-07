@@ -32,6 +32,7 @@ add_filter('xmlrpc_methods', 'c2w_add_xmlrpc_methods');
 add_filter('upload_mimes', 'c2w_add_mime_types');
 
 add_shortcode( 'permalink', 'c2w_generate_permalink' );
+add_shortcode( 'author', 'c2w_generate_author' );
 
 /**
  * Register new XML-RPC methods.
@@ -66,6 +67,105 @@ function c2w_add_mime_types( $mimes ) {
 function c2w_generate_permalink( $atts ){
 	global $post;
 	return get_permalink($post->ID);
+}
+
+// Register shortcode for [author] macros
+function c2w_generate_author( $atts ) {
+	extract( shortcode_atts( array(
+		'firstname' => NULL,
+		'lastname' => NULL,
+		'username' => NULL,
+		'twitter' => NULL,
+		'urls' => NULL
+	), $atts ));
+	
+	$parsedUrls = array();
+	if($username) {
+		$parsedUrls[] = array("xebia", "http://blog.xebia.fr/author/" . urlencode(html_entity_decode($username)));
+	}
+	if($twitter) {
+		$parsedUrls[] = array("twitter", "http://twitter.com/" . urlencode(html_entity_decode($twitter)));
+	}
+	$urls = preg_split("/[\s,]+/", $urls);
+	foreach ($urls as $url) {
+		$url = trim($url);
+		if(!$url) continue;
+			 if(strpos($url, "xebia") !== false) $parsedUrls[] = array("xebia", $url);
+		else if(strpos($url, "aim") !== false) $parsedUrls[] = array("aim", $url);
+		else if(strpos($url, "android") !== false) $parsedUrls[] = array("android", $url);
+		else if(strpos($url, "apple") !== false) $parsedUrls[] = array("apple", $url);
+		else if(strpos($url, "ask") !== false) $parsedUrls[] = array("ask", $url);
+		else if(strpos($url, "bebo") !== false) $parsedUrls[] = array("bebo", $url);
+		else if(strpos($url, "behance") !== false) $parsedUrls[] = array("behance", $url);
+		else if(strpos($url, "blogger") !== false) $parsedUrls[] = array("blogger", $url);
+		else if(strpos($url, "delicious") !== false) $parsedUrls[] = array("delicious", $url);
+		else if(strpos($url, "designbump") !== false) $parsedUrls[] = array("designbump", $url);
+		else if(strpos($url, "designfloat") !== false) $parsedUrls[] = array("designfloat", $url);
+		else if(strpos($url, "designmoo") !== false) $parsedUrls[] = array("designmoo", $url);
+		else if(strpos($url, "deviantart") !== false) $parsedUrls[] = array("deviantart", $url);
+		else if(strpos($url, "digg") !== false) $parsedUrls[] = array("digg", $url);
+		else if(strpos($url, "dribbble") !== false) $parsedUrls[] = array("dribbble", $url);
+		else if(strpos($url, "mailto") !== false) $parsedUrls[] = array("email", $url);
+		else if(strpos($url, "evernote") !== false) $parsedUrls[] = array("evernote", $url);
+		else if(strpos($url, "facebook") !== false) $parsedUrls[] = array("facebook", $url);
+		else if(strpos($url, "flickr") !== false) $parsedUrls[] = array("flickr", $url);
+		else if(strpos($url, "foursquare") !== false) $parsedUrls[] = array("foursquare", $url);
+		else if(strpos($url, "friendfeed") !== false) $parsedUrls[] = array("friendfeed", $url);
+		else if(strpos($url, "github") !== false) $parsedUrls[] = array("github", $url);
+		else if(strpos($url, "plus.google.com") !== false) $parsedUrls[] = array("gplus", $url);
+		else if(strpos($url, "google") !== false) $parsedUrls[] = array("google", $url);
+		else if(strpos($url, "googletalk") || strpos($url, "gtalk") !== false) $parsedUrls[] = array("googletalk", $url);
+		else if(strpos($url, "hackernews") !== false) $parsedUrls[] = array("hackernews", $url);
+		else if(strpos($url, "icq") !== false) $parsedUrls[] = array("icq", $url);
+		else if(strpos($url, "ios") !== false) $parsedUrls[] = array("ios", $url);
+		else if(strpos($url, "lastfm") !== false) $parsedUrls[] = array("lastfm", $url);
+		else if(strpos($url, "linkedin") !== false) $parsedUrls[] = array("linkedin", $url);
+		else if(strpos($url, "meetup") !== false) $parsedUrls[] = array("meetup", $url);
+		else if(strpos($url, "mobileme") !== false) $parsedUrls[] = array("mobileme", $url);
+		else if(strpos($url, "myspace") !== false) $parsedUrls[] = array("myspace", $url);
+		else if(strpos($url, "netvibes") !== false) $parsedUrls[] = array("netvibes", $url);
+		else if(strpos($url, "newsvine") !== false) $parsedUrls[] = array("newsvine", $url);
+		else if(strpos($url, "ning") !== false) $parsedUrls[] = array("ning", $url);
+		else if(strpos($url, "orkut") !== false) $parsedUrls[] = array("orkut", $url);
+		else if(strpos($url, "picasa") !== false) $parsedUrls[] = array("picasa", $url);
+		else if(strpos($url, "pinterest") !== false) $parsedUrls[] = array("pinterest", $url);
+		else if(strpos($url, "posterous") !== false) $parsedUrls[] = array("posterous", $url);
+		else if(strpos($url, "reddit") !== false) $parsedUrls[] = array("reddit", $url);
+		else if(strpos($url, "rss") !== false || strpos($url, "atom") !== false) $parsedUrls[] = array("rss", $url);
+		else if(strpos($url, "sharethis") !== false) $parsedUrls[] = array("sharethis", $url);
+		else if(strpos($url, "skype") !== false) $parsedUrls[] = array("skype", $url);
+		else if(strpos($url, "slashdot") !== false) $parsedUrls[] = array("slashdot", $url);
+		else if(strpos($url, "slideshare") !== false) $parsedUrls[] = array("slideshare", $url);
+		else if(strpos($url, "squidoo") !== false) $parsedUrls[] = array("squidoo", $url);
+		else if(strpos($url, "stumbleupon") !== false) $parsedUrls[] = array("stumbleupon", $url);
+		else if(strpos($url, "technorati") !== false) $parsedUrls[] = array("technorati", $url);
+		else if(strpos($url, "tumblr") !== false) $parsedUrls[] = array("tumblr", $url);
+		else if(strpos($url, "twitter") !== false) $parsedUrls[] = array("twitter", $url);
+		else if(strpos($url, "vimeo") !== false) $parsedUrls[] = array("vimeo", $url);
+		else if(strpos($url, "windows") !== false) $parsedUrls[] = array("windows", $url);
+		else if(strpos($url, "wordpress") !== false) $parsedUrls[] = array("wordpress", $url);
+		else if(strpos($url, "yahoo") !== false) $parsedUrls[] = array("yahoo", $url);
+		else if(strpos($url, "yelp") !== false) $parsedUrls[] = array("yelp", $url);
+		else if(strpos($url, "youtube") !== false) $parsedUrls[] = array("youtube", $url);
+		else $parsedUrls[] = array("generic", $url);
+	}
+
+	$result = '<div style="border-bottom:1px solid #DDD;border-top:1px solid #DDD;padding:5px 0;margin:10px 0">';
+	
+	$result .= '<div style="float:right;text-align:right">';
+	foreach ($parsedUrls as $url) {
+		$result .= "<a style='margin-left:5px' href='$url[1]' target='_blank'><img title='$url[1]' src='" . WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . "/img/rkc-social-set/24x24/24x24-${url[0]}.png' alt='$url[1]' width='24' height='24' /></a>";
+	}
+	$result .= '</div>';
+	
+	$result .= "<span style='font-style:italic;height:24px;line-height:24px'>Par ";
+	if($parsedUrls[0]) {
+		$result .= "<a href='" . $parsedUrls[0][1] ."' target='_blank'>$firstname $lastname</a>";
+	} else {
+		$result .= "$firstname $lastname";
+	}
+	$result .= "</span></div>";
+	return $result;
 }
 
 /**

@@ -74,6 +74,10 @@
         <property key="content-type" value="image/png"/>
     </resource>
     
+    <resource key="social-icons" type="download" name="social/" location="img/rkc-social-set">
+        <property key="content-type" value="image/png"/>
+    </resource>
+    
     <web-item key="link" name="Confluence-to-Wordpress Converter Link" 
         section="system.content.action/primary"  weight="100">
         <label key="link.label" />
@@ -92,12 +96,25 @@
         <parameters />
 	</xhtml-macro>
     
+	<xhtml-macro key="author" name="author" class="fr.dutra.confluence2wordpress.macro.AuthorMacro" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" >
+        <category name="external-content"/>
+        <parameters>
+			<parameter name="firstName" type="string" required="true" />
+			<parameter name="lastName" type="string" required="true" />
+			<parameter name="wordpressUsername" type="string" />
+			<parameter name="twitterAccount" type="string" />
+        	<parameter name="others" type="string" multiple="true" />
+        </parameters>
+	</xhtml-macro>
+	
     <xhtml-macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.dutra.confluence2wordpress.macro.SyncInfoMacro" hidden="true" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
+        <parameters />
     </xhtml-macro>
     
     <xhtml-macro key="wordpress-metadata" name="wordpress-metadata" class="fr.dutra.confluence2wordpress.macro.MetadataMacro" hidden="true" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
+        <parameters />
     </xhtml-macro>
     
     <!-- legacy macros -->

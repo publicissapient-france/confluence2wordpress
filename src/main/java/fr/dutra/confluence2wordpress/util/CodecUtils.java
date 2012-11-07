@@ -2,23 +2,21 @@ package fr.dutra.confluence2wordpress.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 public class CodecUtils {
 
-	private static final String REGEX = "\\A";
-	
 	private static final String UTF_8 = "UTF-8";
 
 	public static String compressAndEncode(String text) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		GZIPOutputStream gzos = new GZIPOutputStream(new Base64OutputStream(baos, true, 0, null));
+		GZIPOutputStream gzos = new GZIPOutputStream(new Base64OutputStream(baos));
 		try {
 			gzos.write(text.getBytes(UTF_8));
 		} finally {
@@ -33,14 +31,12 @@ public class CodecUtils {
 			new GZIPInputStream(
 				new Base64InputStream(
 					new ByteArrayInputStream(
-						encoded.getBytes(UTF_8)), false, 0, null));
-		Scanner scanner = new Scanner(gzis, UTF_8);
+						encoded.getBytes(UTF_8))));
 		try {
-			String decoded = scanner.useDelimiter(REGEX).next();
-			return decoded;
+			return IOUtils.toString(gzis, UTF_8);
 		} finally {
 			gzis.close();
-			scanner.close();
 		}
 	}
+	
 }

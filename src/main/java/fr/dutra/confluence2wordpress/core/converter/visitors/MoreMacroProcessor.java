@@ -23,7 +23,7 @@ import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
 
-import fr.dutra.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.MoreMacroPreprocessor;
 
 
 /**

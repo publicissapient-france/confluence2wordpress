@@ -41,14 +41,15 @@ import com.atlassian.confluence.content.render.xhtml.Renderer;
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
-import fr.dutra.confluence2wordpress.core.converter.postprocessors.CodeMacroPostprocessor;
-import fr.dutra.confluence2wordpress.core.converter.postprocessors.PostProcessor;
-import fr.dutra.confluence2wordpress.core.converter.postprocessors.PressReviewHeaderPostProcessor;
-import fr.dutra.confluence2wordpress.core.converter.postprocessors.TableOfContentsPostProcessor;
-import fr.dutra.confluence2wordpress.core.converter.preprocessors.CodeMacroPreprocessor;
-import fr.dutra.confluence2wordpress.core.converter.preprocessors.IgnoredMacrosPreProcessor;
-import fr.dutra.confluence2wordpress.core.converter.preprocessors.MoreMacroPreprocessor;
-import fr.dutra.confluence2wordpress.core.converter.preprocessors.PreProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.AuthorMacroProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.CodeMacroProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.HeadingsCollector;
+import fr.dutra.confluence2wordpress.core.converter.processors.IgnoredMacrosPreProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.MoreMacroPreprocessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.PostProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.PreProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.PressReviewHeaderPostProcessor;
+import fr.dutra.confluence2wordpress.core.converter.processors.TableOfContentsPostProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.AnchorProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.AttributesCleaner;
 import fr.dutra.confluence2wordpress.core.converter.visitors.EmptyParagraphStripper;
@@ -72,6 +73,12 @@ public class DefaultConverter implements Converter {
 	private final Renderer renderer;
 
 	private final XhtmlContent xhtmlUtils;
+
+	private AuthorMacroProcessor authorMacroProcessor;
+
+	private CodeMacroProcessor codeMacroProcessor;
+
+	private HeadingsCollector headingsCollector;
 	
     public DefaultConverter(Renderer renderer, XhtmlContent xhtmlUtils) {
 		super();
@@ -181,6 +188,8 @@ public class DefaultConverter implements Converter {
     
 	private CleanerProperties getCleanerProperties(ConverterOptions options) {
         CleanerProperties properties = new CleanerProperties();
+        //This is required so that CDATA sections are kept in the DOM tree.
+        properties.setIgnoreQuestAndExclam(false);
         properties.setOmitXmlDeclaration(options.isOmitXmlDeclaration());
         properties.setUseCdataForScriptAndStyle(options.isUseCdataForScriptAndStyle());
         properties.setOmitComments(options.isOmitComments());
@@ -214,7 +223,14 @@ public class DefaultConverter implements Converter {
         List<PreProcessor> processors = new ArrayList<PreProcessor>();
         processors.add(new IgnoredMacrosPreProcessor(xhtmlUtils, conversionContext));
         processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
-        processors.add(new CodeMacroPreprocessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin()));
+        authorMacroProcessor = new AuthorMacroProcessor(xhtmlUtils, conversionContext);
+        codeMacroProcessor = new CodeMacroProcessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin());
+		processors.add(authorMacroProcessor);
+		processors.add(codeMacroProcessor);
+		if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
+            headingsCollector = new HeadingsCollector();
+            processors.add(headingsCollector);
+        }
         return processors;
 	}
 
@@ -240,8 +256,11 @@ public class DefaultConverter implements Converter {
 
 	private List<PostProcessor> getPostProcessors(ConverterOptions options) {
         List<PostProcessor> processors = new ArrayList<PostProcessor>();
-        processors.add(new CodeMacroPostprocessor());
-        processors.add(new TableOfContentsPostProcessor());
+        processors.add(codeMacroProcessor);
+        processors.add(authorMacroProcessor);
+        if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
+        	processors.add(new TableOfContentsPostProcessor(headingsCollector.getHeadings()));
+        }
         processors.add(new PressReviewHeaderPostProcessor());
         return processors;
     }

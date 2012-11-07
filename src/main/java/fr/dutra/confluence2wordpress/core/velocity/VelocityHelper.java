@@ -24,11 +24,14 @@ import com.atlassian.confluence.util.velocity.VelocityUtils;
 
 import fr.dutra.confluence2wordpress.core.converter.visitors.Heading;
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
+import fr.dutra.confluence2wordpress.macro.Author;
 
 
 public class VelocityHelper {
 
     private static final String MORE_VM = "/vm/more.vm";
+
+    private static final String AUTHOR_VM = "/vm/author.vm";
     
 	private static final String SYNC_INFO_VM = "/vm/sync-info.vm";
 
@@ -58,6 +61,12 @@ public class VelocityHelper {
     public String generateReadMoreHtml() {
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         return VelocityUtils.getRenderedTemplate(MORE_VM, context);
+	}
+
+    public String generateAuthorHtml(Author author) {
+        Map<String,Object> context = MacroUtils.defaultVelocityContext();
+        context.put("author", author);
+        return VelocityUtils.getRenderedTemplate(AUTHOR_VM, context);
 	}
 
 }

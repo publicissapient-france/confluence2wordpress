@@ -18,6 +18,8 @@ package fr.dutra.confluence2wordpress.core.converter.visitors;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.dutra.confluence2wordpress.macro.Author;
+
 
 public class Heading {
 
@@ -25,6 +27,8 @@ public class Heading {
 
     private String label;
 
+    private Author author;
+    
     private List<Heading> children = new ArrayList<Heading>();
 
     public String getAnchor() {
@@ -50,5 +54,13 @@ public class Heading {
     public void addChild(Heading e) {
         children.add(e);
     }
+
+	public Author getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(Author author) {
+		this.author = author;
+	}
 
 }
