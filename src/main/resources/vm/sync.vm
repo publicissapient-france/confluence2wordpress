@@ -29,14 +29,12 @@
 #decoratorParam("context" "page")
 #end
     
-#if ( $action.hasActionMessages())
-    <div class="aui-message success closeable">
+#if ($action.hasSuccessMessage())
+    <div class="aui-message success shadowed closeable">
         <p class="title">
             <span class="aui-icon icon-success"></span>
             <strong>
-            #foreach ($message in $action.actionMessages)
-            $message
-            #end
+			$action.successMessage
             </strong>
         </p>
         <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a></p>

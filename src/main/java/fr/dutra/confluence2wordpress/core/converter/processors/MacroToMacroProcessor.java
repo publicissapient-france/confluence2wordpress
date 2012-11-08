@@ -20,9 +20,8 @@ package fr.dutra.confluence2wordpress.core.converter.processors;
 
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.TagNode;
 
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
@@ -54,6 +53,7 @@ public abstract class MacroToMacroProcessor extends MacroPreprocessor implements
 	protected static final String OPEN_BRACKET = "[";
 	protected static final String CLOSE_BRACKET = "]";
 	protected static final String OPEN_BRACKET_SLASH = "[/";
+	protected static final String SLASH_CLOSE_BRACKET = "/]";
 
 	protected static final String QUOTE = "\"";
 	protected static final String EQUALS = "=";
@@ -63,7 +63,7 @@ public abstract class MacroToMacroProcessor extends MacroPreprocessor implements
 	private static final Function<String, String> DOUBLE_ESCAPE_XML_THEN_QUOTE = new Function<String, String>() {
 		
 		@Override
-		public String apply(@Nullable String input) {
+		public String apply(String input) {
 			return QUOTE + doubleEscape(input) + QUOTE;
 		}
 
@@ -104,9 +104,13 @@ public abstract class MacroToMacroProcessor extends MacroPreprocessor implements
     protected String processMacro(ConverterOptions options, MacroDefinition macroDefinition) throws XhtmlException {
         StringBuilder sb = new StringBuilder();
         sb.append(getStartTag());
-        sb.append(getWordpressMacroStartTag(macroDefinition));
-        sb.append(getWordpressMacroBody(macroDefinition));
-        sb.append(getWordpressMacroEndTag(macroDefinition));
+        String wordpressMacroBody = getWordpressMacroBody(macroDefinition);
+		boolean hasBody = StringUtils.isNotEmpty(wordpressMacroBody);
+        sb.append(getWordpressMacroStartTag(macroDefinition, hasBody));
+		if(hasBody) {
+			sb.append(wordpressMacroBody);
+	        sb.append(getWordpressMacroEndTag(macroDefinition));
+		}
         sb.append(getEndTag());
         String string = sb.toString();
 		return string;
@@ -119,11 +123,12 @@ public abstract class MacroToMacroProcessor extends MacroPreprocessor implements
 		int start = html.indexOf(startTag);
 		while(start != -1) {
 			int end = html.indexOf(endTag, start + startTag.length());
+			String finalCode = postProcessCode(html, start, end);
 			html = 
 				html.substring(0, start) + 
-				postProcessCode(html, start, end) + 
+				finalCode + 
 				html.substring(end + endTag.length());
-			start = html.indexOf(startTag, end + endTag.length());
+			start = html.indexOf(startTag, start + finalCode.length());
 		}
 		return html;
 	}
@@ -136,8 +141,11 @@ public abstract class MacroToMacroProcessor extends MacroPreprocessor implements
 		return PRE_END;
 	}
 
-	protected String getWordpressMacroStartTag(MacroDefinition macroDefinition) throws XhtmlException {
-		return OPEN_BRACKET + getWordpressMacroName(macroDefinition) + SPACE + getWordpressMacroParametersAsString(macroDefinition) + CLOSE_BRACKET;
+	protected String getWordpressMacroStartTag(MacroDefinition macroDefinition, boolean hasBody) throws XhtmlException {
+		return OPEN_BRACKET + 
+				getWordpressMacroName(macroDefinition) + 
+				SPACE + getWordpressMacroParametersAsString(macroDefinition) + 
+				(hasBody ? CLOSE_BRACKET : SLASH_CLOSE_BRACKET);
 	}
 
 	protected String getWordpressMacroEndTag(MacroDefinition macroDefinition) throws XhtmlException {

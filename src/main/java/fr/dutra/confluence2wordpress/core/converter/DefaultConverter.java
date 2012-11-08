@@ -39,6 +39,7 @@ import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.content.render.xhtml.DefaultConversionContext;
 import com.atlassian.confluence.content.render.xhtml.Renderer;
 import com.atlassian.confluence.core.ContentEntityObject;
+import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 import fr.dutra.confluence2wordpress.core.converter.processors.AuthorMacroProcessor;
@@ -87,55 +88,56 @@ public class DefaultConverter implements Converter {
 	}
 
 	public String convert(ContentEntityObject page, ConverterOptions options) throws ConversionException {
-    	
-        String storage = page.getBodyAsString();
-        DefaultConversionContext conversionContext = new DefaultConversionContext(page.toPageContext());
 
-        //storage pre-processing
-        List<PreProcessor> preProcessors = getPreProcessors(options, conversionContext);
-        for (PreProcessor preProcessor : preProcessors) {
-        	storage = preProcessor.preProcess(storage, options);
-        }
-        
-        //wiki -> html conversion
         String originalTitle = page.getTitle();
-        String view;
+        
         try {
+        	
         	//temporarily replace page title to get correct anchors
         	//(I know it's ugly)
-        	//Otherwise the anchors are built by
-        	//com.atlassian.renderer.v2.macro.basic.BasicAnchorMacro.getAnchor(RenderContext, String)
-        	//basically it's GeneralUtil.urlEncode((page title + "-" + heading title).trim().replaceAll(" ", ""))
-        	//see also com.atlassian.confluence.util.GeneralUtil.urlEncode(String)
             page.setTitle(options.getPageTitle());
-			view = renderer.render(storage, conversionContext);
+	
+	        String storage = page.getBodyAsString();
+	        PageContext pageContext = page.toPageContext();
+			DefaultConversionContext conversionContext = new DefaultConversionContext(pageContext);
+	
+	        //storage pre-processing
+	        List<PreProcessor> preProcessors = getPreProcessors(options, conversionContext);
+	        for (PreProcessor preProcessor : preProcessors) {
+	        	storage = preProcessor.preProcess(storage, options, pageContext);
+	        }
+	        
+	        //wiki -> html conversion
+	        String view = renderer.render(storage, conversionContext);
+	        
+	        handleConversionErrors(view);
+	        
+	        //HTML cleanup
+	        HtmlCleaner cleaner = getHtmlCleaner(options);
+	        TagNode root = cleaner.clean(view);
+	        TagNode body = root.findElementByName("body", false);
+	
+	        //DOM traversal
+	        List<TagNodeVisitor> visitors = getTagNodeVisitors(options);
+	        for (TagNodeVisitor visitor : visitors) {
+	            body.traverse(visitor);
+	        }
+	        
+	        //serialization
+	        String html = serialize(body, cleaner.getProperties(), options);
+	
+	        //HTML post-processing
+	        List<PostProcessor> postProcessors = getPostProcessors(options);
+	        for (PostProcessor postProcessor : postProcessors) {
+	            html = postProcessor.postProcess(html, body, options);
+	        }
+	        
+	        return html;
+	        
         } finally {
             page.setTitle(originalTitle);
         }
-        
-        handleConversionErrors(view);
-        
-        //HTML cleanup
-        HtmlCleaner cleaner = getHtmlCleaner(options);
-        TagNode root = cleaner.clean(view);
-        TagNode body = root.findElementByName("body", false);
 
-        //DOM traversal
-        List<TagNodeVisitor> visitors = getTagNodeVisitors(options);
-        for (TagNodeVisitor visitor : visitors) {
-            body.traverse(visitor);
-        }
-        
-        //serialization
-        String html = serialize(body, cleaner.getProperties(), options);
-
-        //HTML post-processing
-        List<PostProcessor> postProcessors = getPostProcessors(options);
-        for (PostProcessor postProcessor : postProcessors) {
-            html = postProcessor.postProcess(html, body, options);
-        }
-        
-        return html;
     }
 
     private void handleConversionErrors(String view) throws ConversionException {
@@ -225,12 +227,12 @@ public class DefaultConverter implements Converter {
         processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
         authorMacroProcessor = new AuthorMacroProcessor(xhtmlUtils, conversionContext);
         codeMacroProcessor = new CodeMacroProcessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin());
-		processors.add(authorMacroProcessor);
-		processors.add(codeMacroProcessor);
 		if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
             headingsCollector = new HeadingsCollector();
             processors.add(headingsCollector);
         }
+		processors.add(authorMacroProcessor);
+		processors.add(codeMacroProcessor);
         return processors;
 	}
 

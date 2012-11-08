@@ -22,7 +22,7 @@ import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.radeox.macros.MacroUtils;
 import com.atlassian.confluence.util.velocity.VelocityUtils;
 
-import fr.dutra.confluence2wordpress.core.converter.visitors.Heading;
+import fr.dutra.confluence2wordpress.core.converter.processors.Heading;
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
 import fr.dutra.confluence2wordpress.macro.Author;
 

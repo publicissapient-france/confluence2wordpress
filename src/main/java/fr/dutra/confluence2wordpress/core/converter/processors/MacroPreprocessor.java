@@ -17,6 +17,7 @@ package fr.dutra.confluence2wordpress.core.converter.processors;
 
 import com.atlassian.confluence.content.render.xhtml.ConversionContext;
 import com.atlassian.confluence.content.render.xhtml.XhtmlException;
+import com.atlassian.confluence.renderer.PageContext;
 import com.atlassian.confluence.xhtml.api.MacroDefinition;
 import com.atlassian.confluence.xhtml.api.MacroDefinitionReplacer;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
@@ -56,7 +57,7 @@ public abstract class MacroPreprocessor implements PreProcessor {
     }
 
     @Override
-    public String preProcess(String storage, final ConverterOptions options) throws ConversionException {
+    public String preProcess(String storage, final ConverterOptions options, PageContext pageContext) throws ConversionException {
         try {
             storage = xhtmlUtils.replaceMacroDefinitionsWithString(storage, conversionContext, new MacroDefinitionReplacer() {
                 @Override

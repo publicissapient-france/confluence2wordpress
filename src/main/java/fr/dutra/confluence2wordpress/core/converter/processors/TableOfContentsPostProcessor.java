@@ -20,7 +20,6 @@ import java.util.List;
 import org.htmlcleaner.TagNode;
 
 import fr.dutra.confluence2wordpress.core.converter.ConverterOptions;
-import fr.dutra.confluence2wordpress.core.converter.visitors.Heading;
 import fr.dutra.confluence2wordpress.core.velocity.VelocityHelper;
 
 

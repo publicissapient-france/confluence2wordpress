@@ -26,7 +26,7 @@
   <body>
   
 #if ( $action.hasActionMessages())
-    <div class="aui-message success closeable">
+    <div class="aui-message success shadowed closeable">
         <p class="title">
             <span class="aui-icon icon-success"></span>
             <strong>

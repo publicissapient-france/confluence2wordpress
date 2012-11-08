@@ -15,11 +15,13 @@
  */
 package fr.dutra.confluence2wordpress.core.converter.processors;
 
+import com.atlassian.confluence.renderer.PageContext;
+
 import fr.dutra.confluence2wordpress.core.converter.ConversionException;
 import fr.dutra.confluence2wordpress.core.converter.ConverterOptions;
 
 public interface PreProcessor {
 
-    String preProcess(String storage, ConverterOptions options) throws ConversionException;
+    String preProcess(String storage, ConverterOptions options, PageContext pageContext) throws ConversionException;
 
 }

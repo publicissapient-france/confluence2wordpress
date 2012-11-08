@@ -25,7 +25,6 @@ public class DefaultWordpressSynchronizer implements WordpressSynchronizer {
 	private PluginSettingsManager pluginSettingsManager;
 
 	public DefaultWordpressSynchronizer(SettingsManager settingsManager, Converter converter, AttachmentsSynchronizer attachmentsSynchronizer, PluginSettingsManager pluginSettingsManager) {
-		super();
 		this.settingsManager = settingsManager;
 		this.converter = converter;
 		this.attachmentsSynchronizer = attachmentsSynchronizer;
@@ -55,6 +54,7 @@ public class DefaultWordpressSynchronizer implements WordpressSynchronizer {
 		options.setPageTitle(metadata.getPageTitle());
 		options.setIgnoredConfluenceMacros(metadata.getIgnoredConfluenceMacros());
 		options.setOptimizeForRDP(metadata.isOptimizeForRDP());
+		options.setIncludeTOC(metadata.isIncludeTOC());
 		options.setSyntaxHighlighterPlugin(pluginSettingsManager.getWordpressSyntaxHighlighterPluginAsEnum());
 		options.setTagAttributes(metadata.getTagAttributes());
 		String baseUrl = settingsManager.getGlobalSettings().getBaseUrl();

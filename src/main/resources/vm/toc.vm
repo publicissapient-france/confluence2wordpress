@@ -17,7 +17,7 @@
 <p><strong>$heading.label</strong></p>
 <ul>
 #foreach($subHeading in $heading.children)
-<li><a href="[permalink]#$subHeading.anchor">$subHeading.label</a></li>
+<li><a href="[permalink]#$!{subHeading.anchor}">$subHeading.label</a>#if($subHeading.author) <em>($i18n.getText("macro.author.by") #if ($subHeading.author.allUrls.size() > 0)<a href="${subHeading.author.allUrls.get(0).url}" target="_blank">#end$subHeading.author.firstName ${subHeading.author.lastName}#if ($subHeading.author.allUrls.size() > 0)</a>#end)</em>#end</li>
 #end
 </ul>
 #end

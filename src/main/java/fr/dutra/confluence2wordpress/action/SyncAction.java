@@ -115,6 +115,8 @@ public class SyncAction extends AbstractPageAwareAction {
     private static final String MACROS_KEY = "C2W_MACROS";
 
 	private static final String METADATA_KEY = "C2W_METADATA";
+	
+	private static final String SUCCESS_MESSAGE_KEY = "C2W_SUCCESS_MESSAGE";
 
 	// validating patterns
 	
@@ -450,9 +452,9 @@ public class SyncAction extends AbstractPageAwareAction {
             this.metadataManager.storeMetadata(getPage(), metadata);
             this.pageLabelsSynchronizer.tagNamesToPageLabels(getPage(), metadata);
             if(creation) {
-                addActionMessage(getText(MSG_CREATION_SUCCESS_KEY));
+                addSuccessMessage(getText(MSG_CREATION_SUCCESS_KEY));
             } else {
-                addActionMessage(getText(MSG_UPDATE_SUCCESS_KEY));
+            	addSuccessMessage(getText(MSG_UPDATE_SUCCESS_KEY));
             }
         } catch (ConversionException e) {
             addActionError(ERRORS_CONVERSION, e.getMessage());
@@ -467,7 +469,26 @@ public class SyncAction extends AbstractPageAwareAction {
         return SUCCESS;
     }
 
-    private void initSessionElements() throws WordpressXmlRpcException {
+    @SuppressWarnings("unchecked")
+	private void addSuccessMessage(String message) {
+    	//this message must be stored separately from other action messages
+    	//because it is rendered in a special way
+        getSession().put(SUCCESS_MESSAGE_KEY, message);
+	}
+    
+	public boolean hasSuccessMessage() {
+        return getSession().get(SUCCESS_MESSAGE_KEY) != null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public String getSuccessMessage() {
+		//retrieving the message consumes it
+        String message = (String) getSession().get(SUCCESS_MESSAGE_KEY);
+        getSession().put(SUCCESS_MESSAGE_KEY, null);
+		return message;
+	}
+    
+	private void initSessionElements() throws WordpressXmlRpcException {
         if(getWordpressUsers() == null) {
             WordpressClient client = pluginSettingsManager.getWordpressClient();
             Future<List<WordpressUser>> futureUsers = client.getUsers();

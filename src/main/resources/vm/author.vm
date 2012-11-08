@@ -21,7 +21,7 @@
 	</div>
 	<span style="font-style:italic;height:24px;line-height:24px">$i18n.getText("macro.author.by") 
 	#if ($author.allUrls.size() > 0)
-	<a href="$author.allUrls[0].url" target="_blank">$author.firstName $author.lastName</a>
+	<a href="${author.allUrls.get(0).url}" target="_blank">$author.firstName $author.lastName</a>
 	#else
 	$author.firstName $author.lastName
 	#end
