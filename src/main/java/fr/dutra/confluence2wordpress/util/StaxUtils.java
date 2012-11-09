@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011-2012 Alexandre Dutra
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package fr.dutra.confluence2wordpress.util;
 
 import static com.atlassian.confluence.content.render.xhtml.XhtmlConstants.CONFLUENCE_XHTML_NAMESPACE_ALTERNATE_PREFIX;
@@ -21,10 +36,9 @@ import com.atlassian.confluence.core.ContentEntityObject;
 
 public class StaxUtils {
 
-	/*
-	 * see  com.atlassian.confluence.content.render.xhtml.DefaultXmlEventReaderFactory
+	/**
+	 * @see com.atlassian.confluence.content.render.xhtml.DefaultXmlEventReaderFactory
 	 */
-	
     private static final XMLInputFactory INPUT_FACTORY;
     
     static {
@@ -32,7 +46,6 @@ public class StaxUtils {
     	INPUT_FACTORY.setProperty("javax.xml.stream.supportDTD", Boolean.TRUE);
     	INPUT_FACTORY.setProperty("javax.xml.stream.isCoalescing", Boolean.FALSE);
     	INPUT_FACTORY.setProperty("javax.xml.stream.isReplacingEntityReferences", Boolean.FALSE);
-//    	INPUT_FACTORY.setProperty("http://apache.org/xml/features/disallow-doctype-decl", Boolean.FALSE);
     	INPUT_FACTORY.setProperty("com.ctc.wstx.normalizeAttrValues", Boolean.FALSE);
     	//javax.xml.stream.resolver
     }

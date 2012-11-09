@@ -1,6 +1,6 @@
 <!--
 
-    Copyright 2011 Alexandre Dutra
+    Copyright 2011-2012 Alexandre Dutra
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -57,9 +57,11 @@
     <web-resource key="datepicker-en-GB">
         <resource type="download" name="jquery.ui.datepicker-en-GB.js" location="jquery/jquery.ui.datepicker-en-GB.js"/>
     </web-resource>
+    
     <web-resource key="datepicker-fr">
         <resource type="download" name="jquery.ui.datepicker-fr.js" location="jquery/jquery.ui.datepicker-fr.js"/>
     </web-resource>
+    
     <web-resource key="datepicker-nl">
         <resource type="download" name="jquery.ui.datepicker-nl.js" location="jquery/jquery.ui.datepicker-nl.js"/>
     </web-resource>
@@ -68,6 +70,14 @@
         <resource type="download" name="preview.css" location="css/preview.css"/>
     </web-resource>
  
+    <web-resource key="author-resources">
+        <resource type="download" name="author.css" location="css/author.css"/>
+    </web-resource>
+ 
+    <web-resource key="toc-resources">
+        <resource type="download" name="toc.css" location="css/toc.css"/>
+    </web-resource>
+    
     <resource key="i18n" name="i18n" type="i18n" location="i18n.confluence2wordpress" />
     
     <resource key="icon" name="confluence2wordpress.png" type="download" location="img/confluence2wordpress.png">
@@ -78,8 +88,7 @@
         <property key="content-type" value="image/png"/>
     </resource>
     
-    <web-item key="link" name="Confluence-to-Wordpress Converter Link" 
-        section="system.content.action/primary"  weight="100">
+    <web-item key="link" name="Confluence-to-Wordpress Converter Link" section="system.content.action/primary" weight="100">
         <label key="link.label" />
         <link>/confluence2wordpress/syncOptions.action?pageId=$page.id</link>
         <!-- http://forums.atlassian.com/thread.jspa?threadID=31983 -->
@@ -107,6 +116,18 @@
         </parameters>
 	</xhtml-macro>
 	
+	<xhtml-macro key="c2w-toc" name="c2w-toc" class="fr.dutra.confluence2wordpress.macro.TOCMacro" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" >
+        <category name="external-content"/>
+        <parameters>
+			<parameter name="ordered" type="boolean" required="true" default="false" />
+        </parameters>
+	</xhtml-macro>
+	
+	<xhtml-macro key="c2w-press-review" name="c2w-press-review" class="fr.dutra.confluence2wordpress.macro.PressReviewHeaderMacro" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" >
+        <category name="external-content"/>
+        <parameters />
+	</xhtml-macro>
+	
     <xhtml-macro key="wordpress-sync-info" name="wordpress-sync-info" class="fr.dutra.confluence2wordpress.macro.SyncInfoMacro" hidden="true" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
         <category name="external-content"/>
         <parameters />
@@ -116,18 +137,6 @@
         <category name="external-content"/>
         <parameters />
     </xhtml-macro>
-    
-    <!-- legacy macros -->
-    
-    <macro key="more-legacy" name="more" class="fr.dutra.confluence2wordpress.macro.legacy.MoreLegacyMacro" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
-        <category name="external-content"/>
-        <parameters />
-    </macro>
-    
-    <macro key="wordpress-sync-info-legacy" name="wordpress-sync-info" class="fr.dutra.confluence2wordpress.macro.legacy.SyncInfoLegacyMacro" hidden="true" icon="/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png">
-        <category name="external-content"/>
-        <parameters />
-    </macro>
     
     <!-- xwork actions -->
     

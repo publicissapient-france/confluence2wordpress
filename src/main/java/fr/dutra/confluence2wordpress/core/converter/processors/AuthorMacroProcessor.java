@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -12,9 +12,6 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
- */
-/**
- * 
  */
 package fr.dutra.confluence2wordpress.core.converter.processors;
 
@@ -29,7 +26,7 @@ import com.atlassian.confluence.xhtml.api.MacroDefinition;
 import com.atlassian.confluence.xhtml.api.XhtmlContent;
 import com.google.common.base.Joiner;
 
-import fr.dutra.confluence2wordpress.macro.Author;
+import fr.dutra.confluence2wordpress.core.author.Author;
 
 
 /**
@@ -38,7 +35,17 @@ import fr.dutra.confluence2wordpress.macro.Author;
  */
 public class AuthorMacroProcessor extends MacroToMacroProcessor {
 
-    private static final String CONFLUENCE_MACRO_NAME = "author";
+    private static final String URLS = "urls";
+
+	private static final String TWITTER = "twitter";
+
+	private static final String USERNAME = "username";
+
+	private static final String LASTNAME = "lastname";
+
+	private static final String FIRSTNAME = "firstname";
+
+	private static final String CONFLUENCE_MACRO_NAME = "author";
 
     private static final String WORDPRESS_MACRO_NAME = "author";
 
@@ -69,11 +76,11 @@ public class AuthorMacroProcessor extends MacroToMacroProcessor {
 			throw new XhtmlException(e);
 		}
 		Map<String,String> params = new HashMap<String, String>();
-		params.put("firstname", author.getFirstName());
-		params.put("lastname", author.getLastName());
-		params.put("username", author.getWordpressUsername());
-		params.put("twitter", author.getTwitterAccount());
-		params.put("urls", JOINER.join(author.getOtherUrls()));
+		params.put(FIRSTNAME, author.getFirstName());
+		params.put(LASTNAME, author.getLastName());
+		params.put(USERNAME, author.getWordpressUsername());
+		params.put(TWITTER, author.getTwitterAccount());
+		params.put(URLS, JOINER.join(author.getOtherUrls()));
 		return params;
 	}
 

@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -31,10 +31,12 @@ import fr.dutra.confluence2wordpress.util.UrlUtils;
 
 
 /**
+ * Translates links to Confluence attachments into links accessible on the Wordpress side.
+ * 
  * @author Alexandre Dutra
  *
  */
-public class AnchorProcessor implements TagNodeVisitor {
+public class SynchronizedAttachmentLinkProcessor implements TagNodeVisitor {
 
     private static final String A = "a";
 
@@ -44,8 +46,7 @@ public class AnchorProcessor implements TagNodeVisitor {
 
 	private final String confluenceRootUrl;
     
-    public AnchorProcessor(List<SynchronizedAttachment> synchronizedAttachments, String confluenceRootUrl) {
-        super();
+    public SynchronizedAttachmentLinkProcessor(List<SynchronizedAttachment> synchronizedAttachments, String confluenceRootUrl) {
         this.confluenceRootUrl = confluenceRootUrl;
         this.synchronizedAttachments = new HashMap<String, SynchronizedAttachment>();
         for (SynchronizedAttachment synchronizedAttachment : synchronizedAttachments) {

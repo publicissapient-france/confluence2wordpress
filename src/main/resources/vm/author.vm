@@ -1,5 +1,5 @@
 #*
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,13 +13,14 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *#
-<div style="border-bottom:1px solid #DDD;border-top:1px solid #DDD;padding:5px 0;margin-top:10px">
-	<div style="float:right;text-align:right">
+#requireResource("fr.dutra.confluence2wordpress:author-resources")
+<div class="c2w-author">
+	<div class="c2w-author-icons">
 	#foreach ($url in $author.allUrls)
-		<a style="margin-left:5px" href="$url.url" target="_blank"><img title="$url.url" src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/social/24x24/24x24-${url.icon}.png" alt="$url.url" width="24" height="24" /></a>
+		<a class="c2w-author-icon" href="$url.url" target="_blank"><img title="$url.url" src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/social/24x24/24x24-${url.icon}.png" alt="$url.url" width="24" height="24" /></a>
 	#end
 	</div>
-	<span style="font-style:italic;height:24px;line-height:24px">$i18n.getText("macro.author.by") 
+	<span class="c2w-author-name">$i18n.getText("macro.author.by") 
 	#if ($author.allUrls.size() > 0)
 	<a href="${author.allUrls.get(0).url}" target="_blank">$author.firstName $author.lastName</a>
 	#else

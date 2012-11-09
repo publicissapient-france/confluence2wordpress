@@ -1,5 +1,5 @@
 #*
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@
 			$action.successMessage
             </strong>
         </p>
-        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a></p>
+        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a> <span style="font-size:smaller;font-style:italic">($action.getText("sync.link.viewPost.needsLogin")</span>)</p>
         <p><a href="$action.editLink" target="wp-edit">$action.getText("sync.link.editPost")</a></p>
     </div>   
 #end
@@ -106,44 +106,6 @@
          
 	</script>
     
-    <fieldset class="group">
-      <div class="checkbox">
-        <input id="optimizeForRDP" name="metadata.optimizeForRDP" value="true" type="checkbox" class="checkbox" #if($action.metadata.optimizeForRDP)checked="checked"#end />
-        <label for="optimizeForRDP">$action.getText("sync.form.optimizeForRDP.label")</label>
-      </div>
-      <div class="field-group">
-        <div class="description">$action.getText("sync.form.optimizeForRDP.description")</div>
-      </div>
-    </fieldset>
-
-    <script type="text/javascript">
-        function toggleIncludeTOC(checked){
-            var includeTOC = jQuery("#includeTOC");
-            if(checked){
-                includeTOC.attr("checked", "checked");
-                includeTOC.attr("disabled", "disabled");
-            } else {
-                includeTOC.removeAttr("disabled");
-            }
-        }
-        jQuery("#optimizeForRDP").click(function() {
-            toggleIncludeTOC(jQuery(this).is(":checked"));
-         });
-         jQuery(document).ready(function() {
-            toggleIncludeTOC(jQuery("#optimizeForRDP").is(":checked"));
-         });
-    </script>
-    
-   <fieldset class="group">
-      <div class="checkbox">
-        <input id="includeTOC" name="metadata.includeTOC" value="true" type="checkbox" class="checkbox" #if($action.metadata.includeTOC)checked="checked"#end />
-        <label for="includeTOC">$action.getText("sync.form.includeTOC.label")</label>
-      </div>
-      <div class="field-group">
-        <div class="description">$action.getText("sync.form.includeTOC.description")</div>
-      </div>
-    </fieldset>
-
    <fieldset class="group">
       <div class="checkbox">
         <input id="formatHtml" name="metadata.formatHtml" value="true" type="checkbox" class="checkbox" #if($action.metadata.formatHtml)checked="checked"#end />

@@ -1,6 +1,6 @@
 <!--
 
-    Copyright 2011 Alexandre Dutra
+    Copyright 2011-2012 Alexandre Dutra
 
        Licensed under the Apache License, Version 2.0 (the "License");
        you may not use this file except in compliance with the License.
@@ -37,6 +37,18 @@
       <!-- http://jira.codehaus.org/browse/MASSEMBLY-412 -->
       <!-- <lineEnding>unix</lineEnding> -->
       <filtered>false</filtered>
+    </fileSet>
+    <fileSet>
+      <directory>${project.basedir}/src/main/resources/css</directory>
+      <outputDirectory>/css</outputDirectory>
+      <fileMode>644</fileMode>
+      <lineEnding>unix</lineEnding>
+      <filtered>true</filtered>
+      <!-- exclude files that are only relevant for Confluence -->
+      <excludes>
+      	<exclude>jquery-customizations.css</exclude>
+      	<exclude>preview.css</exclude>
+      </excludes>
     </fileSet>
   </fileSets>
 </assembly>

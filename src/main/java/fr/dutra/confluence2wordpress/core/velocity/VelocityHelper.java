@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
  */
 package fr.dutra.confluence2wordpress.core.velocity;
 
-import java.util.List;
 import java.util.Map;
 
 import com.atlassian.confluence.core.ContentEntityObject;
 import com.atlassian.confluence.renderer.radeox.macros.MacroUtils;
 import com.atlassian.confluence.util.velocity.VelocityUtils;
 
-import fr.dutra.confluence2wordpress.core.converter.processors.Heading;
+import fr.dutra.confluence2wordpress.core.author.Author;
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
-import fr.dutra.confluence2wordpress.macro.Author;
+import fr.dutra.confluence2wordpress.core.toc.Heading;
 
 
 public class VelocityHelper {
@@ -39,14 +38,16 @@ public class VelocityHelper {
 	
 	private static final String RDP_HEADER_VM = "/vm/rdp-header.vm";
 
-    public String generateHeader() {
+    public String generatePressReviewHeader() {
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
         return VelocityUtils.getRenderedTemplate(RDP_HEADER_VM, context);
     }
 
-    public String generateTOC(List<Heading> headings) {
+    public String generateTOC(Heading toc, Boolean ordered, String pageUrl) {
         Map<String,Object> context = MacroUtils.defaultVelocityContext();
-        context.put("headings", headings);
+        context.put("toc", toc);
+        context.put("ordered", ordered);
+        context.put("pageUrl", pageUrl);
         return VelocityUtils.getRenderedTemplate(TOC_VM, context);
     }
     

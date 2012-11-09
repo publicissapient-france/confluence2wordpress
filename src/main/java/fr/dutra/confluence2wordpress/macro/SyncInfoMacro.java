@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -50,7 +50,6 @@ public class SyncInfoMacro implements Macro {
 	private UserAccessor userAccessor;
 	
     public SyncInfoMacro(MetadataManager metadataManager, PluginPermissionsManager pluginPermissionsManager, UserAccessor userAccessor) {
-        super();
         this.metadataManager = metadataManager;
         this.pluginPermissionsManager = pluginPermissionsManager;
         this.userAccessor = userAccessor;

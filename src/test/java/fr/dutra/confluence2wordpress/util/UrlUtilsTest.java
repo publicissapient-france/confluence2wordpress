@@ -1,3 +1,18 @@
+/**
+ * Copyright 2011-2012 Alexandre Dutra
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
 package fr.dutra.confluence2wordpress.util;
 
 import java.net.MalformedURLException;
@@ -55,27 +70,37 @@ public class UrlUtilsTest {
 
     }
     
+
+    
+    @Test
+    public void testAbsolutize() throws MalformedURLException, URISyntaxException {
+
+        assertEquals("http://foo.com/confluence/foo/bar", 
+        		UrlUtils.absolutize("/confluence/foo/bar", "http://foo.com/confluence/"));
+
+        assertEquals("http://foo.com/confluence/foo/bar", 
+        		UrlUtils.absolutize("http://foo.com/confluence/foo/bar", "http://foo.com/confluence/"));
+
+        assertEquals("http://foo.com/confluence/foo/bar", 
+        		UrlUtils.absolutize("/foo/bar", "http://foo.com/confluence/"));
+        
+    }
+    
     @Test
     public void testSanitize() throws MalformedURLException, URISyntaxException {
 
         try {
-			assertEquals(null, UrlUtils.sanitize(null));
+        	UrlUtils.sanitize(null);
 			fail();
 		} catch (MalformedURLException e) {
 		}
 
         try {
-			assertEquals("", UrlUtils.sanitize(""));
+        	UrlUtils.sanitize("");
 			fail();
 		} catch (MalformedURLException e) {
 		}
 
-        try {
-			assertEquals("not really an URL", UrlUtils.sanitize(""));
-			fail();
-		} catch (MalformedURLException e) {
-		}
-        
         assertEquals(
             "http://foo.com?bar=%22S%C3%A3o%20Paulo%22", 
             UrlUtils.sanitize("http://foo.com?bar=\"São Paulo\""));

@@ -1,5 +1,5 @@
 #*
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -13,14 +13,22 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  *#
-#foreach($heading in $headings)
-<p><strong>$heading.label</strong></p>
-<ul>
-#foreach($subHeading in $heading.children)
-<li><a href="[permalink]#$!{subHeading.anchor}">$subHeading.label</a>#if($subHeading.author) <em>($i18n.getText("macro.author.by") #if ($subHeading.author.allUrls.size() > 0)<a href="${subHeading.author.allUrls.get(0).url}" target="_blank">#end$subHeading.author.firstName ${subHeading.author.lastName}#if ($subHeading.author.allUrls.size() > 0)</a>#end)</em>#end</li>
+#requireResource("fr.dutra.confluence2wordpress:toc-resources")
+#macro( c2wtoc $headings $ordered $pageUrl)
+#if ($headings.size() > 0)
+#if($ordered)<ol>#else<ul>#end
+	#foreach($heading in $headings)
+	<li class="c2w-toc-item c2w-toc-level${heading.level}">#if($heading.label)<a class="c2w-toc-label c2w-toc-level${heading.level}" href="${pageUrl}#$!{heading.anchor}">$heading.label</a>#if($heading.author) <span class="c2w-toc-author">($i18n.getText("macro.author.by") #if ($heading.author.allUrls.size() > 0)<a href="${heading.author.allUrls.get(0).url}" target="_blank">#end$heading.author.firstName ${heading.author.lastName}#if ($heading.author.allUrls.size() > 0)</a>#end)</span>#end#else&nbsp;#end
+		#c2wtoc ($heading.children $ordered $pageUrl)
+	</li>
+	#end
+#if($ordered)</ol>#else</ul>#end
 #end
-</ul>
 #end
+
+<div class="c2w-toc">
+#c2wtoc ( $toc.children $ordered $pageUrl )
+</div>
 
 <!--more-->
 

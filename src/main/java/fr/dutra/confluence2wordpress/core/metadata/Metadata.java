@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import fr.dutra.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.dutra.confluence2wordpress.wp.WordpressPost;
@@ -29,6 +30,8 @@ import fr.dutra.confluence2wordpress.wp.WordpressPost;
  * @author Alexandre Dutra
  * 
  */
+//deprecated (removed) properties
+@JsonIgnoreProperties({"includeTOC", "optimizeForRDP"})
 public class Metadata implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -50,10 +53,6 @@ public class Metadata implements Serializable {
 	private List<String> ignoredConfluenceMacros;
 
 	private Map<String, String> tagAttributes;
-
-	private boolean optimizeForRDP;
-
-	private boolean includeTOC;
 
 	private String permalink;
 
@@ -129,28 +128,12 @@ public class Metadata implements Serializable {
 		this.draft = draft;
 	}
 
-	public boolean isOptimizeForRDP() {
-		return optimizeForRDP;
-	}
-
-	public void setOptimizeForRDP(boolean optimizeForRDP) {
-		this.optimizeForRDP = optimizeForRDP;
-	}
-
 	public String getPermalink() {
 		return permalink;
 	}
 
 	public void setPermalink(String permalink) {
 		this.permalink = permalink;
-	}
-
-	public boolean isIncludeTOC() {
-		return includeTOC;
-	}
-
-	public void setIncludeTOC(boolean includeTOC) {
-		this.includeTOC = includeTOC;
 	}
 
 	public String getDigest() {

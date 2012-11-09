@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -124,7 +124,6 @@ public class DefaultMetadataManager implements MetadataManager {
             metadata.setPageTitle(pageTitle);
         }
         if(StringUtils.containsIgnoreCase(metadata.getPageTitle(), RDP_CATEGORY_NAME)) {
-            metadata.setOptimizeForRDP(true);
             metadata.setPageTitle(RDP_PAGE_TITLE); // to normalize the title
             if(categories != null) {
 	            for (WordpressCategory category : categories) {

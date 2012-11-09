@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ public class ConverterOptions {
 
 	private String pageTitle;
 
+	private String pageUrl;
+    
 	private String confluenceRootUrl;
     
     private boolean omitXmlDeclaration = true;
@@ -44,10 +46,6 @@ public class ConverterOptions {
     private Map<String, String> tagTransformations = null;
 
     private List<String> ignoredConfluenceMacros = null;
-
-    private boolean optimizeForRDP = false;
-
-    private boolean includeTOC = false;
 
     private List<SynchronizedAttachment> synchronizedAttachments;
 
@@ -134,22 +132,6 @@ public class ConverterOptions {
         this.ignoredConfluenceMacros = disabledConfluenceMacros;
     }
 
-    public boolean isOptimizeForRDP() {
-        return optimizeForRDP;
-    }
-
-    public void setOptimizeForRDP(boolean optimizeForRDP) {
-        this.optimizeForRDP = optimizeForRDP;
-    }
-    
-    public boolean isIncludeTOC() {
-        return includeTOC;
-    }
-    
-    public void setIncludeTOC(boolean includeTOC) {
-        this.includeTOC = includeTOC;
-    }
-	
     public List<SynchronizedAttachment> getSynchronizedAttachments() {
         return synchronizedAttachments;
     }
@@ -165,6 +147,14 @@ public class ConverterOptions {
     public void setSyntaxHighlighterPlugin(SyntaxHighlighterPlugin syntaxHighlighterPlugin) {
         this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
     }
+
+	public String getPageUrl() {
+		return pageUrl;
+	}
+
+	public void setPageUrl(String pageUrl) {
+		this.pageUrl = pageUrl;
+	}
 
 	public String getConfluenceRootUrl() {
 		return confluenceRootUrl;

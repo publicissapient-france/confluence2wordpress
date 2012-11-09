@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,19 +44,17 @@ import com.atlassian.confluence.xhtml.api.XhtmlContent;
 
 import fr.dutra.confluence2wordpress.core.converter.processors.AuthorMacroProcessor;
 import fr.dutra.confluence2wordpress.core.converter.processors.CodeMacroProcessor;
-import fr.dutra.confluence2wordpress.core.converter.processors.HeadingsCollector;
 import fr.dutra.confluence2wordpress.core.converter.processors.IgnoredMacrosPreProcessor;
 import fr.dutra.confluence2wordpress.core.converter.processors.MoreMacroPreprocessor;
 import fr.dutra.confluence2wordpress.core.converter.processors.PostProcessor;
 import fr.dutra.confluence2wordpress.core.converter.processors.PreProcessor;
-import fr.dutra.confluence2wordpress.core.converter.processors.PressReviewHeaderPostProcessor;
-import fr.dutra.confluence2wordpress.core.converter.processors.TableOfContentsPostProcessor;
-import fr.dutra.confluence2wordpress.core.converter.visitors.AnchorProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.AttributesCleaner;
 import fr.dutra.confluence2wordpress.core.converter.visitors.EmptyParagraphStripper;
 import fr.dutra.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
 import fr.dutra.confluence2wordpress.core.converter.visitors.ImageProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
+import fr.dutra.confluence2wordpress.core.converter.visitors.PermalinkProcessor;
+import fr.dutra.confluence2wordpress.core.converter.visitors.SynchronizedAttachmentLinkProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
 import fr.dutra.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.dutra.confluence2wordpress.util.XPathUtils;
@@ -79,8 +77,6 @@ public class DefaultConverter implements Converter {
 
 	private CodeMacroProcessor codeMacroProcessor;
 
-	private HeadingsCollector headingsCollector;
-	
     public DefaultConverter(Renderer renderer, XhtmlContent xhtmlUtils) {
 		super();
 		this.renderer = renderer;
@@ -227,10 +223,6 @@ public class DefaultConverter implements Converter {
         processors.add(new MoreMacroPreprocessor(xhtmlUtils, conversionContext));
         authorMacroProcessor = new AuthorMacroProcessor(xhtmlUtils, conversionContext);
         codeMacroProcessor = new CodeMacroProcessor(xhtmlUtils, conversionContext, options.getSyntaxHighlighterPlugin());
-		if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
-            headingsCollector = new HeadingsCollector();
-            processors.add(headingsCollector);
-        }
 		processors.add(authorMacroProcessor);
 		processors.add(codeMacroProcessor);
         return processors;
@@ -242,8 +234,9 @@ public class DefaultConverter implements Converter {
         List<SynchronizedAttachment> attachments = options.getSynchronizedAttachments();
 		if(attachments != null && ! attachments.isEmpty()) {
             visitors.add(new ImageProcessor(attachments, options.getConfluenceRootUrl()));
-            visitors.add(new AnchorProcessor(attachments, options.getConfluenceRootUrl()));
+            visitors.add(new SynchronizedAttachmentLinkProcessor(attachments, options.getConfluenceRootUrl()));
         }
+		visitors.add(new PermalinkProcessor(options.getPageUrl(), options.getConfluenceRootUrl()));
 		//must be done:
 		//after image and anchor processing
         visitors.add(new AttributesCleaner());
@@ -260,10 +253,6 @@ public class DefaultConverter implements Converter {
         List<PostProcessor> processors = new ArrayList<PostProcessor>();
         processors.add(codeMacroProcessor);
         processors.add(authorMacroProcessor);
-        if(options.isIncludeTOC() || options.isOptimizeForRDP()) {
-        	processors.add(new TableOfContentsPostProcessor(headingsCollector.getHeadings()));
-        }
-        processors.add(new PressReviewHeaderPostProcessor());
         return processors;
     }
 

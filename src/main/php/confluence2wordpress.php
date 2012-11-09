@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 /*
 Plugin Name: Confluence XML-RPC Tools
 Plugin URI: https://github.com/adutra/confluence2wordpress
-Description: This Wordpress plugin brings additional XML-RPC APIs required for interaction with the "confluence2wordpress" Confluence plugin.
+Description: This Wordpress plugin brings several features required for interaction with the "Confluence to Wordpress Synchronizer" plugin for Confluence, as well as some useful macros, like [permalink] or [author].
 Version: ${project.version}
 Author: Alexandre Dutra
 Author URI: https://github.com/adutra
@@ -30,9 +30,21 @@ require_once(ABSPATH . 'wp-includes/link-template.php');
 
 add_filter('xmlrpc_methods', 'c2w_add_xmlrpc_methods');
 add_filter('upload_mimes', 'c2w_add_mime_types');
+ 
+add_action( 'wp_enqueue_scripts', 'c2w_enqueue_scripts' );
 
 add_shortcode( 'permalink', 'c2w_generate_permalink' );
 add_shortcode( 'author', 'c2w_generate_author' );
+
+/**
+ * Register CSS and JS files.
+ */
+function c2w_enqueue_scripts() {
+	wp_register_style( 'c2w-author-css', plugins_url('css/author.css', __FILE__) );
+	wp_register_style( 'c2w-toc-css', plugins_url('css/toc.css', __FILE__) );
+	wp_enqueue_style( 'c2w-author-css' );
+	wp_enqueue_style( 'c2w-toc-css' );
+}
 
 /**
  * Register new XML-RPC methods.

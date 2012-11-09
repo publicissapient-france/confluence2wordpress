@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,14 +63,12 @@ public class MetadataManagerTest {
 		assertEquals(564, metadata.getPostId().intValue());
 		assertEquals("style=\"float:left\"", metadata.getTagAttributes().get("img"));
 		assertEquals("/download/attachments/2588674/landscape.jpg", metadata.getAttachments().get(0).getAttachmentPath());
-		assertEquals(false, metadata.isIncludeTOC());
 		assertEquals(Arrays.asList(new String[]{"ipsum", "lorem"}), metadata.getTagNames());
 	}
 	
 	@Test
 	public void testMarshallMetadata() throws Exception {
 		Metadata metadata = new Metadata();
-		metadata.setIncludeTOC(true);
 		metadata.setPostId(43);
 		metadata.setTagNames(Arrays.asList(new String[]{"lorem", "ipsum"}));
 		HashMap<String,String> map = Maps.newLinkedHashMap();

@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 Alexandre Dutra
+ * Copyright 2011-2012 Alexandre Dutra
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 /**
  * 
  */
-package fr.dutra.confluence2wordpress.macro;
+package fr.dutra.confluence2wordpress.core.author;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;

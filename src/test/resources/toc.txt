@@ -1,0 +1,32 @@
+<ac:macro ac:name="author">
+	<ac:parameter ac:name="firstName">Author 0</ac:parameter>
+	<ac:parameter ac:name="lastName">Author 0</ac:parameter>
+</ac:macro>
+
+<h3>0.0.1</h3><p>&nbsp;</p>
+
+<h4>0.0.1.1</h4>
+<ac:macro ac:name="foo"><!--should be ignored--></ac:macro>
+<p>
+	<ac:macro ac:name="author">
+		<ac:parameter ac:name="firstName">Author 0.0.1.1</ac:parameter>
+		<ac:parameter ac:name="lastName">Author 0.0.1.1</ac:parameter>
+	</ac:macro>
+</p>
+
+<h4>0.0.1.2</h4>
+<ac:macro ac:name="foo"><!--should be ignored--></ac:macro>
+<p>
+	<ac:macro ac:name="author">
+		<ac:parameter ac:name="firstName">Author 0.0.1.2</ac:parameter>
+		<ac:parameter ac:name="lastName">Author 0.0.1.2</ac:parameter>
+	</ac:macro>
+</p>
+
+<h1>1</h1>
+
+<h3>1.0.1</h3>
+<ac:macro ac:name="author">
+	<ac:parameter ac:name="firstName">Author 1.0.1</ac:parameter>
+	<ac:parameter ac:name="lastName">Author 1.0.1</ac:parameter>
+</ac:macro>
