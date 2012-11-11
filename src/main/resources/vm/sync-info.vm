@@ -16,23 +16,23 @@
 <div class="panelMacro" id="c2w-syncInfo">
     <table class="infoMacro">
         <colgroup>
-            <col width="48"><col>
+            <col width="64"><col>
         </colgroup>
         <tbody>
             <tr>
                 <td valign="top">
-                    <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" width="32" height="32" align="absmiddle" alt="" border="0">
+                    <img src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/confluence2wordpress.png" width="48" height="48" align="absmiddle" alt="" border="0">
                 </td>
                 <td>
                     <b>$i18n.getText("macro.metadata.heading")</b><br/>
-                    #if ($metadata.permalink)
-                    <a href="$metadata.permalink" target="wp-preview">$action.getText("macro.metadata.link.viewPost")</a>
+                    #if($userHasPluginUsagePermission)
+                    <a href="${settingsManager.globalSettings.baseUrl}/confluence2wordpress/syncOptions.action?pageId=$page.id">$action.getText("macro.metadata.link.sync")</a>
                     #end
                     #if ($metadata.permalink && $userHasPluginUsagePermission)
                     |
                     #end
-                    #if($userHasPluginUsagePermission)
-                    <a href="${settingsManager.globalSettings.baseUrl}/confluence2wordpress/syncOptions.action?pageId=$page.id">$action.getText("macro.metadata.link.sync")</a>
+                    #if ($metadata.permalink)
+                    <a href="$metadata.permalink" target="wp-preview">$action.getText("macro.metadata.link.viewPost")</a> <span style="font-size:smaller;font-style:italic">($action.getText("sync.link.viewPost.needsLogin"))</span>
                     #end
                     <br/>
                     <img src="${settingsManager.globalSettings.baseUrl}/images/icons/emoticons/warning.gif" width="16" height="16" align="absmiddle" alt="" border="0">

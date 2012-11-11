@@ -17,13 +17,14 @@
 div.c2w-toc {
 	
 }
+
 div.c2w-toc>ol, div.c2w-toc>ul {
-	list-style:none;
 	margin:0;
 	padding:0;
 }
 
-div.c2w-toc>ol>li, div.c2w-toc ul>li {
+div.c2w-toc>ol>li, div.c2w-toc>ul>li {
+	list-style:none;
 	padding-bottom:10px;
 }
 
@@ -31,30 +32,29 @@ div.c2w-toc>ol>li, div.c2w-toc ul>li {
 	font-style:italic;
 }
 
-.c2w-toc-label {
-	
+.c2w-toc-label.c2w-toc-level1 {
+	font-weight:bold;
+	font-size:120%;
 }
 
-.c2w-toc-level-1 {
-	
+.c2w-toc-label.c2w-toc-level2 {
+	font-weight:bold;
+	font-size:110%;
 }
 
-.c2w-toc-level-2 {
-	
-}
-
-.c2w-toc-item .c2w-toc-level3 {
+.c2w-toc-label.c2w-toc-level3 {
 	font-weight:bold;
 }
 
-.c2w-toc-level-4 {
-	
+.c2w-toc-label.c2w-toc-level4 {
 }
 
-.c2w-toc-level-5 {
-	
+.c2w-toc-label.c2w-toc-level5 {
+	font-size:90%;
+	font-style:italic;
 }
 
-.c2w-toc-level-6 {
-	
+.c2w-toc-label.c2w-toc-level6 {
+	font-size:80%;
+	font-style:italic;
 }

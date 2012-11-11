@@ -25,7 +25,6 @@ import fr.dutra.confluence2wordpress.core.converter.Converter;
 import fr.dutra.confluence2wordpress.core.converter.ConverterOptions;
 import fr.dutra.confluence2wordpress.core.metadata.Metadata;
 import fr.dutra.confluence2wordpress.core.settings.PluginSettingsManager;
-import fr.dutra.confluence2wordpress.util.UrlUtils;
 import fr.dutra.confluence2wordpress.wp.WordpressClient;
 import fr.dutra.confluence2wordpress.wp.WordpressPost;
 import fr.dutra.confluence2wordpress.wp.WordpressXmlRpcException;
@@ -73,7 +72,6 @@ public class DefaultWordpressSynchronizer implements WordpressSynchronizer {
 		options.setTagAttributes(metadata.getTagAttributes());
 		String baseUrl = settingsManager.getGlobalSettings().getBaseUrl();
 		options.setConfluenceRootUrl(baseUrl);
-		options.setPageUrl(UrlUtils.absolutize(page.getUrlPath(), baseUrl));
 		options.setFormatHtml(metadata.isFormatHtml());
 		return options;
 	}

@@ -18,7 +18,7 @@
 #if ($headings.size() > 0)
 #if($ordered)<ol>#else<ul>#end
 	#foreach($heading in $headings)
-	<li class="c2w-toc-item c2w-toc-level${heading.level}">#if($heading.label)<a class="c2w-toc-label c2w-toc-level${heading.level}" href="${pageUrl}#$!{heading.anchor}">$heading.label</a>#if($heading.author) <span class="c2w-toc-author">($i18n.getText("macro.author.by") #if ($heading.author.allUrls.size() > 0)<a href="${heading.author.allUrls.get(0).url}" target="_blank">#end$heading.author.firstName ${heading.author.lastName}#if ($heading.author.allUrls.size() > 0)</a>#end)</span>#end#else&nbsp;#end
+	<li class="c2w-toc-item c2w-toc-level${heading.level}">#if($heading.label)<div><a class="c2w-toc-label c2w-toc-level${heading.level}" href="${pageUrl}#$!{heading.anchor}">$heading.label</a>#if($heading.author) <span class="c2w-toc-author">($i18n.getText("macro.author.by") #if ($heading.author.allUrls.size() > 0)<a href="${heading.author.allUrls.get(0).url}" target="_blank">#end$heading.author.firstName ${heading.author.lastName}#if ($heading.author.allUrls.size() > 0)</a>#end)</span>#end</div>#end
 		#c2wtoc ($heading.children $ordered $pageUrl)
 	</li>
 	#end
@@ -29,6 +29,3 @@
 <div class="c2w-toc">
 #c2wtoc ( $toc.children $ordered $pageUrl )
 </div>
-
-<!--more-->
-

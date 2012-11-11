@@ -84,6 +84,7 @@ public class AuthorURL {
 		if(url.contains("slideshare")) return "slideshare";
 		if(url.contains("squidoo")) return "squidoo";
 		if(url.contains("stumbleupon")) return "stumbleupon";
+		if(url.contains("stackoverflow")) return "stackoverflow";
 		if(url.contains("technorati")) return "technorati";
 		if(url.contains("tumblr")) return "tumblr";
 		if(url.contains("twitter")) return "twitter";

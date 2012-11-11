@@ -29,8 +29,6 @@ public class ConverterOptions {
 
 	private String pageTitle;
 
-	private String pageUrl;
-    
 	private String confluenceRootUrl;
     
     private boolean omitXmlDeclaration = true;
@@ -147,14 +145,6 @@ public class ConverterOptions {
     public void setSyntaxHighlighterPlugin(SyntaxHighlighterPlugin syntaxHighlighterPlugin) {
         this.syntaxHighlighterPlugin = syntaxHighlighterPlugin;
     }
-
-	public String getPageUrl() {
-		return pageUrl;
-	}
-
-	public void setPageUrl(String pageUrl) {
-		this.pageUrl = pageUrl;
-	}
 
 	public String getConfluenceRootUrl() {
 		return confluenceRootUrl;

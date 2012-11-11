@@ -40,10 +40,10 @@ add_shortcode( 'author', 'c2w_generate_author' );
  * Register CSS and JS files.
  */
 function c2w_enqueue_scripts() {
-	wp_register_style( 'c2w-author-css', plugins_url('css/author.css', __FILE__) );
-	wp_register_style( 'c2w-toc-css', plugins_url('css/toc.css', __FILE__) );
-	wp_enqueue_style( 'c2w-author-css' );
-	wp_enqueue_style( 'c2w-toc-css' );
+	wp_register_style( 'c2w-author', plugins_url('css/author.css', __FILE__) );
+	wp_register_style( 'c2w-toc', plugins_url('css/toc.css', __FILE__) );
+	wp_enqueue_style( 'c2w-author' );
+	wp_enqueue_style( 'c2w-toc' );
 }
 
 /**
@@ -149,6 +149,7 @@ function c2w_generate_author( $atts ) {
 		else if(strpos($url, "slashdot") !== false) $parsedUrls[] = array("slashdot", $url);
 		else if(strpos($url, "slideshare") !== false) $parsedUrls[] = array("slideshare", $url);
 		else if(strpos($url, "squidoo") !== false) $parsedUrls[] = array("squidoo", $url);
+		else if(strpos($url, "stackoverflow") !== false) $parsedUrls[] = array("stackoverflow", $url);
 		else if(strpos($url, "stumbleupon") !== false) $parsedUrls[] = array("stumbleupon", $url);
 		else if(strpos($url, "technorati") !== false) $parsedUrls[] = array("technorati", $url);
 		else if(strpos($url, "tumblr") !== false) $parsedUrls[] = array("tumblr", $url);
@@ -162,15 +163,15 @@ function c2w_generate_author( $atts ) {
 		else $parsedUrls[] = array("generic", $url);
 	}
 
-	$result = '<div style="border-bottom:1px solid #DDD;border-top:1px solid #DDD;padding:5px 0;margin:10px 0">';
+	$result = '<div class="c2w-author">';
 	
-	$result .= '<div style="float:right;text-align:right">';
+	$result .= '<div class="c2w-author-icons">';
 	foreach ($parsedUrls as $url) {
-		$result .= "<a style='margin-left:5px' href='$url[1]' target='_blank'><img title='$url[1]' src='" . WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . "/img/rkc-social-set/24x24/24x24-${url[0]}.png' alt='$url[1]' width='24' height='24' /></a>";
+		$result .= "<a class='c2w-author-icon' href='$url[1]' target='_blank'><img title='$url[1]' src='" . WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . "/img/rkc-social-set/24x24/24x24-${url[0]}.png' alt='$url[1]' width='24' height='24' /></a>";
 	}
 	$result .= '</div>';
 	
-	$result .= "<span style='font-style:italic;height:24px;line-height:24px'>Par ";
+	$result .= "<span class='c2w-author-name'>Par ";
 	if($parsedUrls[0]) {
 		$result .= "<a href='" . $parsedUrls[0][1] ."' target='_blank'>$firstname $lastname</a>";
 	} else {

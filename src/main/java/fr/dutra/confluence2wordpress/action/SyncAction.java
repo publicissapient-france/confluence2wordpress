@@ -384,7 +384,7 @@ public class SyncAction extends AbstractPageAwareAction {
         WordpressClient client = pluginSettingsManager.getWordpressClient();
         Integer retrievedPostId = client.findPageIdBySlug(getMetadata().getPostSlug());
         if (retrievedPostId != null && ! retrievedPostId.equals(getMetadata().getPostId())){
-            addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY), new Object[]{retrievedPostId});
+            addActionError(getText(ERRORS_POST_SLUG_AVAILABILITY_KEY, new Object[]{retrievedPostId}));
         }
     }
 

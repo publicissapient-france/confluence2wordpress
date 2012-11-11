@@ -37,7 +37,7 @@
 			$action.successMessage
             </strong>
         </p>
-        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a> <span style="font-size:smaller;font-style:italic">($action.getText("sync.link.viewPost.needsLogin")</span>)</p>
+        <p><a href="$action.metadata.permalink" target="wp-preview">$action.getText("sync.link.viewPost")</a> <span style="font-size:smaller;font-style:italic">($action.getText("sync.link.viewPost.needsLogin"))</span></p>
         <p><a href="$action.editLink" target="wp-edit">$action.getText("sync.link.editPost")</a></p>
     </div>   
 #end

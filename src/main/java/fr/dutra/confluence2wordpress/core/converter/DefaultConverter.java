@@ -114,7 +114,7 @@ public class DefaultConverter implements Converter {
 	        TagNode body = root.findElementByName("body", false);
 	
 	        //DOM traversal
-	        List<TagNodeVisitor> visitors = getTagNodeVisitors(options);
+	        List<TagNodeVisitor> visitors = getTagNodeVisitors(options, page);
 	        for (TagNodeVisitor visitor : visitors) {
 	            body.traverse(visitor);
 	        }
@@ -228,7 +228,7 @@ public class DefaultConverter implements Converter {
         return processors;
 	}
 
-	private List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options) {
+	private List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options, ContentEntityObject page) {
         List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
         visitors.add(new MoreMacroProcessor());
         List<SynchronizedAttachment> attachments = options.getSynchronizedAttachments();
@@ -236,7 +236,7 @@ public class DefaultConverter implements Converter {
             visitors.add(new ImageProcessor(attachments, options.getConfluenceRootUrl()));
             visitors.add(new SynchronizedAttachmentLinkProcessor(attachments, options.getConfluenceRootUrl()));
         }
-		visitors.add(new PermalinkProcessor(options.getPageUrl(), options.getConfluenceRootUrl()));
+		visitors.add(new PermalinkProcessor(page.getUrlPath(), options.getConfluenceRootUrl()));
 		//must be done:
 		//after image and anchor processing
         visitors.add(new AttributesCleaner());

@@ -44,8 +44,8 @@ public class PermalinkProcessor implements TagNodeVisitor {
     
 	private final String confluenceRootUrl;
 	
-    public PermalinkProcessor(String pageUrl, String confluenceRootUrl) {
-    	this.pageUrl = pageUrl;
+    public PermalinkProcessor(String pageUrlPath, String confluenceRootUrl) {
+    	this.pageUrl = UrlUtils.absolutize(pageUrlPath, confluenceRootUrl);
     	this.confluenceRootUrl = confluenceRootUrl;
     }
 

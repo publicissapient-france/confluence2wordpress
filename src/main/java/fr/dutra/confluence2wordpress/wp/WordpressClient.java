@@ -417,7 +417,7 @@ public class WordpressClient {
 			//even without modification, wordpress will append an "\n" before the "more" tag
 			//but if the post has never been edited on wordpress,
 			//then the "\n" is missing
-			if(body.charAt(body.length()-1) != '\n'){
+			if(body.length() > 0 && body.charAt(body.length()-1) != '\n'){
 				body.append("\n");
 			}
 			body.append("<!--more-->");
