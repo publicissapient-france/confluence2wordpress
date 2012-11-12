@@ -63,8 +63,8 @@ public class TOCBuilderTest {
 
 		Heading _0_0_1 = toc.getChildren().get(0);
 		assertThat(_0_0_1.getLevel()).isEqualTo(3);
-		assertThat(_0_0_1.getLabel()).isEqualTo("0.0.1");
-		assertThat(_0_0_1.getAnchor()).isEqualTo("Test-0.0.1");
+		assertThat(_0_0_1.getLabel()).isEqualTo("0.0.1 - Title with spaces, accents, double quotes and single quotes: ('\"é)");
+		assertThat(_0_0_1.getAnchor()).isEqualTo("Test-0.0.1-Titlewithspaces%2Caccents%2Cdoublequotesandsinglequotes%3A%28%27%22%C3%A9%29");
 		assertThat(_0_0_1.getAuthor()).isNull();
 		assertThat(_0_0_1.getChildren()).hasSize(2);
 		

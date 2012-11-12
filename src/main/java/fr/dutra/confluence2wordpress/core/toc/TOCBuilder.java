@@ -20,8 +20,10 @@ package fr.dutra.confluence2wordpress.core.toc;
 
 import static com.atlassian.confluence.content.render.xhtml.XhtmlConstants.*;
 
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +35,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.atlassian.confluence.links.linktypes.AbstractPageLink;
+import com.atlassian.confluence.content.render.xhtml.HtmlElementIdCreator;
 import com.atlassian.confluence.renderer.PageContext;
 
 import fr.dutra.confluence2wordpress.core.author.Author;
@@ -119,8 +121,16 @@ public class TOCBuilder {
 		Heading heading = new Heading(level);
 		String body = node.getTextContent();
 		heading.setLabel(body);
-		String anchor = AbstractPageLink.generateAnchor(pageContext, body);
-		heading.setAnchor(anchor);
+		try {
+			//AbstractPageLink.generateAnchor generates the final anchor
+			//but escaped for XML storage. We need URLencode instead,
+			//so we are basically doing exactly what generateAnchor does
+			//less the XML escaping.
+			//AbstractPageLink.generateAnchor(pageContext, body);
+			String anchor = URLEncoder.encode(HtmlElementIdCreator.convertToIdHtml5(pageContext.getPageTitle() + "-" + body), "UTF-8");
+			heading.setAnchor(anchor);
+		} catch (UnsupportedEncodingException e) {
+		}
 		Heading parent = findParentHeading(level);
 		parent.addChild(heading);
 		heading.setParent(parent);
