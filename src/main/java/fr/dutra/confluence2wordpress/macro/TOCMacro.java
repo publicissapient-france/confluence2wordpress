@@ -48,6 +48,10 @@ public class TOCMacro implements Macro {
 	@Override
 	public String execute(Map<String, String> paramMap, String paramString, ConversionContext paramConversionContext) throws MacroExecutionException {
 		ContentEntityObject page = paramConversionContext.getEntity();
+		if(page == null) {
+			//page can be null if we are in a template
+			return "";
+		}
 		String storage = page.getBodyAsString();
 		TOCBuilder builder = new TOCBuilder();
 		Heading toc;
