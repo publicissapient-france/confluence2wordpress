@@ -22,6 +22,7 @@ import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.codec.binary.Base64OutputStream;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
@@ -53,5 +54,14 @@ public class CodecUtils {
 			gzis.close();
 		}
 	}
-	
+
+	/**
+	 * Returns the MD5 hash of the given email, as required by Gravatar.
+	 * @see "http://fr.gravatar.com/site/implement/hash/"
+	 * @param email
+	 * @return
+	 */
+	public static String gravatarHash(String email) {
+		return DigestUtils.md5Hex(email.trim().toLowerCase());
+	}
 }

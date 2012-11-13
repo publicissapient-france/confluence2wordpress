@@ -16,5 +16,5 @@
 package fr.dutra.confluence2wordpress.core.author;
 
 public enum AuthorMacroParameters {
-	firstName, lastName, wordpressUsername, twitterAccount, others
+	firstName, lastName, gravatarEmail, wordpressUsername, twitterAccount, others
 }

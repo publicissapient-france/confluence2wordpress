@@ -110,6 +110,7 @@
         <parameters>
 			<parameter name="firstName" type="string" required="true" />
 			<parameter name="lastName" type="string" required="true" />
+			<parameter name="gravatarEmail" type="string" />
 			<parameter name="wordpressUsername" type="string" />
 			<parameter name="twitterAccount" type="string" />
         	<parameter name="others" type="string" multiple="true" />

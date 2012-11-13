@@ -43,6 +43,8 @@ public class AuthorMacroProcessor extends MacroToMacroProcessor {
 
 	private static final String LASTNAME = "lastname";
 
+	private static final String GRAVATAR = "gravatar";
+	
 	private static final String FIRSTNAME = "firstname";
 
 	private static final String CONFLUENCE_MACRO_NAME = "author";
@@ -78,6 +80,7 @@ public class AuthorMacroProcessor extends MacroToMacroProcessor {
 		Map<String,String> params = new HashMap<String, String>();
 		params.put(FIRSTNAME, author.getFirstName());
 		params.put(LASTNAME, author.getLastName());
+		params.put(GRAVATAR, author.getGravatarEmail());
 		params.put(USERNAME, author.getWordpressUsername());
 		params.put(TWITTER, author.getTwitterAccount());
 		params.put(URLS, JOINER.join(author.getOtherUrls()));

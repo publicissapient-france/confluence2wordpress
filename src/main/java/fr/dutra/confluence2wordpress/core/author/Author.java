@@ -27,6 +27,9 @@ import java.util.Map;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 
+import fr.dutra.confluence2wordpress.util.CodecUtils;
+import fr.dutra.confluence2wordpress.util.UrlUtils;
+
 
 
 public class Author {
@@ -35,6 +38,8 @@ public class Author {
 	
 	private final String lastName;
 
+	private final String gravatarEmail;
+	
 	private final String wordpressUsername;
 
 	private final String twitterAccount;
@@ -47,21 +52,37 @@ public class Author {
 
 	private final List<AuthorURL> allUrls;
 
+	private final String gravatarProfileUrl;
+
+	private final String gravatarImageUrl;
+
 	private static final Splitter SPLITTER = Splitter.on(CharMatcher.WHITESPACE.or(CharMatcher.is(','))).omitEmptyStrings().trimResults();
 	
 	public static Author fromMacroParameters(Map<String, String> paramMap) throws MalformedURLException, URISyntaxException {
 		String firstName = paramMap.get(AuthorMacroParameters.firstName.name());
 		String lastName = paramMap.get(AuthorMacroParameters.lastName.name());
+		String gravatarEmail = paramMap.get(AuthorMacroParameters.gravatarEmail.name());
 		String wordpressUsername = paramMap.get(AuthorMacroParameters.wordpressUsername.name());
 		String twitterAccount = paramMap.get(AuthorMacroParameters.twitterAccount.name());
 		String others = paramMap.get(AuthorMacroParameters.others.name());
-		return new Author(firstName, lastName, wordpressUsername, twitterAccount, others == null ? null : SPLITTER.split(others));
+		return new Author(firstName, lastName, gravatarEmail, wordpressUsername, twitterAccount, others == null ? null : SPLITTER.split(others));
 	}
 	
-	public Author(String firstName, String lastName, String wordpressUsername, String twitterAccount, Iterable<String> others) throws MalformedURLException, URISyntaxException {
+	public Author(String firstName, String lastName, String gravatarEmail, String wordpressUsername, String twitterAccount, Iterable<String> others) throws MalformedURLException, URISyntaxException {
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.gravatarEmail = gravatarEmail;
 		this.allUrls = new ArrayList<AuthorURL>();
+		if(gravatarEmail != null) {
+			String hash = CodecUtils.gravatarHash(gravatarEmail);
+			//let's follow redirections until we have a pretty nice URL
+			gravatarProfileUrl = UrlUtils.followRedirects("http://www.gravatar.com/" + hash, 10);
+			//image in HTTPS to avoid browser warnings
+			gravatarImageUrl = "https://secure.gravatar.com/avatar/" + hash +".jpg";
+		} else {
+			gravatarProfileUrl = null;
+			gravatarImageUrl = null;
+		}
 		AuthorURL wordpressUrl = null;
 		if(wordpressUsername != null) {
 			wordpressUrl = new AuthorURL("http://blog.xebia.fr/author/" + wordpressUsername, "xebia");
@@ -115,6 +136,18 @@ public class Author {
 
 	public List<AuthorURL> getAllUrls() {
 		return allUrls;
+	}
+
+	public String getGravatarEmail() {
+		return gravatarEmail;
+	}
+
+	public String getGravatarProfileUrl() {
+		return gravatarProfileUrl;
+	}
+
+	public String getGravatarImageUrl() {
+		return gravatarImageUrl;
 	}
 
 }

@@ -15,10 +15,19 @@
  */
 package fr.dutra.confluence2wordpress.util;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+
+import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.params.HttpMethodParams;
 
 
 public class UrlUtils {
@@ -101,5 +110,34 @@ public class UrlUtils {
 		    temp.getQuery(),
 		    temp.getRef());
 		return uri.toASCIIString();
+    }
+    
+    /**
+     * Follow redirections until a final URL is found.
+     * @see "http://workbench.cadenhead.org/news/3358/following-web-page-redirects-java"
+     * @param url
+     * @return
+     */
+    public static String followRedirects(String url, int maxRedirections) {
+        String response = url;
+        HttpClient client = new HttpClient();
+        DefaultHttpMethodRetryHandler handler = new DefaultHttpMethodRetryHandler(1, false);
+        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, handler);
+        HttpMethod method = new HeadMethod(url);
+        method.setFollowRedirects(false);
+        try {
+            int statusCode = client.executeMethod(method);
+            if ((statusCode == HttpStatus.SC_MOVED_PERMANENTLY) | (statusCode == HttpStatus.SC_MOVED_TEMPORARILY)) {
+            	if(maxRedirections > 0) {
+	                Header location = method.getResponseHeader("Location");
+	                if (!location.getValue().equals("")) {
+	                    // recursively check URL until it's not redirected any more
+	                    response = followRedirects(location.getValue(), maxRedirections - 1);
+	                }
+            	}
+            }
+        } catch (IOException ioe) {
+        }
+        return response;
     }
 }

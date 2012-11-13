@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 
 import static junit.framework.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import fr.dutra.confluence2wordpress.util.UrlUtils;
@@ -104,6 +105,16 @@ public class UrlUtilsTest {
         assertEquals(
             "http://foo.com?bar=%22S%C3%A3o%20Paulo%22", 
             UrlUtils.sanitize("http://foo.com?bar=\"São Paulo\""));
+
+    }
+    
+
+    @Test @Ignore
+    public void testFollowRedirects() {
+
+        assertEquals(
+            "http://fr.gravatar.com/alexdut", 
+            UrlUtils.followRedirects("http://www.gravatar.com/e96398d35fcd2cb3df072bcb28c9c917", 10));
 
     }
 }

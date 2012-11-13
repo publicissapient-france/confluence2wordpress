@@ -58,7 +58,7 @@ public class TOCBuilderTest {
 		assertThat(toc.getLevel()).isEqualTo(0);
 		assertThat(toc.getLabel()).isEqualTo("Test");
 		assertThat(toc.getAnchor()).isNull();
-		assertThat(toc.getAuthor()).isEqualsToByComparingFields(new Author("Author 0", "Author 0", null, null, null));
+		assertThat(toc.getAuthor()).isEqualsToByComparingFields(new Author("Author 0", "Author 0", null, null, null, null));
 		assertThat(toc.getChildren()).hasSize(2);
 
 		Heading _0_0_1 = toc.getChildren().get(0);
@@ -72,14 +72,14 @@ public class TOCBuilderTest {
 		assertThat(_0_0_1_1.getLevel()).isEqualTo(4);
 		assertThat(_0_0_1_1.getLabel()).isEqualTo("0.0.1.1");
 		assertThat(_0_0_1_1.getAnchor()).isEqualTo("Test-0.0.1.1");
-		assertThat(_0_0_1_1.getAuthor()).isEqualsToByComparingFields(new Author("Author 0.0.1.1", "Author 0.0.1.1", null, null, null));
+		assertThat(_0_0_1_1.getAuthor()).isEqualsToByComparingFields(new Author("Author 0.0.1.1", "Author 0.0.1.1", null, null, null, null));
 		assertThat(_0_0_1_1.getChildren()).isEmpty();
 
 		Heading _0_0_1_2 = _0_0_1.getChildren().get(1);
 		assertThat(_0_0_1_2.getLevel()).isEqualTo(4);
 		assertThat(_0_0_1_2.getLabel()).isEqualTo("0.0.1.2");
 		assertThat(_0_0_1_2.getAnchor()).isEqualTo("Test-0.0.1.2");
-		assertThat(_0_0_1_2.getAuthor()).isEqualsToByComparingFields(new Author("Author 0.0.1.2", "Author 0.0.1.2", null, null, null));
+		assertThat(_0_0_1_2.getAuthor()).isEqualsToByComparingFields(new Author("Author 0.0.1.2", "Author 0.0.1.2", null, null, null, null));
 		assertThat(_0_0_1_2.getChildren()).isEmpty();
 		
 		Heading _1 = toc.getChildren().get(1);
@@ -93,7 +93,7 @@ public class TOCBuilderTest {
 		assertThat(_1_0_1.getLevel()).isEqualTo(3);
 		assertThat(_1_0_1.getLabel()).isEqualTo("1.0.1");
 		assertThat(_1_0_1.getAnchor()).isEqualTo("Test-1.0.1");
-		assertThat(_1_0_1.getAuthor()).isEqualsToByComparingFields(new Author("Author 1.0.1", "Author 1.0.1", null, null, null));
+		assertThat(_1_0_1.getAuthor()).isEqualsToByComparingFields(new Author("Author 1.0.1", "Author 1.0.1", null, null, null, null));
 		assertThat(_1_0_1.getChildren()).isEmpty();
 	}
 }

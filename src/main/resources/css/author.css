@@ -21,17 +21,35 @@
 	margin-top:10px;
 }
 
-.c2w-author-icons {
-	float:right;
-	text-align:right;
-}
-
-.c2w-author-icon {
-	margin-left:5px;
-}
-
 .c2w-author-name {
 	font-style:italic;
 	height:24px;
 	line-height:24px;
+}
+
+.c2w-author-icons {
+	float:right;
+	text-align:right;
+	height:24px;
+}
+
+.c2w-author-icon {
+	margin-left:5px;
+	display:inline-block;
+	height:24px;
+	width:24px;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	-webkit-box-shadow: 1px 1px 2px #666;
+	-moz-box-shadow: 1px 1px 2px #666;
+	box-shadow: 1px 1px 2px #666;
+}
+
+.c2w-author-gravatar {
+}
+
+/** http://maxvoltar.com/archive/rounded-corners-on-images-css-only */
+.c2w-author-gravatar img {
+	opacity:0;
 }

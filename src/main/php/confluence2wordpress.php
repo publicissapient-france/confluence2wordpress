@@ -86,6 +86,7 @@ function c2w_generate_author( $atts ) {
 	extract( shortcode_atts( array(
 		'firstname' => NULL,
 		'lastname' => NULL,
+		'gravatar' => NULL,
 		'username' => NULL,
 		'twitter' => NULL,
 		'urls' => NULL
@@ -166,6 +167,15 @@ function c2w_generate_author( $atts ) {
 	$result = '<div class="c2w-author">';
 	
 	$result .= '<div class="c2w-author-icons">';
+	
+	if ($gravatar) {
+		$hash = md5(strtolower(trim($gravatar)));
+		$gravatarProfileUrl = "http://www.gravatar.com/$hash";
+		//image in HTTPS to avoid browser warnings
+		$gravatarImageUrl = "https://secure.gravatar.com/avatar/$hash.jpg";
+		$result .= "<a class='c2w-author-icon c2w-author-gravatar' href='$gravatarProfileUrl' target='_blank'><img title='$gravatarProfileUrl' src='$gravatarImageUrl?s=24' alt='$gravatarProfileUrl' width='24' height='24' /></a>";
+	}
+	
 	foreach ($parsedUrls as $url) {
 		$result .= "<a class='c2w-author-icon' href='$url[1]' target='_blank'><img title='$url[1]' src='" . WP_PLUGIN_URL . '/' . basename(dirname(__FILE__)) . "/img/rkc-social-set/24x24/24x24-${url[0]}.png' alt='$url[1]' width='24' height='24' /></a>";
 	}

@@ -16,6 +16,9 @@
 #requireResource("fr.dutra.confluence2wordpress:author-resources")
 <div class="c2w-author">
 	<div class="c2w-author-icons">
+	#if ($author.gravatarImageUrl)
+		<a class="c2w-author-icon c2w-author-gravatar" style="background-image:url(${author.gravatarImageUrl}?s=24)" href="$author.gravatarProfileUrl" target="_blank"><img title="$author.gravatarProfileUrl" src="${author.gravatarImageUrl}?s=24" alt="$author.gravatarProfileUrl" width="24" height="24" /></a>
+	#end
 	#foreach ($url in $author.allUrls)
 		<a class="c2w-author-icon" href="$url.url" target="_blank"><img title="$url.url" src="${settingsManager.globalSettings.baseUrl}/download/resources/fr.dutra.confluence2wordpress/social/24x24/24x24-${url.icon}.png" alt="$url.url" width="24" height="24" /></a>
 	#end
