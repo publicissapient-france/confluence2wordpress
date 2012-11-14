@@ -15,15 +15,13 @@
  */
 package fr.dutra.confluence2wordpress.util;
 
+import static junit.framework.Assert.*;
+
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
-import static junit.framework.Assert.*;
-
 import org.junit.Ignore;
 import org.junit.Test;
-
-import fr.dutra.confluence2wordpress.util.UrlUtils;
 
 
 
@@ -109,8 +107,12 @@ public class UrlUtilsTest {
     }
     
 
+    /**
+     * This test can only be performed with a functional net access.
+     * @throws URISyntaxException
+     */
     @Test @Ignore
-    public void testFollowRedirects() {
+    public void testFollowRedirects() throws URISyntaxException {
 
         assertEquals(
             "http://fr.gravatar.com/alexdut", 

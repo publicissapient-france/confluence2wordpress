@@ -15,7 +15,6 @@
  */
 package fr.dutra.confluence2wordpress.util;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -117,13 +116,19 @@ public class UrlUtils {
      * @see "http://workbench.cadenhead.org/news/3358/following-web-page-redirects-java"
      * @param url
      * @return
+     * @throws URISyntaxException 
      */
-    public static String followRedirects(String url, int maxRedirections) {
-        String response = url;
+    public static String followRedirects(String url, int maxRedirections) throws URISyntaxException {
+        return followRedirectsInternal(new URI(url), maxRedirections).toASCIIString();
+    }
+
+	private static URI followRedirectsInternal(URI url, int maxRedirections) {
+		URI response = url;
         HttpClient client = new HttpClient();
         DefaultHttpMethodRetryHandler handler = new DefaultHttpMethodRetryHandler(1, false);
         client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, handler);
-        HttpMethod method = new HeadMethod(url);
+        HttpMethod method = new HeadMethod(url.toASCIIString());
+        //method.setRequestHeader("Accept-Language", locale.getLanguage() + ",en");
         method.setFollowRedirects(false);
         try {
             int statusCode = client.executeMethod(method);
@@ -132,12 +137,15 @@ public class UrlUtils {
 	                Header location = method.getResponseHeader("Location");
 	                if (!location.getValue().equals("")) {
 	                    // recursively check URL until it's not redirected any more
-	                    response = followRedirects(location.getValue(), maxRedirections - 1);
+	                	// locations can be relative to previous URL
+	                	URI target = url.resolve(location.getValue());
+	                    response = followRedirectsInternal(target, maxRedirections - 1);
 	                }
             	}
             }
-        } catch (IOException ioe) {
+        } catch (Exception e) {
+        	//HttpClient can also throw IllegalArgumentException when URLs are malformed
         }
         return response;
-    }
+	}
 }
