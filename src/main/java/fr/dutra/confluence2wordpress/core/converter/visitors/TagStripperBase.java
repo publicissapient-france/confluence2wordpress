@@ -35,8 +35,10 @@ public abstract class TagStripperBase implements TagNodeVisitor {
 		if(tag.hasChildren()) {
 			@SuppressWarnings("unchecked")
 			List<HtmlNode> children = tag.getChildren();
+			HtmlNode afterThis = tag;
 			for (HtmlNode child : children) {
-			    parentNode.insertChildAfter(tag, child);
+			    parentNode.insertChildAfter(afterThis, child);
+			    afterThis = child;
 			}
 		}
 		parentNode.removeChild(tag);
