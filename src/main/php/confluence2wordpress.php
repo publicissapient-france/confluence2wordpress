@@ -15,7 +15,7 @@
  *    limitations under the License.
  */
 /*
-Plugin Name: Confluence XML-RPC Tools
+Plugin Name: Confluence to Wordpress Synchronizer Tools
 Plugin URI: https://github.com/adutra/confluence2wordpress
 Description: This Wordpress plugin brings several features required for interaction with the "Confluence to Wordpress Synchronizer" plugin for Confluence, as well as some useful macros, like [permalink] or [author].
 Version: ${project.version}
@@ -81,7 +81,11 @@ function c2w_generate_permalink( $atts ){
 	return get_permalink($post->ID);
 }
 
-// Register shortcode for [author] macros
+/**
+ * Register shortcode for [author] macros.
+ * @param array $atts macro attributes
+ * @return the macros's rendered result.
+ */
 function c2w_generate_author( $atts ) {
 	extract( shortcode_atts( array(
 		'firstname' => NULL,
@@ -170,10 +174,10 @@ function c2w_generate_author( $atts ) {
 	
 	if ($gravatar) {
 		$hash = md5(strtolower(trim($gravatar)));
-		$gravatarProfileUrl = "http://www.gravatar.com/$hash";
+		$gravatarProfileUrl = c2w_follow_redirects("http://www.gravatar.com/$hash");
 		//image in HTTPS to avoid browser warnings
 		$gravatarImageUrl = "https://secure.gravatar.com/avatar/$hash.jpg";
-		$result .= "<a class='c2w-author-icon c2w-author-gravatar' href='$gravatarProfileUrl' target='_blank'><img title='$gravatarProfileUrl' src='$gravatarImageUrl?s=24' alt='$gravatarProfileUrl' width='24' height='24' /></a>";
+		$result .= "<a class='c2w-author-icon c2w-author-gravatar' style='background-image:url($gravatarImageUrl?s=24)' href='$gravatarProfileUrl' target='_blank'><img title='$gravatarProfileUrl' src='$gravatarImageUrl?s=24' alt='$gravatarProfileUrl' width='24' height='24' /></a>";
 	}
 	
 	foreach ($parsedUrls as $url) {
@@ -189,6 +193,53 @@ function c2w_generate_author( $atts ) {
 	}
 	$result .= "</span></div>";
 	return $result;
+}
+
+/**
+ * Follow redirections.
+ * @see http://codex.wordpress.org/HTTP_API
+ * @param string $url the initial url
+ * @param int $max_redirects the maximu number of redirections to follow
+ * @return the resolved URL
+ */
+function c2w_follow_redirects($url, $max_redirects = 5) {
+	$headers = array();
+	//we set the same accept-language header as the client request,
+	//because URLs returned by Gravatar can vary according to request locale
+	if(!empty($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
+		$headers['accept-language'] = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
+	}
+	$args = array(
+		'method' => 'HEAD',
+		'timeout' => apply_filters( 'http_request_timeout', 5),
+		'redirection' => 0,
+		'httpversion' => apply_filters( 'http_request_version', '1.0'),
+		'user-agent' => apply_filters( 'http_headers_useragent', 'WordPress/' . $wp_version . '; ' . get_bloginfo( 'url' )  ),
+		'blocking' => true,
+		'headers' => $headers,
+		'cookies' => array(),
+		'body' => null,
+		'compress' => false,
+		'decompress' => true,
+		'sslverify' => true,
+		'stream' => false,
+		'filename' => null
+	);
+	for($i = 0; $i < $max_redirects; $i++) {
+		$response = wp_remote_head($url, $args);
+		if ( ! is_wp_error( $response ) ) {
+			$response_code = wp_remote_retrieve_response_code( $response );
+			if($response_code == '301' || $response_code == '302') {
+				$location = wp_remote_retrieve_header( $response, 'location' );
+				if( $location != '' ) {
+					$url = WP_HTTP::make_absolute_url( $location, $url );
+					continue;
+				}
+			}
+		}
+		break;
+	}
+	return $url;
 }
 
 /**
@@ -221,7 +272,6 @@ function c2w_ping($args){
 	
 	return $text;
 }
-
 
 function c2w_new_post ($args) {
 	
