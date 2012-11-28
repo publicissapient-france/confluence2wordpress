@@ -24,6 +24,8 @@ Author URI: https://github.com/adutra
 License: Apache License v. 2
 */
 
+define("C2W_VERSION", "${project.version}");
+
 require_once(ABSPATH . 'wp-admin/includes/plugin.php');
 require_once(ABSPATH . 'wp-includes/post.php');
 require_once(ABSPATH . 'wp-includes/link-template.php');
@@ -40,8 +42,8 @@ add_shortcode( 'author', 'c2w_generate_author' );
  * Register CSS and JS files.
  */
 function c2w_enqueue_scripts() {
-	wp_register_style( 'c2w-author', plugins_url('css/author.css', __FILE__) );
-	wp_register_style( 'c2w-toc', plugins_url('css/toc.css', __FILE__) );
+	wp_register_style( 'c2w-author', plugins_url('css/author.css', __FILE__), array(), C2W_VERSION);
+	wp_register_style( 'c2w-toc', plugins_url('css/toc.css', __FILE__), array(), C2W_VERSION);
 	wp_enqueue_style( 'c2w-author' );
 	wp_enqueue_style( 'c2w-toc' );
 }

@@ -22,6 +22,7 @@
   <formats>
     <format>zip</format>
   </formats>
+  <baseDirectory>${artifactId}</baseDirectory>
   <fileSets>
     <fileSet>
       <directory>${project.basedir}/src/main/php</directory>
