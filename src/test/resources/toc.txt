@@ -1,3 +1,8 @@
+<!--some XHMTL entities-->
+&hellip;
+&emsp; 
+&otilde;
+
 <ac:macro ac:name="author">
 	<ac:parameter ac:name="firstName">Author 0</ac:parameter>
 	<ac:parameter ac:name="lastName">Author 0</ac:parameter>

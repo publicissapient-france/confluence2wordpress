@@ -29,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.stream.XMLStreamException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.w3c.dom.Node;
@@ -105,14 +104,15 @@ public class TOCBuilder {
 					}
 				}
 			}
-		} catch (XPathExpressionException e) {
-			throw new TOCException(e);
-		} catch (XMLStreamException e) {
-			throw new TOCException(e);
-		} catch (MalformedURLException e) {
-			throw new TOCException(e);
-		} catch (URISyntaxException e) {
-			throw new TOCException(e);
+		} catch (Exception e) {
+			String message = "Could not parse storage";
+			if(e.getMessage() != null) {
+				message += ": " + e.getMessage();
+			}
+			if(e.getCause() != null && e.getCause().getMessage() != null) {
+				message += ": " + e.getCause().getMessage();
+			}
+			throw new TOCException(message, e);
 		}
 		return this.root;
 	}

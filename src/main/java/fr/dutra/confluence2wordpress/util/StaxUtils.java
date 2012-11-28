@@ -69,7 +69,7 @@ public class StaxUtils {
     	XHTML_SPECIAL_DTD = xhtml_special;
     	String xhtml_symbol = null;
     	try {
-    		xhtml_symbol = IOUtils.toString(StaxUtils.class.getResourceAsStream("/dtd/xhtml-special.ent"));
+    		xhtml_symbol = IOUtils.toString(StaxUtils.class.getResourceAsStream("/dtd/xhtml-symbol.ent"));
 		} catch (IOException e) {
 		}
     	XHTML_SYMBOL_DTD = xhtml_symbol;
