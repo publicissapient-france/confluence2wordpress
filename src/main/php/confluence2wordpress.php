@@ -201,7 +201,7 @@ function c2w_generate_author( $atts ) {
  * Follow redirections.
  * @see http://codex.wordpress.org/HTTP_API
  * @param string $url the initial url
- * @param int $max_redirects the maximu number of redirections to follow
+ * @param int $max_redirects the maximum number of redirections to follow
  * @return the resolved URL
  */
 function c2w_follow_redirects($url, $max_redirects = 5) {
