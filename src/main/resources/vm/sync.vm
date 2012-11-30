@@ -53,13 +53,22 @@
         <span class="field-value"><a href="${settingsManager.globalSettings.baseUrl}${action.page.urlPath}"><strong>$action.page.displayTitle</strong> (v. $action.page.version - ID $action.pageId)</a></span>
     </div>    
     
+   	<fieldset class="group">
+      <div class="checkbox">
+        <input id="formatHtml" name="metadata.formatHtml" value="true" type="checkbox" class="checkbox" #if($action.metadata.formatHtml)checked="checked"#end />
+        <label for="formatHtml">$action.getText("sync.form.formatHtml.label")</label>
+      </div>
+      <div class="field-group">
+        <div class="description">$action.getText("sync.form.formatHtml.description")</div>
+      </div>
+    </fieldset>
+    
     <div class="field-group">
-        <label for="pageTitle">
-            $action.getText("sync.form.pageTitle.label")
-            <span class="form-icon aui-icon icon-required"/>
-        </label>
-        <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text long-field"/>
-    </div>    
+        <a href="javascript:void(0)" id="showConversionAdvancedOptions" onclick="jQuery('#conversionAdvancedOptions').show();jQuery('#hideConversionAdvancedOptions').show();jQuery('#showConversionAdvancedOptions').hide()">$action.getText("sync.form.link.showAdvancedOptions")</a>
+    	<a href="javascript:void(0)" id="hideConversionAdvancedOptions" onclick="jQuery('#conversionAdvancedOptions').hide();jQuery('#hideConversionAdvancedOptions').hide();jQuery('#showConversionAdvancedOptions').show()" style="display:none">$action.getText("sync.form.link.hideAdvancedOptions")</a>
+    </div>
+    
+    <div id="conversionAdvancedOptions" style="display:none">
     
     <div class="field-group">
         <label for="ignoredConfluenceMacros">$action.getText("sync.form.ignoredConfluenceMacros.label")</label>
@@ -73,6 +82,38 @@
             autoCompleteMultiple('ignoredConfluenceMacros', availableMacros, 2);
          });
     </script>
+    
+    <div class="field-group">
+        <label>
+            $action.getText("sync.form.tagReplacements.label")
+        </label>
+        <table id="tagReplacements" style="clear:none">
+	        <thead>
+	        	<tr>
+	        		<td>$action.getText("sync.form.tagReplacementsFrom.label")&nbsp;<span class="form-icon aui-icon icon-required"/></td>
+	        		<td>$action.getText("sync.form.tagReplacementsTo.label")&nbsp;<span class="form-icon aui-icon icon-required"/></td>
+	        	</tr>
+	        </thead>
+	        <tbody></tbody>
+	    </table>
+	    <input id="tagReplacements-add" class="button" type="button" value="$action.getText("sync.form.tagReplacements.add.label")" style="margin:0" />
+        <div class="description">$action.getText("sync.form.tagReplacements.description")</div>
+	</div>
+      
+	<script type="text/javascript">
+
+        jQuery(document).ready(function() {
+        	var tagReplacementsManager = new InputMap('tagReplacements', 'tagReplacementsFrom', 'tagReplacementsTo', 'short-field', 'short-field', '$action.getText("sync.form.tagReplacements.delete.label")');
+		    tagReplacementsManager.init();
+		    #if( ! $action.tagReplacementsFrom.empty )
+		    #set( $size = $action.tagReplacementsFrom.size() - 1 )
+		    #foreach ($i in [0 .. $size])
+		    tagReplacementsManager.addRow("$!action.tagReplacementsFrom.get($i)", "$!action.tagReplacementsTo.get($i)");
+		    #end
+		    #end
+        });
+         
+	</script>
     
     <div class="field-group">
         <label>
@@ -94,30 +135,107 @@
 	<script type="text/javascript">
 
         jQuery(document).ready(function() {
-        	var tagAttributesManager = new TagAttributesManager('tagAttributes', '$action.getText("sync.form.tagAttributes.delete.label")');
+        	var tagAttributesManager = new InputMap('tagAttributes', 'tagNames', 'tagAttributes', 'short-field', 'long-field', '$action.getText("sync.form.tagAttributes.delete.label")');
 		    tagAttributesManager.init();
 		    #if( ! $action.tagNames.empty )
 		    #set( $size = $action.tagNames.size() - 1 )
 		    #foreach ($i in [0 .. $size])
-		    tagAttributesManager.addTagAttributesRow("$!action.tagNames.get($i)", "$!action.tagAttributes.get($i)");
+		    tagAttributesManager.addRow("$!action.tagNames.get($i)", "$!action.tagAttributes.get($i)");
 		    #end
 		    #end
         });
          
 	</script>
     
-   <fieldset class="group">
-      <div class="checkbox">
-        <input id="formatHtml" name="metadata.formatHtml" value="true" type="checkbox" class="checkbox" #if($action.metadata.formatHtml)checked="checked"#end />
-        <label for="formatHtml">$action.getText("sync.form.formatHtml.label")</label>
-      </div>
-      <div class="field-group">
-        <div class="description">$action.getText("sync.form.formatHtml.description")</div>
-      </div>
-    </fieldset>
-
+    <div class="field-group">
+        <label for="removeEmptyTags">$action.getText("sync.form.removeEmptyTags.label")</label>
+        <input id="removeEmptyTags" name="removeEmptyTagsAsString" type="text" value="$!action.removeEmptyTagsAsString" class="text long-field" />
+        <div class="description">$action.getText("sync.form.removeEmptyTags.description")</div>
+    </div>    
+    
+    <div class="field-group">
+        <label for="stripTags">$action.getText("sync.form.stripTags.label")</label>
+        <input id="stripTags" name="stripTagsAsString" type="text" value="$!action.stripTagsAsString" class="text long-field" />
+        <div class="description">$action.getText("sync.form.stripTags.description")</div>
+    </div>    
+    
+    </div>
+    
     <h2>$action.getText("sync.form.title.syncOptions")</h2>
 
+    <div class="field-group">
+        <label for="pageTitle">
+            $action.getText("sync.form.pageTitle.label")
+            <span class="form-icon aui-icon icon-required"/>
+        </label>
+        <input id="pageTitle" name="metadata.pageTitle" type="text" value="$action.metadata.pageTitle" class="text long-field"/>
+    </div>    
+    
+    <div class="field-group">
+        <label for="authorId">
+            $action.getText("sync.form.authorId.label")
+            <span class="form-icon aui-icon icon-required"/>
+        </label>
+        <select id="authorId" name="metadata.authorId" class="select long-field">
+            #foreach($wordpressUser in $action.wordpressUsers)
+                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$wordpressUser.niceUsername</option>
+            #end
+        </select>
+    </div>
+    
+    <script type="text/javascript">
+    jQuery(function() {
+        jQuery(document).ready(function() {
+            jQuery( "#authorId" ).autocompleteOnCombobox();
+            jQuery( "#authorId_input" ).addClass("long-field");
+        });
+    });
+    </script>
+    
+    <div class="field-group">
+        <label for="categoryNames">
+            $action.getText("sync.form.categoryNames.label")
+            <span class="form-icon aui-icon icon-required"/>
+        </label>
+        <select id="categoryNames" name="metadata.categoryNames" multiple="true" class="multi-select">
+            #foreach($wordpressCategory in $action.wordpressCategories)
+                <option value="$wordpressCategory.categoryName" #if( $action.metadata.categoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
+            #end
+        </select>
+        <div class="description">$action.getText("sync.form.categoryNames.description")</div>
+    </div>
+    
+    <script type="text/javascript">
+    jQuery(function() {
+        jQuery(document).ready(function() {
+            jQuery( "#categoryNames" ).autocompleteOnCombobox();
+            jQuery( "#categoryNames_input" ).addClass("long-field");
+        });
+    });
+    </script>
+    
+    <div class="field-group">
+        <label for="tagNamesAsString">
+            $action.getText("sync.form.tagNames.label")
+        </label>
+        <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text long-field" />
+        <div class="description">$action.getText("sync.form.tagNames.description")</div>
+    </div>
+    
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var availableTags = [#foreach($wordpressTag in $action.wordpressTags)"$wordpressTag.name"#if($velocityCount < $action.wordpressTags.size()),#end#end];
+            autoCompleteMultiple('tagNamesAsString', availableTags);
+         });
+    </script>
+    
+    <div class="field-group">
+        <a href="javascript:void(0)" id="showSyncAdvancedOptions" onclick="jQuery('#syncAdvancedOptions').show();jQuery('#hideSyncAdvancedOptions').show();jQuery('#showSyncAdvancedOptions').hide()">$action.getText("sync.form.link.showAdvancedOptions")</a>
+    	<a href="javascript:void(0)" id="hideSyncAdvancedOptions" onclick="jQuery('#syncAdvancedOptions').hide();jQuery('#hideSyncAdvancedOptions').hide();jQuery('#showSyncAdvancedOptions').show()" style="display:none">$action.getText("sync.form.link.hideAdvancedOptions")</a>
+    </div>
+    
+    <div id="syncAdvancedOptions" style="display:none">
+    
     <input name="metadata.draft" value="$action.metadata.draft" type="hidden" />
     <fieldset class="group">
         <legend><span>$action.getText("sync.form.draft.label")</legend>
@@ -177,64 +295,6 @@
         <div class="description">$action.getText("sync.form.postSlug.description")</div>
     </div>
 
-    <div class="field-group">
-        <label for="authorId">
-            $action.getText("sync.form.authorId.label")
-            <span class="form-icon aui-icon icon-required"/>
-        </label>
-        <select id="authorId" name="metadata.authorId" class="select long-field">
-            #foreach($wordpressUser in $action.wordpressUsers)
-                <option value="$wordpressUser.id" #if( $wordpressUser.id == $action.metadata.authorId ) selected="true" #end >$wordpressUser.niceUsername</option>
-            #end
-        </select>
-    </div>
-    
-    <script type="text/javascript">
-    jQuery(function() {
-        jQuery(document).ready(function() {
-            jQuery( "#authorId" ).autocompleteOnCombobox();
-            jQuery( "#authorId_input" ).addClass("long-field");
-        });
-    });
-    </script>
-    
-    <div class="field-group">
-        <label for="categoryNames">
-            $action.getText("sync.form.categoryNames.label")
-            <span class="form-icon aui-icon icon-required"/>
-        </label>
-        <select id="categoryNames" name="metadata.categoryNames" multiple="true" class="multi-select">
-            #foreach($wordpressCategory in $action.wordpressCategories)
-                <option value="$wordpressCategory.categoryName" #if( $action.metadata.categoryNames.contains($wordpressCategory.categoryName) ) selected="true" #end >$wordpressCategory.categoryName</option>
-            #end
-        </select>
-        <div class="description">$action.getText("sync.form.categoryNames.description")</div>
-    </div>
-    
-    <script type="text/javascript">
-    jQuery(function() {
-        jQuery(document).ready(function() {
-            jQuery( "#categoryNames" ).autocompleteOnCombobox();
-            jQuery( "#categoryNames_input" ).addClass("long-field");
-        });
-    });
-    </script>
-    
-    <div class="field-group">
-        <label for="tagNamesAsString">
-            $action.getText("sync.form.tagNames.label")
-        </label>
-        <input id="tagNamesAsString" name="tagNamesAsString" value="$!action.tagNamesAsString" class="text long-field" />
-        <div class="description">$action.getText("sync.form.tagNames.description")</div>
-    </div>
-    
-    <script type="text/javascript">
-        jQuery(document).ready(function() {
-            var availableTags = [#foreach($wordpressTag in $action.wordpressTags)"$wordpressTag.name"#if($velocityCount < $action.wordpressTags.size()),#end#end];
-            autoCompleteMultiple('tagNamesAsString', availableTags);
-         });
-    </script>
-    
    <fieldset class="group">
       <div class="checkbox">
         <input id="allowPostOverride" name="allowPostOverride" value="true" type="checkbox" class="checkbox" #if($action.allowPostOverride)checked="checked"#end />
@@ -244,7 +304,9 @@
         <div class="description">$action.getText("sync.form.allowPostOverride.description")</div>
       </div>
     </fieldset>
-            
+    
+    </div>
+    
     <div class="buttons-container">
       <div class="buttons">
         <input type="submit" class="button submit" value="$action.getText("sync.form.button.sync")" onclick="this.form.target='_self';this.form.action='sync.action'" />

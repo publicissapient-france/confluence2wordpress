@@ -40,14 +40,8 @@ import com.google.common.collect.Iterables;
  */
 public class AttributesCleaner implements TagNodeVisitor {
 
-    private static final String STYLE = "style";
-    
     private static final String CLASS = "class";
     
-	private static final String MARGIN_LEFT = "margin-left: 0.0px;";
-	
-	private static final String TEXT_ALIGN = "text-align: justify;";
-	
 	private static final Splitter SPLITTER = Splitter.on(' ').omitEmptyStrings().trimResults();
 
 	private static final Joiner JOINER = Joiner.on(' ').skipNulls();
@@ -75,28 +69,16 @@ public class AttributesCleaner implements TagNodeVisitor {
             	}
             }
             
-            //remove "data-" HTML5 attributes
+            //remove "data-" or "confluence-" attributes
             Map<String, String> attributes = tag.getAttributes();
             Iterator<String> iterator = attributes.keySet().iterator();
             while (iterator.hasNext()) {
 				String name = iterator.next();
-				if(name.startsWith("data-")){
+				if(name.startsWith("data-") || name.startsWith("confluence-")){
 					iterator.remove();
 				}
 			}
             
-            //style cleanup
-            String style = tag.getAttributeByName(STYLE);
-            if(style != null) {
-            	style = style.replace(MARGIN_LEFT, "");
-            	style = style.replace(TEXT_ALIGN, "");
-            	style = StringUtils.trimToNull(style);
-            	if(style == null){
-             		tag.removeAttribute(STYLE);
-            	} else {
-            		tag.setAttribute(STYLE, style);
-            	}
-            }
         }
         return true;
     }

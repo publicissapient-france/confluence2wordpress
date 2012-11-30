@@ -52,7 +52,15 @@ public class Metadata implements Serializable {
 
 	private List<String> ignoredConfluenceMacros;
 
-	private Map<String, String> tagAttributes;
+	private boolean formatHtml = true;
+
+    private Map<String,String> replaceTags;
+
+    private Map<String,String> tagAttributes;
+
+    private List<String> removeEmptyTags;
+
+    private List<String> stripTags;
 
 	private String permalink;
 
@@ -62,8 +70,6 @@ public class Metadata implements Serializable {
 
 	private List<SynchronizedAttachment> attachments;
 
-	private boolean formatHtml = true;
-	
 	public String getPageTitle() {
 		return pageTitle;
 	}
@@ -158,6 +164,30 @@ public class Metadata implements Serializable {
 
 	public void setTagAttributes(Map<String, String> tagAttributes) {
 		this.tagAttributes = tagAttributes;
+	}
+
+	public Map<String, String> getReplaceTags() {
+		return replaceTags;
+	}
+
+	public void setReplaceTags(Map<String, String> replaceTags) {
+		this.replaceTags = replaceTags;
+	}
+
+	public List<String> getRemoveEmptyTags() {
+		return removeEmptyTags;
+	}
+
+	public void setRemoveEmptyTags(List<String> removeEmptyTags) {
+		this.removeEmptyTags = removeEmptyTags;
+	}
+
+	public List<String> getStripTags() {
+		return stripTags;
+	}
+
+	public void setStripTags(List<String> stripTags) {
+		this.stripTags = stripTags;
 	}
 
 	public List<SynchronizedAttachment> getAttachments() {

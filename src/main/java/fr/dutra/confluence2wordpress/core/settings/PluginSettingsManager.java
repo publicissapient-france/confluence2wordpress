@@ -91,4 +91,21 @@ public interface PluginSettingsManager {
 
     void setTagAttributes(Map<String,String> attributes);
 
+	Map<String, String> getDefaultReplaceTags();
+
+	void setDefaultReplaceTags(Map<String, String> replaceTags);
+
+	String getDefaultRemoveEmptyTags();
+
+	List<String> getDefaultRemoveEmptyTagsAsList();
+
+	void setDefaultRemoveEmptyTags(String removeEmptyTags);
+
+	String getDefaultStripTags();
+	
+	List<String> getDefaultStripTagsAsList();
+
+	void setDefaultStripTags(String stripTags);
+
+
 }

@@ -18,8 +18,10 @@
  */
 package fr.dutra.confluence2wordpress.core.converter.visitors;
 
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.htmlcleaner.HtmlNode;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.TagNodeVisitor;
@@ -29,9 +31,40 @@ import org.htmlcleaner.TagNodeVisitor;
  * @author Alexandre Dutra
  *
  */
-public abstract class TagStripperBase implements TagNodeVisitor {
+public class TagStripper implements TagNodeVisitor {
 
-	protected void stripTag(TagNode parentNode, TagNode tag) {
+	private final List<String> tagNames;
+	
+	public TagStripper(List<String> tagNames) {
+		this.tagNames = tagNames;
+	}
+
+	@Override
+	public boolean visit(TagNode parentNode, HtmlNode htmlNode) {
+		if (htmlNode instanceof TagNode) {
+            TagNode tag = (TagNode) htmlNode;
+            if(canBeStripped(tag)) {
+            	stripTag(parentNode, tag);
+            }
+        }
+        return true;
+	}
+
+    private boolean canBeStripped(TagNode tag) {
+		return tagNames.contains(tag.getName()) && hasNoAttributes(tag);
+	}
+
+	private boolean hasNoAttributes(TagNode tag) {
+        Collection<String> values = tag.getAttributes().values();
+        for (String value : values) {
+            if(StringUtils.isNotBlank(value)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+	private void stripTag(TagNode parentNode, TagNode tag) {
 		if(tag.hasChildren()) {
 			@SuppressWarnings("unchecked")
 			List<HtmlNode> children = tag.getChildren();

@@ -15,12 +15,8 @@
  */
 package fr.dutra.confluence2wordpress.core.converter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.beanutils.PropertyUtils;
 
 import fr.dutra.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.dutra.confluence2wordpress.util.MapUtils;
@@ -41,28 +37,26 @@ public class ConverterOptions {
 
     private boolean convertFontTagToSpan = true;
 
-    private Map<String, String> tagTransformations = null;
+    private Map<String, String> tagTransformations = MapUtils.split("tt=code", ",", "=");
 
     private List<String> ignoredConfluenceMacros = null;
 
     private List<SynchronizedAttachment> synchronizedAttachments;
 
     private SyntaxHighlighterPlugin syntaxHighlighterPlugin = SyntaxHighlighterPlugin.SH_LEGACY;
-    
+
+    private Map<String,String> replaceTags;
+
     private Map<String,String> tagAttributes;
-    
+
+    private List<String> removeEmptyTags = null;
+
+    private List<String> stripTags = null;
+
     private boolean formatHtml;
     
     public ConverterOptions() {
         this.tagTransformations = MapUtils.split("tt=code", ",", "=");
-    }
-
-    public ConverterOptions(Map<Object,Object> properties) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        for (Entry<Object, Object> entry : properties.entrySet()) {
-            String name = entry.getKey().toString();
-            Object value = entry.getValue();
-            PropertyUtils.setProperty(this, name, value);
-        }
     }
 
     public String getPageTitle() {
@@ -118,8 +112,7 @@ public class ConverterOptions {
     }
 
     public void setTagTransformations(Map<String, String> tagTransformations) {
-        //no hashtables here, and no empty strings
-        this.tagTransformations = MapUtils.trimValues(tagTransformations);
+        this.tagTransformations = tagTransformations;
     }
 
     public List<String> getIgnoredConfluenceMacros() {
@@ -168,6 +161,30 @@ public class ConverterOptions {
 
 	public void setFormatHtml(boolean formatHtml) {
 		this.formatHtml = formatHtml;
+	}
+
+	public List<String> getRemoveEmptyTags() {
+		return removeEmptyTags;
+	}
+
+	public void setRemoveEmptyTags(List<String> removeEmptyTags) {
+		this.removeEmptyTags = removeEmptyTags;
+	}
+
+	public List<String> getStripTags() {
+		return stripTags;
+	}
+
+	public void setStripTags(List<String> stripTags) {
+		this.stripTags = stripTags;
+	}
+
+	public Map<String, String> getReplaceTags() {
+		return replaceTags;
+	}
+
+	public void setReplaceTags(Map<String, String> replaceTags) {
+		this.replaceTags = replaceTags;
 	}
 
 }

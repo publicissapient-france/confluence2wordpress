@@ -59,6 +59,12 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 
     private static final Map<String,String> DEFAULT_TAG_ATTRIBUTES = new LinkedHashMap<String, String>();
 
+    private static final Map<String,String> DEFAULT_TAG_REPLACEMENTS = new LinkedHashMap<String, String>();
+
+    private static final String DEFAULT_REMOVE_EMPTY_TAGS = "p, div";
+
+    private static final String DEFAULT_STRIP_TAGS = "span";
+
     private PluginSettingsFactory pluginSettingsFactory;
 
     private WordpressClient client;
@@ -247,7 +253,47 @@ public class DefaultPluginSettingsManager implements PluginSettingsManager {
 	public void setTagAttributes(Map<String, String> attributes) {
 		storeSettings("tagAttributes", attributes);
 	}
+
+	@Override
+	public Map<String, String> getDefaultReplaceTags() {
+		return retrieveSettings("tagReplacements", DEFAULT_TAG_REPLACEMENTS);
+	}
+
+	@Override
+	public void setDefaultReplaceTags(Map<String, String> tagReplacements) {
+		storeSettings("tagReplacements", tagReplacements);
+	}
+
+	@Override
+	public String getDefaultRemoveEmptyTags() {
+		return retrieveSettings("removeEmptyTags", DEFAULT_REMOVE_EMPTY_TAGS);
+	}
 	
+	@Override
+	public List<String> getDefaultRemoveEmptyTagsAsList() {
+		return CollectionUtils.split(getDefaultRemoveEmptyTags(), ",");
+	}
+
+	@Override
+	public void setDefaultRemoveEmptyTags(String removeEmptyTags) {
+		storeSettings("removeEmptyTags", removeEmptyTags);
+	}
+
+	@Override
+	public String getDefaultStripTags() {
+		return retrieveSettings("stripTags", DEFAULT_STRIP_TAGS);
+	}
+	
+	@Override
+	public List<String> getDefaultStripTagsAsList() {
+		return CollectionUtils.split(getDefaultStripTags(), ",");
+	}
+
+	@Override
+	public void setDefaultStripTags(String stripTags) {
+		storeSettings("stripTags", stripTags);
+	}
+
 	private <T> T retrieveSettings(String settingsKey, T defaultValue) {
         PluginSettings pluginSettings = pluginSettingsFactory.createGlobalSettings();
         @SuppressWarnings("unchecked")

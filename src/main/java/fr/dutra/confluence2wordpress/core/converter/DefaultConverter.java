@@ -49,13 +49,14 @@ import fr.dutra.confluence2wordpress.core.converter.processors.MoreMacroPreproce
 import fr.dutra.confluence2wordpress.core.converter.processors.PostProcessor;
 import fr.dutra.confluence2wordpress.core.converter.processors.PreProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.AttributesCleaner;
-import fr.dutra.confluence2wordpress.core.converter.visitors.EmptyParagraphStripper;
-import fr.dutra.confluence2wordpress.core.converter.visitors.EmptySpanStripper;
+import fr.dutra.confluence2wordpress.core.converter.visitors.EmptyTagRemover;
 import fr.dutra.confluence2wordpress.core.converter.visitors.ImageProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.MoreMacroProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.PermalinkProcessor;
 import fr.dutra.confluence2wordpress.core.converter.visitors.SynchronizedAttachmentLinkProcessor;
-import fr.dutra.confluence2wordpress.core.converter.visitors.TagAttributesProcessor;
+import fr.dutra.confluence2wordpress.core.converter.visitors.TagAttributesSetter;
+import fr.dutra.confluence2wordpress.core.converter.visitors.TagReplacer;
+import fr.dutra.confluence2wordpress.core.converter.visitors.TagStripper;
 import fr.dutra.confluence2wordpress.core.sync.SynchronizedAttachment;
 import fr.dutra.confluence2wordpress.util.XPathUtils;
 
@@ -229,7 +230,8 @@ public class DefaultConverter implements Converter {
 	}
 
 	private List<TagNodeVisitor> getTagNodeVisitors(ConverterOptions options, ContentEntityObject page) {
-        List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
+        
+		List<TagNodeVisitor> visitors = new ArrayList<TagNodeVisitor>();
         visitors.add(new MoreMacroProcessor());
         List<SynchronizedAttachment> attachments = options.getSynchronizedAttachments();
 		if(attachments != null && ! attachments.isEmpty()) {
@@ -237,15 +239,33 @@ public class DefaultConverter implements Converter {
             visitors.add(new SynchronizedAttachmentLinkProcessor(attachments, options.getConfluenceRootUrl()));
         }
 		visitors.add(new PermalinkProcessor(page.getUrlPath(), options.getConfluenceRootUrl()));
-		//must be done:
-		//after image and anchor processing
-        visitors.add(new AttributesCleaner());
+		
+		//Tag transformations 
+		// - MUST be done after image and anchor processing
+		// - transformation order DOES matter !
+		
+        //tag replacement
+		Map<String, String> replaceTags = options.getReplaceTags();
+		if(replaceTags != null && ! replaceTags.isEmpty()) {
+        	visitors.add(new TagReplacer(replaceTags));
+        }
+        //tag attributes
         Map<String, String> tagAttributes = options.getTagAttributes();
 		if(tagAttributes != null && ! tagAttributes.isEmpty()) {
-        	visitors.add(new TagAttributesProcessor(tagAttributes));
+        	visitors.add(new TagAttributesSetter(tagAttributes));
         }
-        visitors.add(new EmptySpanStripper());
-        visitors.add(new EmptyParagraphStripper());
+		//attributes cleanup
+        visitors.add(new AttributesCleaner());
+        //remove empty tags
+        List<String> emptyTags = options.getRemoveEmptyTags();
+		if(emptyTags != null && ! emptyTags.isEmpty()) {
+        	visitors.add(new EmptyTagRemover(emptyTags));
+        }
+        //strip tags
+		List<String> stripTags = options.getStripTags();
+		if(stripTags != null && ! stripTags.isEmpty()) {
+        	visitors.add(new TagStripper(stripTags));
+        }
         return visitors;
     }
 

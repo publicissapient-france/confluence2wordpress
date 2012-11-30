@@ -32,7 +32,7 @@ import com.google.common.base.Splitter;
 public class CollectionUtils {
 
     public static List<String> split(String str, String sep) {
-        if (StringUtils.isEmpty(str)) {
+        if (StringUtils.isBlank(str)) {
             return null;
         }
         Splitter splitter = Splitter.on(sep).trimResults().omitEmptyStrings();

@@ -32,11 +32,11 @@ import org.htmlcleaner.TagNodeVisitor;
  * @author Alexandre Dutra
  *
  */
-public class TagAttributesProcessor implements TagNodeVisitor {
+public class TagAttributesSetter implements TagNodeVisitor {
 
     private final Map<String,String> tagAttributes;
     
-    public TagAttributesProcessor(Map<String,String> tagAttributes) {
+    public TagAttributesSetter(Map<String,String> tagAttributes) {
        this.tagAttributes = tagAttributes;
     }
 

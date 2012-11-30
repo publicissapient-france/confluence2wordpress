@@ -94,6 +94,18 @@ public class SyncAction extends AbstractPageAwareAction {
 
 	private static final String ERRORS_TAG_ATTRIBUTE_EMPTY_KEY = "sync.errors.tagAttribute.empty";
 
+	private static final String ERRORS_REPLACE_TAG_FROM_EMPTY_KEY = "sync.errors.replaceTagFrom.empty";
+
+	private static final String ERRORS_REPLACE_TAG_FROM_INVALID_KEY = "sync.errors.replaceTagFrom.invalid";
+
+	private static final String ERRORS_REPLACE_TAG_TO_EMPTY_KEY = "sync.errors.replaceTagTo.empty";
+
+	private static final String ERRORS_REPLACE_TAG_TO_INVALID_KEY = "sync.errors.replaceTagTo.invalid";
+
+	private static final String ERRORS_REMOVE_TAG_INVALID_KEY = "sync.errors.removeTag.invalid";
+
+	private static final String ERRORS_STRIP_TAG_INVALID_KEY = "sync.errors.stripTag.invalid";
+
     private static final String ERRORS_CONVERSION = "sync.errors.conversion";
 
     private static final String ERRORS_XMLRPC = "sync.errors.xmlrpc";
@@ -150,17 +162,33 @@ public class SyncAction extends AbstractPageAwareAction {
 
     private String dateCreated;
     
+    /**
+     * The post's tags (keywords) as a comma-separated string.
+     */
     private String tagNamesAsString;
 
     private String ignoredConfluenceMacrosAsString;
 
+    // tag replacement
+    
+    @SuppressWarnings("unchecked")
+	private List<String> tagReplacementsFrom = new XWorkList(String.class);
+    
+    @SuppressWarnings("unchecked")
+    private List<String> tagReplacementsTo = new XWorkList(String.class);
+    
+    // automatic tag attributes
+    
     @SuppressWarnings("unchecked")
 	private List<String> tagNames = new XWorkList(String.class);
     
     @SuppressWarnings("unchecked")
     private List<String> tagAttributes = new XWorkList(String.class);
-    
-    
+
+    private String removeEmptyTagsAsString;
+
+    private String stripTagsAsString;
+
     
     public void setPageManager(PageManager pageManager) {
         this.pageManager = pageManager;
@@ -296,7 +324,39 @@ public class SyncAction extends AbstractPageAwareAction {
 		this.tagAttributes = tagAttributes;
 	}
 
-    public String getHtml() {
+    public List<String> getTagReplacementsFrom() {
+		return tagReplacementsFrom;
+	}
+
+	public void setTagReplacementsFrom(List<String> tagReplacementsFrom) {
+		this.tagReplacementsFrom = tagReplacementsFrom;
+	}
+
+	public List<String> getTagReplacementsTo() {
+		return tagReplacementsTo;
+	}
+
+	public void setTagReplacementsTo(List<String> tagReplacementsTo) {
+		this.tagReplacementsTo = tagReplacementsTo;
+	}
+
+	public String getRemoveEmptyTagsAsString() {
+		return removeEmptyTagsAsString;
+	}
+
+	public void setRemoveEmptyTagsAsString(String removeEmptyTagsAsString) {
+		this.removeEmptyTagsAsString = removeEmptyTagsAsString;
+	}
+
+	public String getStripTagsAsString() {
+		return stripTagsAsString;
+	}
+
+	public void setStripTagsAsString(String stripTagsAsString) {
+		this.stripTagsAsString = stripTagsAsString;
+	}
+
+	public String getHtml() {
         return html;
     }
 
@@ -320,45 +380,37 @@ public class SyncAction extends AbstractPageAwareAction {
 
     @Override
     public void validate() {
-        if (StringUtils.isBlank(getMetadata().getPageTitle())) {
-            addActionError(getText(ERRORS_PAGE_TITLE_EMPTY_KEY));
-        }
-        if (getMetadata().getAuthorId() == null) {
-            addActionError(getText(ERRORS_AUTHOR_ID_EMPTY_KEY));
-        }
-        try {
-            if (StringUtils.isNotBlank(getMetadata().getPostSlug())) {
-                checkPostSlugSyntax();
-                checkPostSlugAvailability();
-            }
-            if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
-                checkConcurrentPostModification();
-            }
-        } catch (WordpressXmlRpcException e) {
-            addActionError(getText(ERRORS_XMLRPC), e.getMessage());
-        }
-        if(StringUtils.isNotBlank(dateCreated)){
-            try {
-                String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
-                Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
-                getMetadata().setDateCreated(dateCreated);
-            } catch (ParseException e) {
-                addActionError(getText(ERRORS_DATE_CREATED_KEY));
-            }
-        }
         
-        if(getMetadata().getCategoryNames() == null || getMetadata().getCategoryNames().isEmpty()){
-            addActionError(getText(ERRORS_CATEGORIES_EMPTY_KEY));
-        }
+    	// Conversion Options
+    	
+        // ignored confluence macros
+        List<String> ignoredConfluenceMacros = CollectionUtils.split(ignoredConfluenceMacrosAsString, ",");
+        getMetadata().setIgnoredConfluenceMacros(ignoredConfluenceMacros);
         
-        if(StringUtils.isNotBlank(tagNamesAsString)){
-            List<String> tagNames = CollectionUtils.split(tagNamesAsString, ",");
-            getMetadata().setTagNames(tagNames);
-        }
-        if(StringUtils.isNotBlank(ignoredConfluenceMacrosAsString)){
-            List<String> ignoredConfluenceMacros = CollectionUtils.split(ignoredConfluenceMacrosAsString, ",");
-            getMetadata().setIgnoredConfluenceMacros(ignoredConfluenceMacros);
-        }
+        //replace tags
+        for (int i = 0; i < tagReplacementsFrom.size(); i++) {
+        	String tagName = tagReplacementsFrom.get(i);
+			if(StringUtils.isBlank(tagName)){
+				addActionError(getText(ERRORS_REPLACE_TAG_FROM_EMPTY_KEY, new Object[]{i+1}));
+			} else if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_REPLACE_TAG_FROM_INVALID_KEY, new Object[]{tagName, i+1}));
+			}
+		}
+        for (int i = 0; i < tagReplacementsTo.size(); i++) {
+        	String tagName = tagReplacementsTo.get(i);
+			if(StringUtils.isBlank(tagName)){
+				addActionError(getText(ERRORS_REPLACE_TAG_TO_EMPTY_KEY, new Object[]{i+1}));
+			} else if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_REPLACE_TAG_TO_INVALID_KEY, new Object[]{tagName, i+1}));
+			}
+		}
+        Map<String, String> replacementsMap = new LinkedHashMap<String, String>();
+        for (int i = 0; i < tagReplacementsFrom.size(); i++) {
+        	replacementsMap.put(tagReplacementsFrom.get(i), tagReplacementsTo.get(i));
+		}
+        getMetadata().setReplaceTags(replacementsMap);
+        
+        // automatic tag attributes
         for (int i = 0; i < tagNames.size(); i++) {
         	String tagName = tagNames.get(i);
 			if(StringUtils.isBlank(tagName)){
@@ -378,6 +430,72 @@ public class SyncAction extends AbstractPageAwareAction {
         	tagAttributesMap.put(tagNames.get(i), tagAttributes.get(i));
 		}
         getMetadata().setTagAttributes(tagAttributesMap);
+        
+        //remove empty tags
+        List<String> removeEmptyTags = CollectionUtils.split(removeEmptyTagsAsString, ",");
+        for (int i = 0; i < removeEmptyTags.size(); i++) {
+        	String tagName = removeEmptyTags.get(i);
+			if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_REMOVE_TAG_INVALID_KEY, new Object[]{tagName}));
+			}
+		}
+        getMetadata().setRemoveEmptyTags(removeEmptyTags);
+        
+        //strip tags
+        List<String> stripTags = CollectionUtils.split(stripTagsAsString, ",");
+        for (int i = 0; i < stripTags.size(); i++) {
+        	String tagName = stripTags.get(i);
+			if( ! TAG_NAME_PATTERN.matcher(tagName).matches()){
+				addActionError(getText(ERRORS_STRIP_TAG_INVALID_KEY, new Object[]{tagName}));
+			}
+		}
+        getMetadata().setStripTags(stripTags);
+        
+        // Synchronisation Options
+
+    	// title
+    	if (StringUtils.isBlank(getMetadata().getPageTitle())) {
+            addActionError(getText(ERRORS_PAGE_TITLE_EMPTY_KEY));
+        }
+
+        // author
+        if (getMetadata().getAuthorId() == null) {
+            addActionError(getText(ERRORS_AUTHOR_ID_EMPTY_KEY));
+        }
+        
+        // categories
+        if(getMetadata().getCategoryNames() == null || getMetadata().getCategoryNames().isEmpty()){
+            addActionError(getText(ERRORS_CATEGORIES_EMPTY_KEY));
+        }
+        
+        // tags
+        List<String> tagNames = CollectionUtils.split(tagNamesAsString, ",");
+        getMetadata().setTagNames(tagNames);
+        
+        // date created
+        if(StringUtils.isNotBlank(dateCreated)){
+            try {
+                String pattern = getText(JS_DATEPICKER_FORMAT_KEY);
+                Date dateCreated = new SimpleDateFormat(pattern).parse(this.dateCreated);
+                getMetadata().setDateCreated(dateCreated);
+            } catch (ParseException e) {
+                addActionError(getText(ERRORS_DATE_CREATED_KEY));
+            }
+        }
+
+        // post slug
+        try {
+            if (StringUtils.isNotBlank(getMetadata().getPostSlug())) {
+                checkPostSlugSyntax();
+                checkPostSlugAvailability();
+            }
+            if (getMetadata().getDigest() != null && ! isAllowPostOverride()) {
+                checkConcurrentPostModification();
+            }
+        } catch (WordpressXmlRpcException e) {
+            addActionError(getText(ERRORS_XMLRPC), e.getMessage());
+        }
+
     }
 
     private void checkPostSlugAvailability() throws WordpressXmlRpcException {
@@ -574,7 +692,10 @@ public class SyncAction extends AbstractPageAwareAction {
                 getWordpressCategories()
             );
             metadata.setIgnoredConfluenceMacros(pluginSettingsManager.getDefaultIgnoredConfluenceMacrosAsList());
+            metadata.setReplaceTags(pluginSettingsManager.getDefaultReplaceTags());
             metadata.setTagAttributes(pluginSettingsManager.getDefaultTagAttributes());
+            metadata.setRemoveEmptyTags(pluginSettingsManager.getDefaultRemoveEmptyTagsAsList());
+            metadata.setStripTags(pluginSettingsManager.getDefaultStripTagsAsList());
         }
         pageLabelsSynchronizer.pageLabelsToTagNames(getPage(), metadata);
         metadataManager.storeMetadata(getPage(), metadata);
@@ -588,6 +709,13 @@ public class SyncAction extends AbstractPageAwareAction {
         }
         this.tagNamesAsString = CollectionUtils.join(getMetadata().getTagNames(), ", ");
         this.ignoredConfluenceMacrosAsString = CollectionUtils.join(getMetadata().getIgnoredConfluenceMacros(), ", ");
+        Map<String, String> replacements = getMetadata().getReplaceTags();
+        if(replacements != null) {
+	        for (Entry<String, String> entry : replacements.entrySet()) {
+	        	tagReplacementsFrom.add(entry.getKey());
+	        	tagReplacementsTo.add(entry.getValue());
+			}
+        }
         Map<String, String> tagAttributesMap = getMetadata().getTagAttributes();
         if(tagAttributesMap != null) {
 	        for (Entry<String, String> entry : tagAttributesMap.entrySet()) {
@@ -595,6 +723,8 @@ public class SyncAction extends AbstractPageAwareAction {
 	        	tagAttributes.add(entry.getValue());
 			}
         }
+        this.removeEmptyTagsAsString = CollectionUtils.join(getMetadata().getRemoveEmptyTags(), ", ");
+        this.stripTagsAsString = CollectionUtils.join(getMetadata().getStripTags(), ", ");
     }
 
 }

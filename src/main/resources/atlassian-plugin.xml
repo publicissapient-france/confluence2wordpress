@@ -35,7 +35,7 @@
         <!-- jQuery personal extensions -->
         <resource type="download" name="autocomplete-combobox.js" location="js/autocomplete-combobox.js"/>
         <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
-        <resource type="download" name="tag-attributes.js" location="js/tag-attributes.js"/>
+        <resource type="download" name="input-map.js" location="js/input-map.js"/>
         <!-- jQuery customizations -->
         <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
         <dependency>confluence.web.resources:ajs</dependency>
@@ -48,7 +48,7 @@
         <resource type="download" name="images/" location="jquery/images"/>
         <!-- jQuery personal extensions -->
         <resource type="download" name="autocomplete-multiple.js" location="js/autocomplete-multiple.js"/>
-        <resource type="download" name="tag-attributes.js" location="js/tag-attributes.js"/>
+        <resource type="download" name="input-map.js" location="js/input-map.js"/>
         <!-- jQuery customizations -->
         <resource type="download" name="jquery-customizations.css" location="css/jquery-customizations.css"/>
         <dependency>confluence.web.resources:ajs</dependency>
